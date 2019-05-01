@@ -21,8 +21,6 @@
 //-----------------------------------------------------------------------
 namespace Ekona
 {
-    using System;  
-	using Yarhl;
     using Yarhl.FileSystem;
     using Yarhl.IO;
 
@@ -31,7 +29,7 @@ namespace Ekona
     /// </summary>
 	public class OverlayFile : Node
     {
-		private OverlayFile(GameFile baseFile, bool isArm9)
+		private OverlayFile(Node baseFile, bool isArm9)
 			: base(string.Empty, baseFile.Stream)
         {
 			this.Tags["Id"] = baseFile.Tags["Id"];
@@ -138,7 +136,7 @@ namespace Ekona
         /// <param name="str">Stream to read the table.</param>
         /// <param name="listFiles">List of files where the overlay must be.</param>
         /// <returns>Overlay file.</returns>
-		public static OverlayFile FromTable(DataStream str, bool isArm9, GameFile[] listFiles)
+		public static OverlayFile FromTable(DataStream str, bool isArm9, Node[] listFiles)
         {
 			DataReader dr = new DataReader(str);
             

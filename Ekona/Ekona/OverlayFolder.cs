@@ -55,7 +55,7 @@ namespace Nitro.Rom
         /// <param name="isArm9">If must read overlays from the ARM9 or ARM7.</param>
         /// <param name="listFiles">List with all the files in the ROM.</param>
         /// <returns>Folder with overlays.</returns>
-		public static OverlayFolder FromTable(DataStream str, RomHeader header, bool isArm9, GameFile[] listFiles)
+		public static OverlayFolder FromTable(DataStream str, RomHeader header, bool isArm9, Node[] listFiles)
         {
             OverlayFolder overlays = new OverlayFolder(isArm9);
             
@@ -86,7 +86,7 @@ namespace Nitro.Rom
             int numOverlays = 0;   
             
 			// For each overlay, writes its info
-			foreach (GameFile file in this.Files) {
+			foreach (Node file in this.Files) {
                 OverlayFile ov = file as OverlayFile;
 				if (ov == null)
 					continue;

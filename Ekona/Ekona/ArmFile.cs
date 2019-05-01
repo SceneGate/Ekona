@@ -19,11 +19,10 @@
 // <email>benito356@gmail.com</email>
 // <date>28/02/2013</date>
 //-----------------------------------------------------------------------
-namespace Nitro.Rom
+namespace Ekona.Formats
 {
     using System;
     using System.Collections.Generic;
-    using Yarhl.FileFormat;
     using Yarhl.FileSystem;
     using Yarhl.IO;
     
@@ -100,7 +99,7 @@ namespace Nitro.Rom
             // Set the unknown tail
 			if (isArm9) {   
                 // It's after the ARM9 file.
-				str.Seek(header.Arm9Offset + header.Arm9Size, SeekMode.Origin);
+				str.Seek(header.Arm9Offset + header.Arm9Size, SeekMode.Start);
                 
 				// Read until reachs padding byte
                 List<byte> tail = new List<byte>();
@@ -151,9 +150,9 @@ namespace Nitro.Rom
 				// Update encoded size if it was set
 				uint encodeSize = this.SearchEncodedSizeAddress();
 				if (encodeSize != 0 && encodeSize != 1) {
-					this.Stream.Seek(encodeSize, SeekMode.Origin);
+					this.Stream.Seek(encodeSize, SeekMode.Start);
 					if (new DataReader(this.Stream).ReadUInt32() != 0x00) {
-						str.Seek(encodeSize, SeekMode.Origin);
+						str.Seek(encodeSize, SeekMode.Start);
 						new DataWriter(str).Write((uint)(this.Length + this.RamAddress));
 						str.Seek(0, SeekMode.End);
 					}
@@ -216,7 +215,7 @@ namespace Nitro.Rom
 			uint entryAddress = this.EntryAddress - this.RamAddress;
 
 			// 2º
-			this.Stream.Seek(entryAddress, SeekMode.Origin);
+			this.Stream.Seek(entryAddress, SeekMode.Start);
 			uint decoderAddress = SearchDecoder();
 			if (decoderAddress == 0x00) {
 				Console.WriteLine("INVALID decoder address.");
@@ -224,7 +223,7 @@ namespace Nitro.Rom
 			}
 
 			// 3º & 4º
-			this.Stream.Seek(entryAddress, SeekMode.Origin);
+			this.Stream.Seek(entryAddress, SeekMode.Start);
 			uint baseOffset = SearchBaseOffset(decoderAddress);
 			if (baseOffset == 0x00) {
 				Console.WriteLine("INVALID base offset.");
@@ -232,7 +231,7 @@ namespace Nitro.Rom
 			}
 
 			// Get relative address (not RAM address)
-			this.Stream.Seek(baseOffset, SeekMode.Origin);
+			this.Stream.Seek(baseOffset, SeekMode.Start);
 			uint sizeAddress = reader.ReadUInt32() + 0x14;	// Size is at 0x14 from that address
 			sizeAddress -= this.RamAddress;
 
@@ -247,7 +246,7 @@ namespace Nitro.Rom
 			uint decoderAddress = 0x00;
 			while (this.Stream.Position - startPosition < SecureAreaSize && decoderAddress == 0x00)
 			{
-				long loopPosition = this.Stream.RelativePosition;
+				long loopPosition = this.Stream.Position;
 
 				// Compare instructions to see if it's the routing we want
 				bool found = true;
@@ -260,7 +259,7 @@ namespace Nitro.Rom
 				if (found)
 					decoderAddress = (uint)loopPosition - DecoderShift;		// Get start of routine
 				else
-					this.Stream.Seek(loopPosition + 4, SeekMode.Origin);	// Go to next instruction
+					this.Stream.Seek(loopPosition + 4, SeekMode.Start);	// Go to next instruction
 			}
 
 			return decoderAddress;
@@ -274,7 +273,7 @@ namespace Nitro.Rom
 			// Search the instruction: BL DecoderAddress
 			// Where DecoderAddress=(PC+8+nn*4)
 			bool found = false;
-			while (this.Stream.RelativePosition < decoderAddress && !found)
+			while (this.Stream.Position < decoderAddress && !found)
 			{
 				instr = reader.ReadUInt32();
 				if ((instr & 0xFF000000) == 0xEB000000) {
@@ -282,7 +281,7 @@ namespace Nitro.Rom
 					shift = 4 + shift * 4;
 
 					// Check if that jump goes to the correct routine
-					if (this.Stream.RelativePosition + shift == decoderAddress)
+					if (this.Stream.Position + shift == decoderAddress)
 						found = true;
 				}
 			}
@@ -293,7 +292,7 @@ namespace Nitro.Rom
 			uint baseOffset = 0x00;
 			instr = reader.ReadUInt32();
 			if ((instr & 0xFFFF0000) == 0xE59F0000)
-				baseOffset = (uint)this.Stream.RelativePosition + (instr & 0xFFF) + 4;
+				baseOffset = (uint)this.Stream.Position + (instr & 0xFFF) + 4;
 
 			// If not found... Should we continue looking above instructions?
 			// I run a test with > 500 games and at the moment it is always there

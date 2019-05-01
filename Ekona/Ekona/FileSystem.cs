@@ -66,7 +66,7 @@ namespace Ekona.Formats
             get { return this.sysFolder; }
         }
 
-		public override void Initialize(GameFile file, params object[] parameters)
+		public override void Initialize(Node file, params object[] parameters)
 		{
 			base.Initialize(file, parameters);
 
@@ -159,7 +159,7 @@ namespace Ekona.Formats
 		private void WriteArm(DataStream str, bool isArm9)
         {
             // Write the ARM file.
-			foreach (GameFile file in this.sysFolder.Files) {
+			foreach (Node file in this.sysFolder.Files) {
                 ArmFile arm = file as ArmFile;
 				if (arm == null || arm.IsArm9 != isArm9)
 					continue;
@@ -180,7 +180,7 @@ namespace Ekona.Formats
 				str.WritePadding(FileSystem.PaddingByte, FileSystem.PaddingAddress);
                 
 				// Write overlays
-				foreach (GameFile file in overlayFolder.Files) {
+				foreach (Node file in overlayFolder.Files) {
 					OverlayFile overlay = file as OverlayFile;
 					if (overlay == null)
 						continue;
@@ -201,7 +201,7 @@ namespace Ekona.Formats
                 if (overlayFolder == null || overlayFolder.IsArm9 != isArm9)                   
                     continue;
                 
-				foreach (GameFile file in overlayFolder.Files) {
+				foreach (Node file in overlayFolder.Files) {
                     if (file is OverlayFile)
                         count++;
                 }

@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="Fnt.cs" company="none">
-// Copyright (C) 2013
+// Copyright (C) 2019
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General Public License as published by 
@@ -26,6 +26,7 @@ namespace Nitro.Rom
     using System.Text;
 	using Yarhl;
     using Yarhl.FileFormat;
+    using Yarhl.FileSystem;
     using Yarhl.IO;
 
     /// <summary>
@@ -37,12 +38,8 @@ namespace Nitro.Rom
         private static readonly Encoding DefaultEncoding = Encoding.GetEncoding("shift_jis");
         
         private Fnt.FntTable[] tables;
-                          
-		public override string FormatName {
-			get { return "Nitro.FNT"; }
-		}
-		   
-		public override void Initialize(GameFile file, params object[] parameters)
+		
+		public void Initialize(Node file, params object[] parameters)
 		{
 			base.Initialize(file, parameters);
 
@@ -56,7 +53,7 @@ namespace Nitro.Rom
 		/// </summary>
 		/// <param name="files">Files in the tree.</param>
 		/// <returns>Root folder</returns>
-		public GameFolder CreateTree(GameFile[] files)
+		public GameFolder CreateTree(Node[] files)
 		{
 			GameFolder root = new GameFolder("ROM");
 			root.Tags["Id"] =  (ushort)this.tables.Length;
@@ -68,7 +65,7 @@ namespace Nitro.Rom
         /// Write a <see cref="Fnt" /> section in a stream.
         /// </summary>
         /// <param name="str">Stream to write to.</param>
-		public override void Write(DataStream str)
+		public void Write(DataStream str)
         {
 			DataWriter dw = new DataWriter(str);
             long baseOffset = str.RelativePosition;
@@ -89,7 +86,7 @@ namespace Nitro.Rom
         /// Read a FNT section from a stream.
         /// </summary>
         /// <param name="str">Stream to read from.</param>
-		public override void Read(DataStream str)
+		public void Read(DataStream str)
         {
 			DataReader dr = new DataReader(str);
 			uint fntOffset = (uint)str.Position;
@@ -137,7 +134,7 @@ namespace Nitro.Rom
         
 		private static int ReassignFileIds(GameFolder folder, int currentId)
         {
-			foreach (GameFile file in folder.Files)
+			foreach (Node file in folder.Files)
 				file.Tags["Id"] = (ushort)(currentId++);
             
 			foreach (GameFolder subfolder in folder.Folders)
@@ -151,7 +148,7 @@ namespace Nitro.Rom
             ushort id = 0xFFFF;
             
             // Searchs in files
-			foreach (GameFile file in folder.Files) {
+			foreach (Node file in folder.Files) {
 				if ((ushort)file.Tags["Id"] < id)
 					id = (ushort)file.Tags["Id"];
             }
@@ -166,7 +163,7 @@ namespace Nitro.Rom
             return id;
         }
         
-		private void CreateTree(GameFolder currentFolder, GameFile[] listFile)
+		private void CreateTree(GameFolder currentFolder, Node[] listFile)
         {
 			int folderId = ((ushort)currentFolder.Tags["Id"] > 0x0FFF) ?
 			                (ushort)currentFolder.Tags["Id"] & 0x0FFF : 0;
@@ -209,7 +206,7 @@ namespace Nitro.Rom
 				parentId);
             
             // Set the info values
-			foreach (GameFile file in currentFolder.Files)
+			foreach (Node file in currentFolder.Files)
 				this.tables[folderId].AddFileInfo(file.Name, (ushort)file.Tags["Id"]);
             
 			foreach (GameFolder folder in currentFolder.Folders)

@@ -21,8 +21,6 @@
 //-----------------------------------------------------------------------
 namespace Ekona.Formats
 {
-	using Yarhl.IO;
-    using Yarhl.FileFormat;
     using Yarhl.FileSystem;
 
     /* ROM sections:

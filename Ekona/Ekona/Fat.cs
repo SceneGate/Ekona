@@ -26,6 +26,7 @@ namespace Nitro.Rom
 	using System.Linq;
 	using Yarhl;
     using Yarhl.FileFormat;
+    using Yarhl.FileSystem;
     using Yarhl.IO;
 
     /// <summary>
@@ -35,7 +36,7 @@ namespace Nitro.Rom
     {
         private const int FatEntrySize = 0x08;
         
-		private GameFile[] files;
+		private Node[] files;
         private uint firstOffset;        // Offset where the first file is.   
         
         #region Properties
@@ -58,16 +59,16 @@ namespace Nitro.Rom
         
         #endregion
 		   
-		public override void Initialize(GameFile file, params object[] parameters)
+		public void Initialize(Node file, params object[] parameters)
 		{
 			base.Initialize(file, parameters);
 
 			if (parameters.Length >= 1) {
 				// Get a list with all files...
 				GameFolder root = parameters[0] as GameFolder;
-				List<GameFile> fileList = new List<GameFile>();
+				List<Node> fileList = new List<Node>();
 				foreach (FileContainer f in root.GetFilesRecursive(false))
-					fileList.Add(f as GameFile);
+					fileList.Add(f as Node);
 
 				// ... and sort them by Id
 				fileList.OrderBy(f => (ushort)f.Tags["Id"]);
@@ -82,13 +83,13 @@ namespace Nitro.Rom
         /// Write the Fat to a stream.
         /// </summary>
         /// <param name="str">Stream to write to.</param>
-		public override void Write(DataStream str)
+		public void Write(DataStream str)
         {
 			DataWriter dw = new DataWriter(str);
             uint offset = (uint)str.Position + this.Size + this.firstOffset;
 			offset = offset.Pad(FileSystem.PaddingAddress);
             
-			foreach (GameFile file in this.files) {
+			foreach (Node file in this.files) {
                 OverlayFile overlay = file as OverlayFile;
                 
 				if (overlay == null) {
@@ -107,7 +108,7 @@ namespace Nitro.Rom
 		public void WriteFiles(DataStream strOut)
 		{
 			// Write every file
-			foreach (GameFile file in this.files) {
+			foreach (Node file in this.files) {
 				file.Stream.WriteTo(strOut);
 				strOut.WritePadding(FileSystem.PaddingByte, FileSystem.PaddingAddress);
 			}
@@ -117,7 +118,7 @@ namespace Nitro.Rom
         /// Gets the files in the Fat section.
         /// </summary>
         /// <returns>Array with RomFiles instances.</returns>
-		public GameFile[] GetFiles()
+		public Node[] GetFiles()
         {
             return this.files;
         }
@@ -126,16 +127,16 @@ namespace Nitro.Rom
         /// Read a Fat section from a stream.
         /// </summary>
         /// <param name="str">Stream to read from.</param>
-		public override void Read(DataStream str)
+		public void Read(DataStream str)
         {
-			this.files = new GameFile[str.Length / FatEntrySize];
+			this.files = new Node[str.Length / FatEntrySize];
 			DataReader dr = new DataReader(str);
             
             uint startOffset, endOffset;
 			for (ushort i = 0; i < this.files.Length; i++) {
                 startOffset = dr.ReadUInt32();
 				endOffset   = dr.ReadUInt32();
-				this.files[i] = new GameFile(
+				this.files[i] = new Node(
 					string.Empty,	// Name will be added later in FNT
 					new DataStream(str.BaseStream, startOffset, endOffset - startOffset)); // TODO: FIX
 				this.files[i].Tags["Id"] = i;
