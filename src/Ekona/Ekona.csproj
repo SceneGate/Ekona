@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+<PropertyGroup>
+    <OutputType>Library</OutputType>
+    <AssemblyName>Ekona</AssemblyName>
+    <Product>SceneGate</Product>
+    <Version>0.1.0</Version>
+    <Description>Library for Nintendo DS file formats.</Description>
+
+    <Authors>SceneGate</Authors>
+    <Company>SceneGate</Company>
+    <Copyright>Copyright (c) 2019 SceneGate</Copyright>
+    <RepositoryUrl>https://github.com/SceneGate/Ekona/</RepositoryUrl>
+    <License>GPL-3.0-or-later</License>
+    <PackageProjectUrl>https://github.com/SceneGate/Ekona/</PackageProjectUrl>
+    <PackageTags>romhacking;nds;scenegate</PackageTags>
+
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <RootNamespace>Ekona</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <CodeAnalysisRuleSet>..\StyleCop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="**/*" />
+    <Compile Include="Containers/Formats/Arm.cs" />
+    <Compile Include="Containers/Formats/ProcessorType.cs" />
+    <Compile Include="Containers/Converters/ArmEncodeFieldFinder.cs" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Yarhl" Version="3.0.0-alpha03" />
+    <PackageReference Include="DotNetAnalyzers.DocumentationAnalyzers" Version="1.0.0-beta.59">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.1-beta.61">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Text.Analyzers" Version="2.6.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
