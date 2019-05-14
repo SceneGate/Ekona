@@ -110,5 +110,60 @@ namespace Nitro.Rom
                     header.Ov7TableOffset = 0x00;
             }
         }        
+
+                
+        
+        /// <summary>
+        /// Create a new overlay file from the info in the overlay table.
+        /// </summary>
+        /// <param name="str">Stream to read the table.</param>
+        /// <param name="listFiles">List of files where the overlay must be.</param>
+        /// <returns>Overlay file.</returns>
+		public static OverlayFile FromTable(DataStream str, bool isArm9, Node[] listFiles)
+        {
+			DataReader dr = new DataReader(str);
+            
+			str.Seek(0x18, SeekMode.Current);
+            uint fileId = dr.ReadUInt32();
+			str.Seek(-0x1C, SeekMode.Current);
+            
+			OverlayFile overlay = new OverlayFile(listFiles[fileId], isArm9);
+			overlay.OverlayId       = dr.ReadUInt32();
+			overlay.RamAddress      = dr.ReadUInt32();
+			overlay.RamSize         = dr.ReadUInt32();
+			overlay.BssSize         = dr.ReadUInt32();
+            overlay.StaticInitStart = dr.ReadUInt32();
+			overlay.StaticInitEnd   = dr.ReadUInt32();
+            dr.ReadUInt32();    // File ID again
+			uint encodingInfo   = dr.ReadUInt32();
+            overlay.EncodedSize = encodingInfo & 0x00FFFFFF;
+            overlay.IsEncoded   = ((encodingInfo >> 24) & 0x01) == 1;
+            overlay.IsSigned    = ((encodingInfo >> 24) & 0x02) == 2;
+            
+            return overlay;
+        }
+        
+        /// <summary>
+        /// Write the table info of this overlay.
+        /// </summary>
+        /// <param name="str">Stream to write to.</param>
+		public void WriteTable(DataStream str)
+        {
+			DataWriter dw = new DataWriter(str);
+            
+			this.EncodedSize = (uint)this.Length;
+			uint encodingInfo = this.EncodedSize;
+            encodingInfo |= (uint)((this.IsEncoded ? 1 : 0) << 24);
+            encodingInfo |= (uint)((this.IsSigned  ? 2 : 0) << 24);
+
+			dw.Write(this.OverlayId);
+			dw.Write(this.RamAddress);
+			dw.Write(this.RamSize);
+			dw.Write(this.BssSize);
+			dw.Write(this.StaticInitStart);
+			dw.Write(this.StaticInitEnd);
+			dw.Write((uint)(ushort)this.Tags["Id"]);
+            dw.Write(encodingInfo);
+        }
     }
 }

@@ -21,12 +21,8 @@
     <CodeAnalysisRuleSet>..\StyleCop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="**/*" />
-    <Compile Include="Containers/Formats/Arm.cs" />
-    <Compile Include="Containers/Formats/ProcessorType.cs" />
-    <Compile Include="Containers/Converters/ArmEncodeFieldFinder.cs" />
-
+ <ItemGroup>
+    <Compile Remove="Containers/Converters/*" />
   </ItemGroup>
 
   <ItemGroup>
