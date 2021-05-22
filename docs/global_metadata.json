@@ -1,0 +1,11 @@
+{
+  "_appTitle": "Yarhl plugin for Nintendo DS common formats",
+  "_appFooter": "Copyright (c) 2021 SceneGate",
+  "_enableSearch": true,
+  "_enableNewTab": true,
+  "_gitContribute": {
+    "apiSpecFolder": "docs/apidoc",
+    "repo": "https://github.com/SceneGate/Ekona",
+    "branch": "main"
+  }
+}
