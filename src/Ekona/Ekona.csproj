@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>SceneGate.Ekona</AssemblyName>
+    <RootNamespace>SceneGate.Ekona</RootNamespace>
+    <Description>Library for Nintendo DS file formats.</Description>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Yarhl" />
+  </ItemGroup>
+
+</Project>
