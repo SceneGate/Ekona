@@ -1,0 +1,21 @@
+### YamlMime:XRefMap
+sorted: true
+references:
+- uid: CONTRIBUTING
+  name: Contributing to the project
+  href: guides/Contributing.html
+- uid: README
+  name: 'Ekona  '
+  href: index.html
+- uid: SceneGate.Ekona
+  name: SceneGate.Ekona
+  href: api/SceneGate.Ekona.html
+  commentId: N:SceneGate.Ekona
+  fullName: SceneGate.Ekona
+  nameWithType: SceneGate.Ekona
+- uid: SceneGate.Ekona.Dummy
+  name: Dummy
+  href: api/SceneGate.Ekona.Dummy.html
+  commentId: T:SceneGate.Ekona.Dummy
+  fullName: SceneGate.Ekona.Dummy
+  nameWithType: Dummy
