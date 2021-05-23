@@ -1,14 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyName>SceneGate.Ekona</AssemblyName>
     <RootNamespace>SceneGate.Ekona</RootNamespace>
-    <Description>Library for Nintendo DS file formats.</Description>
+    <Description>Library for NDS file formats.</Description>
     <TargetFrameworks>net5.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- To be ported -->
+    <Compile Remove="Containers/Converters/*" />
+    <Compile Remove="Containers/Formats/*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Yarhl" />
+    <PackageReference Include="System.Data.HashFunction.CRC" />
   </ItemGroup>
 
 </Project>

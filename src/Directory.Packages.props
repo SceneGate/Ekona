@@ -1,8 +1,11 @@
 <Project>
     <!-- Centralize dependency management -->
     <ItemGroup>
-        <PackageVersion Include="Yarhl" Version="3.1.0" />
+        <PackageVersion Include="Yarhl" Version="3.1.1-preview.28" />
+        <PackageVersion Include="System.Data.HashFunction.CRC" Version="2.0.0" />
 
+        <PackageVersion Include="YamlDotNet" Version="11.1.1" />
+        <PackageVersion Include="FluentAssertions" Version="5.10.3" />
         <PackageVersion Include="nunit" Version="3.13.1" />
         <PackageVersion Include="NUnit3TestAdapter" Version="3.17.0" />
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.9.1"/>

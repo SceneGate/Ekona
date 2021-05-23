@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyName>SceneGate.Ekona.Tests</AssemblyName>
@@ -10,10 +10,16 @@
   <ItemGroup>
     <ProjectReference Include="../Ekona/Ekona.csproj" />
 
+    <PackageReference Include="YamlDotNet" />
+    <PackageReference Include="FluentAssertions" />
     <PackageReference Include="nunit" />
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="coverlet.collector" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
