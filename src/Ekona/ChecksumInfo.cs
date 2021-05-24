@@ -19,6 +19,15 @@ namespace SceneGate.Ekona
         /// <summary>
         /// Initializes a new instance of the <see cref="ChecksumInfo{T}"/> class.
         /// </summary>
+        /// <param name="expected">The expected checksum of the stream.</param>
+        public ChecksumInfo(T expected)
+        {
+            Expected = expected;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChecksumInfo{T}"/> class.
+        /// </summary>
         /// <param name="actual">The actual checksum of the stream.</param>
         /// <param name="expected">The expected checksum of the stream.</param>
         public ChecksumInfo(T actual, T expected)
@@ -28,9 +37,9 @@ namespace SceneGate.Ekona
         }
 
         /// <summary>
-        /// Gets the actual checksum of the stream.
+        /// Gets or sets the actual checksum of the stream.
         /// </summary>
-        public T Actual { get; init; }
+        public T Actual { get; set; }
 
         /// <summary>
         /// Gets the expected checksum of the stream.

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Yarhl" />
+    <PackageReference Include="Texim" />
     <PackageReference Include="System.Data.HashFunction.CRC" />
   </ItemGroup>
 

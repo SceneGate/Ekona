@@ -23,7 +23,7 @@ using Yarhl.FileFormat;
 namespace SceneGate.Ekona.Containers.Rom
 {
     /// <summary>
-    /// Banner of a ROM.
+    /// Banner of a program.
     /// </summary>
     public class Banner : IFormat
     {
@@ -81,16 +81,6 @@ namespace SceneGate.Ekona.Containers.Rom
         /// </summary>
         /// <remarks>This field may be null if the model was not deserialized from binary data.</remarks>
         public ChecksumInfo<ushort> ChecksumAnimatedIcon { get; set; }
-
-        /// <summary>
-        /// Gets or sets the icon indexed pixels.
-        /// </summary>
-        public byte[] IconPixels { get; set; }
-
-        /// <summary>
-        /// Gets or sets the icon palette colors.
-        /// </summary>
-        public byte[] IconPalette { get; set; }
 
         /// <summary>
         /// Gets or sets the Japenese title.
