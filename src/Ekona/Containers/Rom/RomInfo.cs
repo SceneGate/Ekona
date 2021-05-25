@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System.Collections.ObjectModel;
 using Yarhl.FileFormat;
 
 namespace SceneGate.Ekona.Containers.Rom
@@ -62,25 +63,40 @@ namespace SceneGate.Ekona.Containers.Rom
 
         public byte Region { get; set; }
 
-        public byte RomVersion { get; set; }
+        /// <summary>
+        /// Gets or sets the version of the program.
+        /// </summary>
+        public byte Version { get; set; }
 
         public byte AutoStartFlag { get; set; }
 
+        /// <summary>
+        /// Gets or sets the entry address of the ARM-9.
+        /// </summary>
         public uint Arm9EntryAddress { get; set; }
 
+        /// <summary>
+        /// Gets or sets the address of the ARM-9 in the RAM.
+        /// </summary>
         public uint Arm9RamAddress { get; set; }
 
+        /// <summary>
+        /// Gets or sets the entry address of the ARM-7.
+        /// </summary>
         public uint Arm7EntryAddress { get; set; }
 
+        /// <summary>
+        /// Gets or sets the address of the ARM-7 in the RAM.
+        /// </summary>
         public uint Arm7RamAddress { get; set; }
 
         /// <summary>
-        /// Control register flags for read.
+        /// Gets or sets the control register flags for read.
         /// </summary>
         public uint FlagsRead { get; set; }
 
         /// <summary>
-        /// Control register flags for init.
+        /// Gets or sets the control register flags for init.
         /// </summary>
         public uint FlagsInit { get; set; }
 
@@ -91,8 +107,14 @@ namespace SceneGate.Ekona.Containers.Rom
 
         public ushort SecureAreaDelay { get; set; }
 
+        /// <summary>
+        /// Gets or sets the auto-load address of the ARM-9.
+        /// </summary>
         public uint Arm9Autoload { get; set; }
 
+        /// <summary>
+        /// Gets or sets the auto-load address of the ARM-7.
+        /// </summary>
         public uint Arm7Autoload { get; set; }
 
         /// <summary>
@@ -100,8 +122,14 @@ namespace SceneGate.Ekona.Containers.Rom
         /// </summary>
         public ulong SecureDisable { get; set; }
 
+        /// <summary>
+        /// Gets or sets the checksum of the copyright logo.
+        /// </summary>
         public ChecksumInfo<ushort> ChecksumLogo { get; set; }
 
+        /// <summary>
+        /// Gets or sets the checksum of the header.
+        /// </summary>
         public ChecksumInfo<ushort> ChecksumHeader { get; set; }
 
         public uint DebugRomOffset { get; set; }
@@ -109,5 +137,15 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint DebugSize { get; set; }
 
         public uint DebugRamAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collection of information of overlays for ARM-9.
+        /// </summary>
+        public Collection<OverlayInfo> Overlays9Info { get; set; } = new Collection<OverlayInfo>();
+
+        /// <summary>
+        /// Gets or sets the collection of information of overlays for ARM-7.
+        /// </summary>
+        public Collection<OverlayInfo> Overlays7Info { get; set; } = new Collection<OverlayInfo>();
     }
 }

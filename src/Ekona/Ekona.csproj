@@ -8,12 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- To be ported -->
-    <Compile Remove="Containers/Converters/*" />
-    <Compile Remove="Containers/Formats/*" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Yarhl" />
     <PackageReference Include="Texim" />
     <PackageReference Include="System.Data.HashFunction.CRC" />

@@ -72,7 +72,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the size of the table of overlays for ARM-9 program.
         /// </summary>
-        public uint Overlay9TableSize { get; set; }
+        public int Overlay9TableSize { get; set; }
 
         /// <summary>
         /// Gets or sets the offset of the table of overlays for ARM-7 program.
@@ -82,7 +82,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the size of the table of overlays for ARM-7 program.
         /// </summary>
-        public uint Overlay7TableSize { get; set; }
+        public int Overlay7TableSize { get; set; }
 
         /// <summary>
         /// Gets or sets the offset of the program banner.

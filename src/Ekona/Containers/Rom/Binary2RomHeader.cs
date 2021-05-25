@@ -53,7 +53,7 @@ namespace SceneGate.Ekona.Containers.Rom
             source.Stream.Position += 7; // reserved
             header.ProgramInfo.DsiFlags = reader.ReadByte();
             header.ProgramInfo.Region = reader.ReadByte();
-            header.ProgramInfo.RomVersion = reader.ReadByte();
+            header.ProgramInfo.Version = reader.ReadByte();
             header.ProgramInfo.AutoStartFlag = reader.ReadByte();
 
             header.SectionInfo.Arm9Offset = reader.ReadUInt32();
@@ -69,9 +69,9 @@ namespace SceneGate.Ekona.Containers.Rom
             header.SectionInfo.FatOffset = reader.ReadUInt32();
             header.SectionInfo.FatSize = reader.ReadUInt32();
             header.SectionInfo.Overlay9TableOffset = reader.ReadUInt32();
-            header.SectionInfo.Overlay9TableSize = reader.ReadUInt32();
+            header.SectionInfo.Overlay9TableSize = reader.ReadInt32();
             header.SectionInfo.Overlay7TableOffset = reader.ReadUInt32();
-            header.SectionInfo.Overlay7TableSize = reader.ReadUInt32();
+            header.SectionInfo.Overlay7TableSize = reader.ReadInt32();
 
             header.ProgramInfo.FlagsRead = reader.ReadUInt32();
             header.ProgramInfo.FlagsInit = reader.ReadUInt32();
