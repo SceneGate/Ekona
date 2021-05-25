@@ -137,8 +137,10 @@ namespace SceneGate.Ekona.Containers.Rom
                 infos.Add(overlayInfo);
 
                 var fileInfo = addresses[overlayInfo.OverlayId];
-                var overlay = new BinaryFormat(reader.Stream, fileInfo.Offset, fileInfo.Size);
-                rom.System.Children["overlays9"].Add(new Node($"overlay_{i}", overlay));
+                var binaryOverlay = new BinaryFormat(reader.Stream, fileInfo.Offset, fileInfo.Size);
+                var overlay = new Node($"overlay_{i}", binaryOverlay);
+                overlay.Tags.Add("scenegate.ekona.id", overlayInfo.OverlayId);
+                rom.System.Children["overlays9"].Add(overlay);
             }
         }
 
@@ -147,7 +149,9 @@ namespace SceneGate.Ekona.Containers.Rom
             var encoding = Encoding.GetEncoding("shift_jis");
             var directoryQueue = new Queue<(int Id, Node Current)>();
 
+            rom.Data.Tags["scenegate.ekona.id"] = 0xF000;
             directoryQueue.Enqueue((0xF000, rom.Data));
+
             while (directoryQueue.Count > 0) {
                 var info = directoryQueue.Dequeue();
 

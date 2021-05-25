@@ -52,6 +52,9 @@ namespace SceneGate.Ekona.Containers.Rom
         /// </summary>
         public byte UnitCode { get; set; }
 
+        /// <summary>
+        /// Gets or sets the index to encryption seed byte for KEY2.
+        /// </summary>
         public byte EncryptionSeed { get; set; }
 
         /// <summary>
@@ -59,8 +62,14 @@ namespace SceneGate.Ekona.Containers.Rom
         /// </summary>
         public long CartridgeSize { get; set; }
 
+        /// <summary>
+        /// Gets or sets the modcrypt flags for DSi.
+        /// </summary>
         public byte DsiFlags { get; set; }
 
+        /// <summary>
+        /// Gets or sets the special game region.
+        /// </summary>
         public byte Region { get; set; }
 
         /// <summary>
@@ -68,6 +77,9 @@ namespace SceneGate.Ekona.Containers.Rom
         /// </summary>
         public byte Version { get; set; }
 
+        /// <summary>
+        /// Gets or sets the flags to skip parts of the autostart.
+        /// </summary>
         public byte AutoStartFlag { get; set; }
 
         /// <summary>
@@ -101,10 +113,13 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint FlagsInit { get; set; }
 
         /// <summary>
-        /// Secure area CRC16 0x4000 - 0x7FFF.
+        /// Gets or sets the checksum of the ARM-9 secure area.
         /// </summary>
         public ChecksumInfo<ushort> ChecksumSecureArea { get; set; }
 
+        /// <summary>
+        /// Gets or sets the secure area delay in 131kHz units.
+        /// </summary>
         public ushort SecureAreaDelay { get; set; }
 
         /// <summary>
@@ -118,7 +133,7 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint Arm7Autoload { get; set; }
 
         /// <summary>
-        /// Magic number for unencrypted mode.
+        /// Gets or sets the special value that disables the secure area encryption.
         /// </summary>
         public ulong SecureDisable { get; set; }
 
@@ -132,10 +147,19 @@ namespace SceneGate.Ekona.Containers.Rom
         /// </summary>
         public ChecksumInfo<ushort> ChecksumHeader { get; set; }
 
+        /// <summary>
+        /// Gets or sets the debug ROM offset.
+        /// </summary>
         public uint DebugRomOffset { get; set; }
 
+        /// <summary>
+        /// Gets or sets the debug ROM size.
+        /// </summary>
         public uint DebugSize { get; set; }
 
+        /// <summary>
+        /// Gets or sets the debug ROM location in the RAM.
+        /// </summary>
         public uint DebugRamAddress { get; set; }
 
         /// <summary>
