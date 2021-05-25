@@ -1,17 +1,21 @@
 <Project>
     <!-- Centralize dependency management -->
     <ItemGroup>
-        <PackageVersion Include="Yarhl" Version="3.1.0" />
+        <PackageVersion Include="Yarhl" Version="3.1.1-preview.28" />
+        <PackageVersion Include="Texim" Version="0.1.0-preview.103" />
+        <PackageVersion Include="System.Data.HashFunction.CRC" Version="2.0.0" />
 
-        <PackageVersion Include="nunit" Version="3.13.1" />
+        <PackageVersion Include="YamlDotNet" Version="11.1.1" />
+        <PackageVersion Include="FluentAssertions" Version="5.10.3" />
+        <PackageVersion Include="nunit" Version="3.13.2" />
         <PackageVersion Include="NUnit3TestAdapter" Version="3.17.0" />
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.9.1"/>
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.9.4"/>
         <PackageVersion Include="coverlet.collector" Version="3.0.3" />
 
         <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.0.0" />
 
         <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
-        <PackageVersion Include="SonarAnalyzer.CSharp" Version="8.19.0.28253" />
+        <PackageVersion Include="SonarAnalyzer.CSharp" Version="8.23.0.32424" />
         <PackageVersion Include="Roslynator.Analyzers" Version="3.1.0" />
     </ItemGroup>
 </Project>
