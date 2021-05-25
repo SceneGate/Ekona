@@ -1,0 +1,1123 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class RomInfo
+   | Yarhl plugin for Nintendo DS common formats </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class RomInfo
+   | Yarhl plugin for Nintendo DS common formats ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="../dev/toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    <meta property="docfx:newtab" content="true">
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+                
+                <ul class="nav level1 navbar-nav">
+                      <li>
+                          <a href="../index.html" title="Home">Home</a>
+                      </li>
+                      <li>
+                          <a href="../guides/Contributing.html" title="Guides">Guides</a>
+                      </li>
+                      <li>
+                          <a href="../dev/Changelog.html" title="API">API</a>
+                      </li>
+                      <li>
+                          <a href="https://github.com/SceneGate/Ekona" title="GitHub">GitHub</a>
+                      </li>
+                </ul>    </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div>
+              <div class="sidefilter">
+                <form class="toc-filter">
+                  <span class="glyphicon glyphicon-filter filter-icon"></span>
+                  <input type="text" id="toc_filter_input" placeholder="Enter here to filter..." onkeypress="if(event.keyCode==13) {return false;}">
+                </form>
+              </div>
+              <div class="sidetoc">
+                <div class="toc" id="toc">
+                  
+                  <ul class="nav level1">
+                    <li class="">
+                      <a href="../dev/Changelog.html" title="Changelog" class="">Changelog</a>
+                    </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a class="">API</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <span class="expand-stub"></span>
+                            <a href="../dev/../api/SceneGate.Ekona.html" title="SceneGate.Ekona" class="">SceneGate.Ekona</a>
+                              
+                              <ul class="nav level3">
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.ChecksumInfo-1.html" title="ChecksumInfo&lt;T&gt;" class="">ChecksumInfo&lt;T&gt;</a>
+                                </li>
+                              </ul>  </li>
+                          <li class="">
+                            <span class="expand-stub"></span>
+                            <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.html" title="SceneGate.Ekona.Containers.Rom" class="">SceneGate.Ekona.Containers.Rom</a>
+                              
+                              <ul class="nav level3">
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.ArmEncodeFieldFinder.html" title="ArmEncodeFieldFinder" class="">ArmEncodeFieldFinder</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Banner.html" title="Banner" class="">Banner</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Binary2Banner.html" title="Binary2Banner" class="">Binary2Banner</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Binary2NitroRom.html" title="Binary2NitroRom" class="">Binary2NitroRom</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Binary2RomHeader.html" title="Binary2RomHeader" class="">Binary2RomHeader</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.NitroRom.html" title="NitroRom" class="">NitroRom</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.OverlayInfo.html" title="OverlayInfo" class="">OverlayInfo</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.RomHeader.html" title="RomHeader" class="">RomHeader</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.RomInfo.html" title="RomInfo" class="">RomInfo</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.RomSectionInfo.html" title="RomSectionInfo" class="">RomSectionInfo</a>
+                                </li>
+                              </ul>  </li>
+                        </ul>  </li>
+                  </ul>        </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo">
+  
+  
+  <h1 id="SceneGate_Ekona_Containers_Rom_RomInfo" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo" class="text-break">Class RomInfo
+  </h1>
+  <div class="markdown level0 summary"><p>Information about the content of the program.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">RomInfo</span></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="SceneGate.Ekona.Containers.Rom.html">SceneGate.Ekona.Containers.Rom</a></h6>
+  <h6><strong>Assembly</strong>: SceneGate.Ekona.dll</h6>
+  <h5 id="SceneGate_Ekona_Containers_Rom_RomInfo_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class RomInfo : IFormat</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Arm7Autoload.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Arm7Autoload%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L133">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm7Autoload_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm7Autoload*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm7Autoload" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm7Autoload">Arm7Autoload</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the auto-load address of the ARM-7.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint Arm7Autoload { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Arm7EntryAddress.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Arm7EntryAddress%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L98">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm7EntryAddress_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm7EntryAddress*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm7EntryAddress" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm7EntryAddress">Arm7EntryAddress</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the entry address of the ARM-7.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint Arm7EntryAddress { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Arm7RamAddress.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Arm7RamAddress%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L103">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm7RamAddress_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm7RamAddress*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm7RamAddress" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm7RamAddress">Arm7RamAddress</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the address of the ARM-7 in the RAM.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint Arm7RamAddress { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Arm9Autoload.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Arm9Autoload%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L128">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm9Autoload_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm9Autoload*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm9Autoload" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm9Autoload">Arm9Autoload</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the auto-load address of the ARM-9.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint Arm9Autoload { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Arm9EntryAddress.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Arm9EntryAddress%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L88">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm9EntryAddress_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm9EntryAddress*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm9EntryAddress" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm9EntryAddress">Arm9EntryAddress</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the entry address of the ARM-9.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint Arm9EntryAddress { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Arm9RamAddress.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Arm9RamAddress%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L93">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm9RamAddress_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm9RamAddress*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Arm9RamAddress" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Arm9RamAddress">Arm9RamAddress</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the address of the ARM-9 in the RAM.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint Arm9RamAddress { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_AutoStartFlag.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.AutoStartFlag%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L83">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_AutoStartFlag_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.AutoStartFlag*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_AutoStartFlag" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.AutoStartFlag">AutoStartFlag</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the flags to skip parts of the autostart.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte AutoStartFlag { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.byte">Byte</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_CartridgeSize.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.CartridgeSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L63">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_CartridgeSize_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.CartridgeSize*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_CartridgeSize" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.CartridgeSize">CartridgeSize</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the size of the ROM cartridge.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long CartridgeSize { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int64">Int64</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumHeader.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumHeader%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L148">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumHeader_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumHeader*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumHeader" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumHeader">ChecksumHeader</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the checksum of the header.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ChecksumInfo&lt;ushort&gt; ChecksumHeader { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="SceneGate.Ekona.ChecksumInfo-1.html">ChecksumInfo</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint16">UInt16</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumLogo.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumLogo%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L143">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumLogo_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumLogo*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumLogo" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumLogo">ChecksumLogo</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the checksum of the copyright logo.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ChecksumInfo&lt;ushort&gt; ChecksumLogo { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="SceneGate.Ekona.ChecksumInfo-1.html">ChecksumInfo</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint16">UInt16</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumSecureArea.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumSecureArea%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L118">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumSecureArea_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumSecureArea*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_ChecksumSecureArea" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.ChecksumSecureArea">ChecksumSecureArea</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the checksum of the ARM-9 secure area.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ChecksumInfo&lt;ushort&gt; ChecksumSecureArea { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="SceneGate.Ekona.ChecksumInfo-1.html">ChecksumInfo</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint16">UInt16</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_DebugRamAddress.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.DebugRamAddress%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L163">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_DebugRamAddress_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DebugRamAddress*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_DebugRamAddress" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DebugRamAddress">DebugRamAddress</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the debug ROM location in the RAM.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint DebugRamAddress { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_DebugRomOffset.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.DebugRomOffset%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L153">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_DebugRomOffset_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DebugRomOffset*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_DebugRomOffset" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DebugRomOffset">DebugRomOffset</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the debug ROM offset.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint DebugRomOffset { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_DebugSize.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.DebugSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L158">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_DebugSize_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DebugSize*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_DebugSize" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DebugSize">DebugSize</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the debug ROM size.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint DebugSize { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_DsiFlags.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.DsiFlags%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L68">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_DsiFlags_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DsiFlags*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_DsiFlags" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.DsiFlags">DsiFlags</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the modcrypt flags for DSi.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte DsiFlags { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.byte">Byte</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_EncryptionSeed.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.EncryptionSeed%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L58">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_EncryptionSeed_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.EncryptionSeed*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_EncryptionSeed" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.EncryptionSeed">EncryptionSeed</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the index to encryption seed byte for KEY2.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte EncryptionSeed { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.byte">Byte</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_FlagsInit.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.FlagsInit%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L113">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_FlagsInit_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.FlagsInit*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_FlagsInit" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.FlagsInit">FlagsInit</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the control register flags for init.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint FlagsInit { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_FlagsRead.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.FlagsRead%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L108">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_FlagsRead_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.FlagsRead*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_FlagsRead" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.FlagsRead">FlagsRead</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the control register flags for read.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint FlagsRead { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_GameCode.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.GameCode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L43">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_GameCode_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.GameCode*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_GameCode" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.GameCode">GameCode</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the game code.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string GameCode { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_GameTitle.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.GameTitle%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L38">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_GameTitle_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.GameTitle*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_GameTitle" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.GameTitle">GameTitle</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the short game title.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string GameTitle { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_MakerCode.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.MakerCode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L48">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_MakerCode_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.MakerCode*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_MakerCode" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.MakerCode">MakerCode</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the maker code.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string MakerCode { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_MinimumCartridgeSize.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.MinimumCartridgeSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L33">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_MinimumCartridgeSize_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.MinimumCartridgeSize*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_MinimumCartridgeSize" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.MinimumCartridgeSize">MinimumCartridgeSize</h4>
+  <div class="markdown level1 summary"><p>Gets the minimum cartridge size.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static long MinimumCartridgeSize { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int64">Int64</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Overlays7Info.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Overlays7Info%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L173">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Overlays7Info_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Overlays7Info*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Overlays7Info" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Overlays7Info">Overlays7Info</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the collection of information of overlays for ARM-7.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Collection&lt;OverlayInfo&gt; Overlays7Info { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Collection</span>&lt;<a class="xref" href="SceneGate.Ekona.Containers.Rom.OverlayInfo.html">OverlayInfo</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Overlays9Info.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Overlays9Info%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L168">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Overlays9Info_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Overlays9Info*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Overlays9Info" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Overlays9Info">Overlays9Info</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the collection of information of overlays for ARM-9.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Collection&lt;OverlayInfo&gt; Overlays9Info { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Collection</span>&lt;<a class="xref" href="SceneGate.Ekona.Containers.Rom.OverlayInfo.html">OverlayInfo</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Region.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Region%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L73">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Region_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Region*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Region" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Region">Region</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the special game region.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte Region { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.byte">Byte</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_SecureAreaDelay.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.SecureAreaDelay%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L123">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_SecureAreaDelay_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.SecureAreaDelay*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_SecureAreaDelay" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.SecureAreaDelay">SecureAreaDelay</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the secure area delay in 131kHz units.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ushort SecureAreaDelay { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint16">UInt16</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_SecureDisable.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.SecureDisable%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L138">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_SecureDisable_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.SecureDisable*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_SecureDisable" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.SecureDisable">SecureDisable</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the special value that disables the secure area encryption.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ulong SecureDisable { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint64">UInt64</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_UnitCode.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.UnitCode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L53">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_UnitCode_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.UnitCode*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_UnitCode" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.UnitCode">UnitCode</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the unit code.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte UnitCode { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.byte">Byte</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo_Version.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo.Version%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L78">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomInfo_Version_" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Version*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomInfo_Version" data-uid="SceneGate.Ekona.Containers.Rom.RomInfo.Version">Version</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the version of the program.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte Version { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.byte">Byte</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomInfo.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomInfo%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomInfo.cs/#L28" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            Copyright (c) 2021 SceneGate
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

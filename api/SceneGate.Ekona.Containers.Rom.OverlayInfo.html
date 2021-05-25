@@ -1,0 +1,507 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class OverlayInfo
+   | Yarhl plugin for Nintendo DS common formats </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class OverlayInfo
+   | Yarhl plugin for Nintendo DS common formats ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="../dev/toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    <meta property="docfx:newtab" content="true">
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+                
+                <ul class="nav level1 navbar-nav">
+                      <li>
+                          <a href="../index.html" title="Home">Home</a>
+                      </li>
+                      <li>
+                          <a href="../guides/Contributing.html" title="Guides">Guides</a>
+                      </li>
+                      <li>
+                          <a href="../dev/Changelog.html" title="API">API</a>
+                      </li>
+                      <li>
+                          <a href="https://github.com/SceneGate/Ekona" title="GitHub">GitHub</a>
+                      </li>
+                </ul>    </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div>
+              <div class="sidefilter">
+                <form class="toc-filter">
+                  <span class="glyphicon glyphicon-filter filter-icon"></span>
+                  <input type="text" id="toc_filter_input" placeholder="Enter here to filter..." onkeypress="if(event.keyCode==13) {return false;}">
+                </form>
+              </div>
+              <div class="sidetoc">
+                <div class="toc" id="toc">
+                  
+                  <ul class="nav level1">
+                    <li class="">
+                      <a href="../dev/Changelog.html" title="Changelog" class="">Changelog</a>
+                    </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a class="">API</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <span class="expand-stub"></span>
+                            <a href="../dev/../api/SceneGate.Ekona.html" title="SceneGate.Ekona" class="">SceneGate.Ekona</a>
+                              
+                              <ul class="nav level3">
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.ChecksumInfo-1.html" title="ChecksumInfo&lt;T&gt;" class="">ChecksumInfo&lt;T&gt;</a>
+                                </li>
+                              </ul>  </li>
+                          <li class="">
+                            <span class="expand-stub"></span>
+                            <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.html" title="SceneGate.Ekona.Containers.Rom" class="">SceneGate.Ekona.Containers.Rom</a>
+                              
+                              <ul class="nav level3">
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.ArmEncodeFieldFinder.html" title="ArmEncodeFieldFinder" class="">ArmEncodeFieldFinder</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Banner.html" title="Banner" class="">Banner</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Binary2Banner.html" title="Binary2Banner" class="">Binary2Banner</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Binary2NitroRom.html" title="Binary2NitroRom" class="">Binary2NitroRom</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.Binary2RomHeader.html" title="Binary2RomHeader" class="">Binary2RomHeader</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.NitroRom.html" title="NitroRom" class="">NitroRom</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.OverlayInfo.html" title="OverlayInfo" class="">OverlayInfo</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.RomHeader.html" title="RomHeader" class="">RomHeader</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.RomInfo.html" title="RomInfo" class="">RomInfo</a>
+                                </li>
+                                <li class="">
+                                  <a href="../dev/../api/SceneGate.Ekona.Containers.Rom.RomSectionInfo.html" title="RomSectionInfo" class="">RomSectionInfo</a>
+                                </li>
+                              </ul>  </li>
+                        </ul>  </li>
+                  </ul>        </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo">
+  
+  
+  <h1 id="SceneGate_Ekona_Containers_Rom_OverlayInfo" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo" class="text-break">Class OverlayInfo
+  </h1>
+  <div class="markdown level0 summary"><p>Information about a program overlay.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">OverlayInfo</span></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="SceneGate.Ekona.Containers.Rom.html">SceneGate.Ekona.Containers.Rom</a></h6>
+  <h6><strong>Assembly</strong>: SceneGate.Ekona.dll</h6>
+  <h5 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class OverlayInfo : object</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_BssSize.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.BssSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L45">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_BssSize_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.BssSize*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_BssSize" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.BssSize">BssSize</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the size of the BSS data region.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint BssSize { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_CompressedSize.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.CompressedSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L60">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_CompressedSize_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.CompressedSize*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_CompressedSize" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.CompressedSize">CompressedSize</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the size of the overlay compressed or 0 if it is not compressed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint CompressedSize { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_IsCompressed.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.IsCompressed%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L65">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_IsCompressed_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.IsCompressed*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_IsCompressed" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.IsCompressed">IsCompressed</h4>
+  <div class="markdown level1 summary"><p>Gets or sets a value indicating whether the overlay is BLZ compressed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsCompressed { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_IsSigned.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.IsSigned%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L74">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_IsSigned_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.IsSigned*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_IsSigned" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.IsSigned">IsSigned</h4>
+  <div class="markdown level1 summary"><p>Gets or sets a value indicating whether this overlay is digitally signed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsSigned { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_IsSigned_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>The signature seems to be validated only when executing a program
+recived from other devices.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_OverlayId.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.OverlayId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L30">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_OverlayId_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.OverlayId*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_OverlayId" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.OverlayId">OverlayId</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the ID of the overlay.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint OverlayId { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_RamAddress.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.RamAddress%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L35">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_RamAddress_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.RamAddress*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_RamAddress" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.RamAddress">RamAddress</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the address where the overlay will be load in the RAM.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint RamAddress { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_RamSize.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.RamSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L40">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_RamSize_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.RamSize*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_RamSize" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.RamSize">RamSize</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the amount of bytes to load in RAM of the overlay.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint RamSize { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_StaticInitEnd.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.StaticInitEnd%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L55">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_StaticInitEnd_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.StaticInitEnd*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_StaticInitEnd" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.StaticInitEnd">StaticInitEnd</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the static initialization end address.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint StaticInitEnd { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo_StaticInitStart.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo.StaticInitStart%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L50">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_OverlayInfo_StaticInitStart_" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.StaticInitStart*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_OverlayInfo_StaticInitStart" data-uid="SceneGate.Ekona.Containers.Rom.OverlayInfo.StaticInitStart">StaticInitStart</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the static initialization start address.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public uint StaticInitStart { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.uint32">UInt32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_OverlayInfo.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.OverlayInfo%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/OverlayInfo.cs/#L25" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            Copyright (c) 2021 SceneGate
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Namespace SceneGate.Ekona
+    <title>Class RomHeader
    | Yarhl plugin for Nintendo DS common formats </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Namespace SceneGate.Ekona
+    <meta name="title" content="Class RomHeader
    | Yarhl plugin for Nintendo DS common formats ">
     <meta name="generator" content="docfx 2.56.7.0">
     
@@ -158,18 +158,124 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="SceneGate.Ekona">
+            <article class="content wrap" id="_content" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader">
   
-  <h1 id="SceneGate_Ekona" data-uid="SceneGate.Ekona" class="text-break">Namespace SceneGate.Ekona
+  
+  <h1 id="SceneGate_Ekona_Containers_Rom_RomHeader" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader" class="text-break">Class RomHeader
   </h1>
-  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 summary"><p>Header of the program in a ROM.</p>
+</div>
   <div class="markdown level0 conceptual"></div>
-  <div class="markdown level0 remarks"></div>
-    <h3 id="classes">Classes
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">RomHeader</span></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="SceneGate.Ekona.Containers.Rom.html">SceneGate.Ekona.Containers.Rom</a></h6>
+  <h6><strong>Assembly</strong>: SceneGate.Ekona.dll</h6>
+  <h5 id="SceneGate_Ekona_Containers_Rom_RomHeader_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class RomHeader : IFormat</code></pre>
+  </div>
+  <h3 id="properties">Properties
   </h3>
-      <h4><a class="xref" href="SceneGate.Ekona.ChecksumInfo-1.html">ChecksumInfo&lt;T&gt;</a></h4>
-      <section><p>Information for a checksum verification.</p>
-</section>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomHeader_CopyrightLogo.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomHeader.CopyrightLogo%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomHeader.cs/#L46">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomHeader_CopyrightLogo_" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader.CopyrightLogo*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomHeader_CopyrightLogo" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader.CopyrightLogo">CopyrightLogo</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the compressed copyright logo.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte[] CopyrightLogo { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.byte">Byte</a>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="SceneGate_Ekona_Containers_Rom_RomHeader_CopyrightLogo_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>The logo is compressed with Huffman with a header present in the BIOS.</p>
+<p>The logo must be the original or the device won&apos;t boot the game.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomHeader_ProgramInfo.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomHeader.ProgramInfo%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomHeader.cs/#L32">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomHeader_ProgramInfo_" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader.ProgramInfo*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomHeader_ProgramInfo" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader.ProgramInfo">ProgramInfo</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the information of the program.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public RomInfo ProgramInfo { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="SceneGate.Ekona.Containers.Rom.RomInfo.html">RomInfo</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomHeader_SectionInfo.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomHeader.SectionInfo%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomHeader.cs/#L37">View Source</a>
+  </span>
+  <a id="SceneGate_Ekona_Containers_Rom_RomHeader_SectionInfo_" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader.SectionInfo*"></a>
+  <h4 id="SceneGate_Ekona_Containers_Rom_RomHeader_SectionInfo" data-uid="SceneGate.Ekona.Containers.Rom.RomHeader.SectionInfo">SectionInfo</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the information of the sections of the ROM.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public RomSectionInfo SectionInfo { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="SceneGate.Ekona.Containers.Rom.RomSectionInfo.html">RomSectionInfo</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
 </article>
           </div>
           
@@ -177,6 +283,12 @@
             <div class="sideaffix">
               <div class="contribution">
                 <ul class="nav">
+                  <li>
+                    <a href="https://github.com/SceneGate/Ekona/new/main/docs/apidoc/new?filename=SceneGate_Ekona_Containers_Rom_RomHeader.md&amp;value=---%0Auid%3A%20SceneGate.Ekona.Containers.Rom.RomHeader%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/SceneGate/Ekona/blob/main/src/Ekona/Containers/Rom/RomHeader.cs/#L27" class="contribution-link">View Source</a>
+                  </li>
                 </ul>
               </div>
               <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
