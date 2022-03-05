@@ -3,7 +3,7 @@
 [Yarhl](https://github.com/SceneGate/yarhl) plugin for Nintendo DS common
 formats.
 
-The library supports .NET 5.0 and above on Linux, Window and MacOS.
+The library supports .NET 6.0 and above on Linux, Window and MacOS.
 
 <!-- prettier-ignore -->
 | Release | Package                                                           |
@@ -26,9 +26,8 @@ Check our on-line [API documentation](https://scenegate.github.io/Ekona/).
 
 ## Build
 
-The project requires to build .NET 5.0 SDK, .NET Core 3.1 runtime and .NET
-Framework 4.8 or latest Mono. If you open the project with VS Code and you did
-install the
+The project requires to build .NET 6.0 SDK and .NET Framework 4.8 or latest
+Mono. If you open the project with VS Code and you did install the
 [VS Code Remote Containers](https://code.visualstudio.com/docs/remote/containers)
 extension, you can have an already pre-configured development environment with
 Docker or Podman.

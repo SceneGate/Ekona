@@ -4,7 +4,7 @@
     <AssemblyName>SceneGate.Ekona.Tests</AssemblyName>
     <RootNamespace>SceneGate.Ekona.Tests</RootNamespace>
     <Description>Tests for Ekona.</Description>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
