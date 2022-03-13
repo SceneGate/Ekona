@@ -30,5 +30,22 @@ namespace SceneGate.Ekona
                 Actual = actual,
             };
         }
+
+        /// <summary>
+        /// Compute a CRC16 over the specific substream and write the result.
+        /// </summary>
+        /// <param name="writer">Write to write the result and get the stream.</param>
+        /// <param name="offset">Offset of the segment to calculate the CRC.</param>
+        /// <param name="length">The length to calculate the CRC.</param>
+        public static void WriteComputedCrc16(this DataWriter writer, long offset, long length)
+        {
+            using DataStream segment = new DataStream(writer.Stream, offset, length);
+
+            ICRC crc = CRCFactory.Instance.Create(CRCConfig.MODBUS);
+            IHashValue hash = crc.ComputeHash(segment);
+            ushort actual = (ushort)(hash.Hash[0] | (hash.Hash[1] << 8));
+
+            writer.Write(actual);
+        }
     }
 }

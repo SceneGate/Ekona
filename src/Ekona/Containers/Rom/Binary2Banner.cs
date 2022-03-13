@@ -78,6 +78,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <returns>The new container with the banner.</returns>
         public NodeContainerFormat Convert(IBinary source)
         {
+            source.Stream.Position = 0;
             var reader = new DataReader(source.Stream) {
                 DefaultEncoding = Encoding.Unicode,
             };
