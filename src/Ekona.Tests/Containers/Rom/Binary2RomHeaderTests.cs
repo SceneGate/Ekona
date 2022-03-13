@@ -25,6 +25,7 @@ using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
 
@@ -63,6 +64,39 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             node.GetFormatAs<RomHeader>().Should().BeEquivalentTo(
                 expected,
                 opts => opts.Excluding(p => p.CopyrightLogo));
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        [Ignore("It requires to implement DSi fields #9")]
+        public void TwoWaysIdenticalStream(string infoPath, string headerPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(headerPath);
+
+            using Node node = NodeFactory.FromFile(headerPath, FileOpenMode.Read);
+
+            var header = (RomHeader)ConvertFormat.With<Binary2RomHeader>(node.Format!);
+            var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
+
+            var originalStream = new DataStream(node.Stream!, 0, header.SectionInfo.HeaderSize);
+            originalStream.Length.Should().Be(generatedStream.Stream.Length);
+            originalStream.Compare(generatedStream.Stream).Should().BeTrue();
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void ThreeWaysIdenticalObjects(string infoPath, string headerPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(headerPath);
+
+            using Node node = NodeFactory.FromFile(headerPath, FileOpenMode.Read);
+
+            var originalHeader = (RomHeader)ConvertFormat.With<Binary2RomHeader>(node.Format!);
+            var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(originalHeader);
+            var generatedHeader = (RomHeader)ConvertFormat.With<Binary2RomHeader>(generatedStream);
+
+            // Ignore ChecksumHeader as we are not generating identical headers due to DSi flags yet (#9).
+            generatedHeader.Should().BeEquivalentTo(
+                originalHeader,
+                opts => opts.Excluding(p => p.ProgramInfo.ChecksumHeader));
         }
     }
 }

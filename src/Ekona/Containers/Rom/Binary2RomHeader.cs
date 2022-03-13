@@ -83,8 +83,9 @@ namespace SceneGate.Ekona.Containers.Rom
             header.ProgramInfo.SecureDisable = reader.ReadUInt64();
             header.SectionInfo.RomSize = reader.ReadUInt32();
             header.SectionInfo.HeaderSize = reader.ReadUInt32();
+            header.SectionInfo.Unknown88 = reader.ReadUInt32();
 
-            source.Stream.Position += 0x38;
+            source.Stream.Position += 0x34;
             header.CopyrightLogo = reader.ReadBytes(156);
             header.ProgramInfo.ChecksumLogo = reader.ValidateCrc16(0xC0, 0x9C);
             header.ProgramInfo.ChecksumHeader = reader.ValidateCrc16(0x00, 0x15E);
