@@ -27,6 +27,7 @@ using Texim.Formats;
 using Texim.Images;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
 
@@ -44,7 +45,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                     Path.Combine(basePath, data),
                     Path.Combine(basePath, data + ".yml"),
                     Path.Combine(basePath, data + ".png"))
-                    .SetName($"({data})"));
+                    .SetName($"{{m}}({data})"));
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -102,6 +103,43 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             if (actual.Version.Minor > 2) {
                 actual.KoreanTitle.Should().Be(expected.KoreanTitle);
             }
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        [Ignore("Requires implementing the animations")]
+        public void TwoWaysIdenticalStream(string bannerPath, string infoPath, string iconPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
+
+            using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
+
+            var banner = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(node.Format!);
+            var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(banner);
+
+            node.Stream.Length.Should().Be(generatedStream.Stream.Length);
+            node.Stream.Compare(generatedStream.Stream).Should().BeTrue();
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void ThreeWaysIdenticalObjects(string bannerPath, string infoPath, string iconPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
+
+            using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
+
+            var originalNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(node.Format!);
+            var originalBanner = originalNode.Root.Children["info"].GetFormatAs<Banner>();
+            var originalIcon = originalNode.Root.Children["icon"].GetFormatAs<IndexedPaletteImage>();
+
+            var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(originalNode);
+
+            var generatedNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(generatedStream);
+            var generatedBanner = generatedNode.Root.Children["info"].GetFormatAs<Banner>();
+            var generatedIcon = generatedNode.Root.Children["icon"].GetFormatAs<IndexedPaletteImage>();
+
+            // TODO: Implement icon animations
+            generatedBanner.Should().BeEquivalentTo(originalBanner, opts => opts.Excluding(f => f.ChecksumAnimatedIcon));
+            generatedIcon.Should().BeEquivalentTo(originalIcon);
         }
     }
 }
