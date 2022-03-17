@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
@@ -37,6 +38,7 @@ namespace SceneGate.Ekona.Containers.Rom
         private NitroRom rom;
         private RomHeader header;
         private FileAddress[] addresses;
+        private FileAddress[] addressesByOffset;
 
         /// <summary>
         /// Read the internal info of a ROM file.
@@ -48,6 +50,7 @@ namespace SceneGate.Ekona.Containers.Rom
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
+            source.Stream.Position = 0;
             reader = new DataReader(source.Stream);
             rom = new NitroRom();
 
@@ -62,6 +65,10 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ReadHeader()
         {
+            if (reader.Stream.Length < Binary2RomHeader.HeaderSizeOffset + 4) {
+                throw new EndOfStreamException("Stream is smaller than the ROM header");
+            }
+
             reader.Stream.Seek(Binary2RomHeader.HeaderSizeOffset, SeekOrigin.Begin);
             int headerSize = reader.ReadInt32();
             using var binaryHeader = new BinaryFormat(reader.Stream, 0, headerSize);
@@ -97,6 +104,8 @@ namespace SceneGate.Ekona.Containers.Rom
                     Size = endOffset - offset,
                 };
             }
+
+            addressesByOffset = addresses.OrderBy(a => a.Offset).ToArray();
         }
 
         private void ReadPrograms()
@@ -173,9 +182,10 @@ namespace SceneGate.Ekona.Containers.Rom
                     int id;
                     if (isFile) {
                         id = fileId++;
-                        var fileInfo = addresses[id];
+                        FileAddress fileInfo = addresses[id];
                         var fileData = new BinaryFormat(reader.Stream, fileInfo.Offset, fileInfo.Size);
                         node = new Node(name, fileData);
+                        node.Tags["scenegate.ekona.physical_id"] = Array.IndexOf(addressesByOffset, fileInfo);
                     } else {
                         id = reader.ReadUInt16();
                         node = NodeFactory.CreateContainer(name);

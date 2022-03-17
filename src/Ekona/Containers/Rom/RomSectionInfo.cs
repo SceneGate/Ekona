@@ -98,14 +98,5 @@ namespace SceneGate.Ekona.Containers.Rom
         /// Gets or sets the size of the header.
         /// </summary>
         public uint HeaderSize { get; set; }
-
-        /// <summary>
-        /// Gets or sets an unknown value at 0x88.
-        /// </summary>
-        /// <remarks>
-        /// In DS games it looks like an offset pointing to the SDK information
-        /// inside the arm9.bin.
-        /// </remarks>
-        public uint Unknown88 { get; set; }
     }
 }

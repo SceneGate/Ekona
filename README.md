@@ -15,7 +15,9 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
 
 _Encryption, decryption or signature validation not supported yet._
 
-- DS cartridge filesystem: read
+- DS cartridge filesystem: read and write
+  - Header: read and write
+  - Banner and icon: read and write
 
 ## Documentation
 

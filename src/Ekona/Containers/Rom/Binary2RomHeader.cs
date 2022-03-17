@@ -46,44 +46,57 @@ namespace SceneGate.Ekona.Containers.Rom
             header.ProgramInfo.GameTitle = reader.ReadString(12).Replace("\0", string.Empty);
             header.ProgramInfo.GameCode = reader.ReadString(4);
             header.ProgramInfo.MakerCode = reader.ReadString(2);
+
+            // Pos: 0x10
             header.ProgramInfo.UnitCode = reader.ReadByte();
             header.ProgramInfo.EncryptionSeed = reader.ReadByte();
             header.ProgramInfo.CartridgeSize = RomInfo.MinimumCartridgeSize * (1 << reader.ReadByte());
-
             source.Stream.Position += 7; // reserved
             header.ProgramInfo.DsiFlags = reader.ReadByte();
             header.ProgramInfo.Region = reader.ReadByte();
             header.ProgramInfo.Version = reader.ReadByte();
             header.ProgramInfo.AutoStartFlag = reader.ReadByte();
 
+            // Pos: 0x20
             header.SectionInfo.Arm9Offset = reader.ReadUInt32();
             header.ProgramInfo.Arm9EntryAddress = reader.ReadUInt32();
             header.ProgramInfo.Arm9RamAddress = reader.ReadUInt32();
             header.SectionInfo.Arm9Size = reader.ReadUInt32();
+
+            // Pos: 0x30
             header.SectionInfo.Arm7Offset = reader.ReadUInt32();
             header.ProgramInfo.Arm7EntryAddress = reader.ReadUInt32();
             header.ProgramInfo.Arm7RamAddress = reader.ReadUInt32();
             header.SectionInfo.Arm7Size = reader.ReadUInt32();
+
+            // Pos: 0x40
             header.SectionInfo.FntOffset = reader.ReadUInt32();
             header.SectionInfo.FntSize = reader.ReadUInt32();
             header.SectionInfo.FatOffset = reader.ReadUInt32();
             header.SectionInfo.FatSize = reader.ReadUInt32();
+
+            // Pos: 0x50
             header.SectionInfo.Overlay9TableOffset = reader.ReadUInt32();
             header.SectionInfo.Overlay9TableSize = reader.ReadInt32();
             header.SectionInfo.Overlay7TableOffset = reader.ReadUInt32();
             header.SectionInfo.Overlay7TableSize = reader.ReadInt32();
 
+            // Pos: 0x60
             header.ProgramInfo.FlagsRead = reader.ReadUInt32();
             header.ProgramInfo.FlagsInit = reader.ReadUInt32();
             header.SectionInfo.BannerOffset = reader.ReadUInt32();
             header.ProgramInfo.ChecksumSecureArea = new ChecksumInfo<ushort>(reader.ReadUInt16());
             header.ProgramInfo.SecureAreaDelay = reader.ReadUInt16();
+
+            // Pos: 0x70
             header.ProgramInfo.Arm9Autoload = reader.ReadUInt32();
             header.ProgramInfo.Arm7Autoload = reader.ReadUInt32();
             header.ProgramInfo.SecureDisable = reader.ReadUInt64();
+
+            // Pos: 0x80
             header.SectionInfo.RomSize = reader.ReadUInt32();
             header.SectionInfo.HeaderSize = reader.ReadUInt32();
-            header.SectionInfo.Unknown88 = reader.ReadUInt32();
+            header.ProgramInfo.Unknown88 = reader.ReadUInt32();
 
             source.Stream.Position += 0x34;
             header.CopyrightLogo = reader.ReadBytes(156);

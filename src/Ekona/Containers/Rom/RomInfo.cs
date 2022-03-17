@@ -163,6 +163,15 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint DebugRamAddress { get; set; }
 
         /// <summary>
+        /// Gets or sets an unknown value at 0x88.
+        /// </summary>
+        /// <remarks>
+        /// In DS games it looks like an offset pointing to the SDK information
+        /// inside the arm9.bin.
+        /// </remarks>
+        public uint Unknown88 { get; set; }
+
+        /// <summary>
         /// Gets or sets the collection of information of overlays for ARM-9.
         /// </summary>
         public Collection<OverlayInfo> Overlays9Info { get; set; } = new Collection<OverlayInfo>();

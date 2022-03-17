@@ -43,11 +43,11 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 .Select(data => new TestCaseData(
                     Path.Combine(basePath, data[0]),
                     Path.Combine(basePath, data[1]))
-                    .SetName($"({data[1]})"));
+                    .SetName($"{{m}}({data[1]})"));
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void DeserializeMatchInfo(string infoPath, string headerPath)
+        public void DeserializeRomHeaderMatchInfo(string infoPath, string headerPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
             TestDataBase.IgnoreIfFileDoesNotExist(headerPath);
@@ -67,8 +67,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        [Ignore("It requires to implement DSi fields #9")]
-        public void TwoWaysIdenticalStream(string infoPath, string headerPath)
+        public void TwoWaysIdenticalRomHeaderStream(string infoPath, string headerPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(headerPath);
 
@@ -78,12 +77,14 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
 
             var originalStream = new DataStream(node.Stream!, 0, header.SectionInfo.HeaderSize);
-            originalStream.Length.Should().Be(generatedStream.Stream.Length);
-            originalStream.Compare(generatedStream.Stream).Should().BeTrue();
+            generatedStream.Stream.Length.Should().Be(originalStream.Length);
+
+            // TODO: After DSi support
+            // generatedStream.Stream.Compare(originalStream).Should().BeTrue();
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void ThreeWaysIdenticalObjects(string infoPath, string headerPath)
+        public void ThreeWaysIdenticalRomHeaderObjects(string infoPath, string headerPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(headerPath);
 

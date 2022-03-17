@@ -135,27 +135,21 @@ public class Banner2Binary : IConverter<NodeContainerFormat, BinaryFormat>
 
         if (banner.Version.Minor > 1) {
             writer.Write(banner.ChineseTitle, 0x100);
-        } else {
-            writer.WriteTimes(0xFF, 0x100);
         }
 
         if (banner.Version.Minor > 2) {
             writer.Write(banner.KoreanTitle, 0x100);
-        } else {
-            writer.WriteTimes(0xFF, 0xC0);
-            writer.WriteTimes(0x00, 0x40);
         }
-
-        // reserved for future titles
-        writer.WriteTimes(0, 0x800);
     }
 
     private static void WriteAnimatedIcon(DataWriter writer)
     {
         // TODO: implement properly
+        writer.WriteUntilLength(0xFF, 0x1240);
+        writer.Stream.Position = 0x1240;
+
         writer.WriteTimes(0, 0x1000); // 8 bitmaps
         writer.WriteTimes(0, 0x100); // 8 palettes
         writer.WriteTimes(0, 0x80); // animation sequence
-        writer.WriteTimes(0xFF, 0x40); // padding
     }
 }
