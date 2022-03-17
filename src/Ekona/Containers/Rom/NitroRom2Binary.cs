@@ -356,6 +356,7 @@ public class NitroRom2Binary :
         string systemPath = $"/{root.Name}/system";
         fileIndex += GetChildSafe("system/overlays9").Children.Count;
         fileIndex += GetChildSafe("system/overlays7").Children.Count;
+        physicalIndex = fileIndex;
 
         foreach (Node node in Navigator.IterateNodes(root, NavigationMode.DepthFirst)) {
             // Skip system as they are written in a special way

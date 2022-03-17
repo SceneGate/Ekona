@@ -80,7 +80,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             generatedStream.Stream.Length.Should().Be(originalStream.Length);
 
             // TODO: After DSi support
-            // generatedStream.Stream.Compare(originalStream).Should().BeTrue();
+            // generatedStream.Stream.Compare(originalStream).Should().BeTrue()
         }
 
         [TestCaseSource(nameof(GetFiles))]

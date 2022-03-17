@@ -76,7 +76,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
 
             // TODO: After identical header and banner
-            // generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
+            // generatedStream.Stream!.Compare(node.Stream).Should().BeTrue()
         }
 
         [TestCaseSource(nameof(GetFiles))]

@@ -34,11 +34,12 @@ namespace SceneGate.Ekona.Containers.Rom
     /// </summary>
     public class Binary2NitroRom : IConverter<IBinary, NitroRom>
     {
+        private static readonly FileAddressOffsetComparer FileAddressComparer = new FileAddressOffsetComparer();
         private DataReader reader;
         private NitroRom rom;
         private RomHeader header;
         private FileAddress[] addresses;
-        private FileAddress[] addressesByOffset;
+        private List<FileAddress> addressesByOffset;
 
         /// <summary>
         /// Read the internal info of a ROM file.
@@ -100,12 +101,14 @@ namespace SceneGate.Ekona.Containers.Rom
                 uint offset = reader.ReadUInt32();
                 uint endOffset = reader.ReadUInt32();
                 addresses[i] = new FileAddress {
+                    Index = i,
                     Offset = offset,
                     Size = endOffset - offset,
                 };
             }
 
-            addressesByOffset = addresses.OrderBy(a => a.Offset).ToArray();
+            addressesByOffset = addresses.ToList();
+            addressesByOffset.Sort(FileAddressComparer);
         }
 
         private void ReadPrograms()
@@ -185,7 +188,7 @@ namespace SceneGate.Ekona.Containers.Rom
                         FileAddress fileInfo = addresses[id];
                         var fileData = new BinaryFormat(reader.Stream, fileInfo.Offset, fileInfo.Size);
                         node = new Node(name, fileData);
-                        node.Tags["scenegate.ekona.physical_id"] = Array.IndexOf(addressesByOffset, fileInfo);
+                        node.Tags["scenegate.ekona.physical_id"] = addressesByOffset.BinarySearch(fileInfo, FileAddressComparer);
                     } else {
                         id = reader.ReadUInt16();
                         node = NodeFactory.CreateContainer(name);
@@ -205,6 +208,18 @@ namespace SceneGate.Ekona.Containers.Rom
             public uint Offset { get; init; }
 
             public uint Size { get; init; }
+
+            public int Index { get; init; }
+        }
+
+        private sealed class FileAddressOffsetComparer : IComparer<FileAddress>
+        {
+            public int Compare(FileAddress x, FileAddress y)
+            {
+                int offsetComparison = x.Offset.CompareTo(y.Offset);
+                if (offsetComparison != 0) return offsetComparison;
+                return x.Index.CompareTo(y.Index);
+            }
         }
     }
 }
