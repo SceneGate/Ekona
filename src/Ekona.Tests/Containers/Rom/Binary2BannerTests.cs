@@ -49,7 +49,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void DeserializeMatchInfo(string bannerPath, string infoPath, string iconPath)
+        public void DeserializeBannerMatchInfo(string bannerPath, string infoPath, string iconPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
@@ -106,8 +106,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        [Ignore("Requires implementing the animations")]
-        public void TwoWaysIdenticalStream(string bannerPath, string infoPath, string iconPath)
+        public void TwoWaysIdenticalBannerStream(string bannerPath, string infoPath, string iconPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
 
@@ -116,12 +115,14 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var banner = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(node.Format!);
             var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(banner);
 
-            node.Stream.Length.Should().Be(generatedStream.Stream.Length);
-            node.Stream.Compare(generatedStream.Stream).Should().BeTrue();
+            generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
+
+            // TODO: After implementing animations, can compare streams
+            // generatedStream.Stream.Compare(node.Stream).Should().BeTrue()
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void ThreeWaysIdenticalObjects(string bannerPath, string infoPath, string iconPath)
+        public void ThreeWaysIdenticalBannerObjects(string bannerPath, string infoPath, string iconPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
 

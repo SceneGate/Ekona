@@ -25,6 +25,7 @@ using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
 
@@ -42,11 +43,11 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 .Select(data => new TestCaseData(
                     Path.Combine(basePath, data[0]),
                     Path.Combine(basePath, data[1]))
-                    .SetName($"({data[1]})"));
+                    .SetName($"{{m}}({data[1]})"));
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void DeserializeMatchInfo(string infoPath, string romPath)
+        public void DeserializeRomMatchInfo(string infoPath, string romPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);
@@ -59,6 +60,42 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            node.Should().MatchInfo(expected);
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void TwoWaysIdenticalRomStream(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+
+            var rom = (NodeContainerFormat)ConvertFormat.With<Binary2NitroRom>(node.Format!);
+            var generatedStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
+
+            generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
+
+            // TODO: After identical header and banner
+            // generatedStream.Stream!.Compare(node.Stream).Should().BeTrue()
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void ReadWriteThreeWaysRomMatchInfo(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+
+            string yaml = File.ReadAllText(infoPath);
+            NodeContainerInfo expected = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build()
+                .Deserialize<NodeContainerInfo>(yaml);
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            node.Invoking(n => n.TransformWith<NitroRom2Binary>()).Should().NotThrow();
+            node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+
             node.Should().MatchInfo(expected);
         }
     }

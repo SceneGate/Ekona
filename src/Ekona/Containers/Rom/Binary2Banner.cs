@@ -62,14 +62,22 @@ namespace SceneGate.Ekona.Containers.Rom
             stream.Position -= 2;
 
             var version = new Version(major, minor);
-            return version switch {
+            return GetSize(version);
+        }
+
+        /// <summary>
+        /// Gets the serialized size of the banner including padding.
+        /// </summary>
+        /// <param name="version">Version of the banner.</param>
+        /// <returns>The expected size of the binary banner.</returns>
+        public static int GetSize(Version version) =>
+            version switch {
                 { Major: 0, Minor: 1 } => 0x0840,
                 { Major: 0, Minor: 2 } => 0x0940,
                 { Major: 0, Minor: 3 } => 0x0A40,
                 { Major: 1, Minor: 3 } => 0x23C0,
                 _ => throw new NotSupportedException(),
             };
-        }
 
         /// <summary>
         /// Read a banner from a binary format.

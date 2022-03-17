@@ -84,7 +84,7 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.SecureDisable);
         writer.Write(source.SectionInfo.RomSize);
         writer.Write(source.SectionInfo.HeaderSize);
-        writer.Write(source.SectionInfo.Unknown88);
+        writer.Write(source.ProgramInfo.Unknown88);
 
         writer.WriteTimes(0, 0x34);
         writer.Write(source.CopyrightLogo);

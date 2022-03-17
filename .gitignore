@@ -16,3 +16,4 @@ docs/_site_pdf
 
 # IDEs
 .vs/
+.DotSettings.user
