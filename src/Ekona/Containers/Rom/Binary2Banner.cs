@@ -210,7 +210,7 @@ namespace SceneGate.Ekona.Containers.Rom
                 }
 
                 var frame = new IconAnimationFrame {
-                    FrameDuration = (int)((aniData & 0xFF) * 1000.0 / 60),
+                    Duration = (int)((aniData & 0xFF) * 1000.0 / 60),
                     BitmapIndex = (aniData >> 8) & 0x3,
                     PaletteIndex = (aniData >> 11) & 0x3,
                     FlipHorizontal = ((aniData >> 14) & 0x1) != 0,

@@ -181,7 +181,7 @@ public class Banner2Binary : IConverter<NodeContainerFormat, BinaryFormat>
             }
 
             var frame = animation.Frames[i];
-            ushort data = (byte)(frame.FrameDuration * 60.0 / 1000);
+            ushort data = (byte)(frame.Duration * 60.0 / 1000);
             data |= (ushort)(frame.BitmapIndex << 8);
             data |= (ushort)(frame.PaletteIndex << 11);
             data |= (ushort)((frame.FlipHorizontal ? 1 : 0) << 14);

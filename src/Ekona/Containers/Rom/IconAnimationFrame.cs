@@ -35,7 +35,7 @@ public class IconAnimationFrame
     /// <remarks>
     /// The resolution is 60 Hz.
     /// </remarks>
-    public int FrameDuration { get; set; }
+    public int Duration { get; set; }
 
     /// <summary>
     /// Gets or sets the index of the bitmap for this frame.

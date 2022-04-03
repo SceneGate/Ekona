@@ -51,6 +51,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
         public static string GetIconFile(string bannerPath) => bannerPath + ".png";
 
+        public static string GetGifFile(string bannerPath) => bannerPath + ".gif";
+
         public static string GetAniInfoFile(string bannerPath) => bannerPath + ".ani.yml";
 
         [TestCaseSource(nameof(GetFiles))]
@@ -148,10 +150,16 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             animated.Children["palettes"]?.GetFormatAs<PaletteCollection>()?.Palettes.Should().HaveCount(numImages);
             animated.Children["animation"].Should().NotBeNull();
 
-            // TODO: GIF support in Texim
+            string gifPath = GetGifFile(bannerPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(gifPath);
+            using var expectedGif = DataStreamFactory.FromFile(gifPath, FileOpenMode.Read);
+
+            object animatedImage = ConvertFormat.With<IconAnimation2AnimatedImage>(animated.Format);
+            using var actualGif = (BinaryFormat)ConvertFormat.With<AnimatedFullImage2Gif>(animatedImage);
+            actualGif.Stream.Compare(expectedGif).Should().BeTrue("GIF streams must be identical");
+
             string infoPath = GetAniInfoFile(bannerPath);
             TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
-
             string yaml = File.ReadAllText(infoPath);
             IconAnimationSequence expectedInfo = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
