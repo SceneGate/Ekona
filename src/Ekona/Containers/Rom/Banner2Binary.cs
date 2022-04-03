@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2022 SceneGate
+// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,9 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
+using System.Linq;
 using System.Text;
 using Texim.Colors;
 using Texim.Images;
+using Texim.Palettes;
 using Texim.Pixels;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
@@ -65,8 +67,8 @@ public class Banner2Binary : IConverter<NodeContainerFormat, BinaryFormat>
         WriteIcon(writer, icon);
         WriteTitles(writer, banner);
 
-        if (banner.Version.Major > 0) {
-            WriteAnimatedIcon(writer);
+        if (banner.SupportAnimatedIcon) {
+            WriteAnimatedIcon(writer, GetChildSafe(source.Root, "animated"));
         }
 
         writer.Stream.Position = 0;
@@ -75,11 +77,14 @@ public class Banner2Binary : IConverter<NodeContainerFormat, BinaryFormat>
         return binary;
     }
 
+    private static Node GetChildSafe(Node root, string childName) =>
+        root.Children[childName]
+            ?? throw new FormatException($"Missing child '{childName}'");
+
     private static T GetFormatSafe<T>(Node root, string childName)
         where T : class, IFormat
     {
-        Node child = root.Children[childName] ?? throw new FormatException($"Missing child '{childName}'");
-        return child.GetFormatAs<T>()
+        return GetChildSafe(root, childName).GetFormatAs<T>()
             ?? throw new FormatException($"Child '{childName}' has not the expected format: {typeof(T).Name}");
     }
 
@@ -142,14 +147,46 @@ public class Banner2Binary : IConverter<NodeContainerFormat, BinaryFormat>
         }
     }
 
-    private static void WriteAnimatedIcon(DataWriter writer)
+    private static void WriteAnimatedIcon(DataWriter writer, Node container)
     {
-        // TODO: implement properly
-        writer.WriteUntilLength(0xFF, 0x1240);
+        writer.WriteUntilLength(0, 0x1240);
         writer.Stream.Position = 0x1240;
 
-        writer.WriteTimes(0, 0x1000); // 8 bitmaps
-        writer.WriteTimes(0, 0x100); // 8 palettes
-        writer.WriteTimes(0, 0x80); // animation sequence
+        int numBitmaps = container.Children.Count(n => n.Name.StartsWith("bitmap"));
+        if (numBitmaps != Binary2Banner.NumAnimatedImages) {
+            throw new FormatException("Required 8 animated bitmaps");
+        }
+
+        for (int i = 0; i < numBitmaps; i++) {
+            var icon = GetFormatSafe<IndexedImage>(container, $"bitmap{i}");
+            var swizzling = new TileSwizzling<IndexedPixel>(icon.Width);
+            var pixels = swizzling.Swizzle(icon.Pixels);
+            writer.Write<Indexed4Bpp>(pixels);
+        }
+
+        var palettes = GetFormatSafe<PaletteCollection>(container, "palettes");
+        if (palettes.Palettes.Count != Binary2Banner.NumAnimatedImages) {
+            throw new FormatException("Required 8 palettes for the animated icons");
+        }
+
+        foreach (IPalette palette in palettes.Palettes) {
+            writer.Write<Bgr555>(palette.Colors);
+        }
+
+        var animation = GetFormatSafe<IconAnimationSequence>(container, "animation");
+        for (int i = 0; i < 64; i++) {
+            if (i >= animation.Frames.Count) {
+                writer.Write((ushort)0);
+                continue;
+            }
+
+            var frame = animation.Frames[i];
+            ushort data = (byte)(frame.Duration * 60.0 / 1000);
+            data |= (ushort)(frame.BitmapIndex << 8);
+            data |= (ushort)(frame.PaletteIndex << 11);
+            data |= (ushort)((frame.FlipHorizontal ? 1 : 0) << 14);
+            data |= (ushort)((frame.FlipVertical ? 1 : 0) << 15);
+            writer.Write(data);
+        }
     }
 }

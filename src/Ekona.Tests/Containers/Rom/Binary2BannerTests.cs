@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,7 @@ using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using Texim.Formats;
 using Texim.Images;
+using Texim.Palettes;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Yarhl.FileFormat;
@@ -41,18 +43,25 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             string basePath = Path.Combine(TestDataBase.RootFromOutputPath, "Containers");
             string listPath = Path.Combine(basePath, "banner.txt");
             return TestDataBase.ReadTestListFile(listPath)
-                .Select(data => new TestCaseData(
-                    Path.Combine(basePath, data),
-                    Path.Combine(basePath, data + ".yml"),
-                    Path.Combine(basePath, data + ".png"))
+                .Select(data => new TestCaseData(Path.Combine(basePath, data))
                     .SetName($"{{m}}({data})"));
         }
 
+        public static string GetInfoFile(string bannerPath) => bannerPath + ".yml";
+
+        public static string GetIconFile(string bannerPath) => bannerPath + ".png";
+
+        public static string GetGifFile(string bannerPath) => bannerPath + ".gif";
+
+        public static string GetAniInfoFile(string bannerPath) => bannerPath + ".ani.yml";
+
         [TestCaseSource(nameof(GetFiles))]
-        public void DeserializeBannerMatchInfo(string bannerPath, string infoPath, string iconPath)
+        public void DeserializeBannerMatchInfo(string bannerPath)
         {
-            TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
+
+            string infoPath = GetInfoFile(bannerPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
 
             string yaml = File.ReadAllText(infoPath);
             Banner expected = new DeserializerBuilder()
@@ -62,16 +71,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
             node.Invoking(n => n.TransformWith<Binary2Banner>()).Should().NotThrow();
-            node.Children.Should().HaveCount(2);
             node.Children["info"].Should().NotBeNull();
-            node.Children["icon"].Should().NotBeNull();
-
-            var paletteParam = new IndexedImageBitmapParams {
-                Palettes = node.Children["icon"].GetFormatAs<IndexedPaletteImage>(),
-            };
-            node.Children["icon"].TransformWith<IndexedImage2Bitmap, IndexedImageBitmapParams>(paletteParam);
-            using var expectedIcon = NodeFactory.FromFile(iconPath, FileOpenMode.Read);
-            expectedIcon.Stream.Compare(node.Children["icon"].Stream).Should().BeTrue();
 
             var actual = node.Children["info"].GetFormatAs<Banner>();
             actual.Version.Should().Be(expected.Version);
@@ -85,8 +85,11 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 actual.ChecksumKorean.IsValid.Should().BeTrue();
             }
 
-            if (actual.Version is { Major: 1, Minor: 3 }) {
+            if (actual.Version is { Major: > 1 } or { Major: 1, Minor: >= 3 }) {
+                actual.SupportAnimatedIcon.Should().BeTrue();
                 actual.ChecksumAnimatedIcon.IsValid.Should().BeTrue();
+            } else {
+                actual.SupportAnimatedIcon.Should().BeFalse();
             }
 
             actual.JapaneseTitle.Should().Be(expected.JapaneseTitle);
@@ -106,7 +109,83 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void TwoWaysIdenticalBannerStream(string bannerPath, string infoPath, string iconPath)
+        public void DeserializeBannerIcon(string bannerPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
+
+            string expectedIconPath = GetIconFile(bannerPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(expectedIconPath);
+
+            using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith<Binary2Banner>()).Should().NotThrow();
+            Node actualIcon = node.Children["icon"];
+            actualIcon.Should().NotBeNull();
+
+            var paletteParam = new IndexedImageBitmapParams {
+                Palettes = actualIcon.GetFormatAs<IPaletteCollection>(),
+            };
+            actualIcon.Invoking(n => n.TransformWith<IndexedImage2Bitmap, IndexedImageBitmapParams>(paletteParam))
+                .Should().NotThrow();
+
+            using var expectedIcon = NodeFactory.FromFile(expectedIconPath, FileOpenMode.Read);
+            actualIcon.Stream.Compare(expectedIcon.Stream).Should().BeTrue();
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void DeserializeBannerAnimatedIcon(string bannerPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
+
+            using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith<Binary2Banner>()).Should().NotThrow();
+            if (!node.Children["info"].GetFormatAs<Banner>().SupportAnimatedIcon) {
+                Assert.Pass();
+            }
+
+            Node animated = node.Children["animated"];
+            animated.Should().NotBeNull();
+
+            int numImages = Binary2Banner.NumAnimatedImages;
+            animated.Children.Where(n => n.Name.StartsWith("bitmap")).Should().HaveCount(numImages);
+            animated.Children["palettes"]?.GetFormatAs<PaletteCollection>()?.Palettes.Should().HaveCount(numImages);
+            animated.Children["animation"].Should().NotBeNull();
+
+            string gifPath = GetGifFile(bannerPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(gifPath);
+            using var expectedGif = DataStreamFactory.FromFile(gifPath, FileOpenMode.Read);
+
+            object animatedImage = ConvertFormat.With<IconAnimation2AnimatedImage>(animated.Format);
+            using var actualGif = (BinaryFormat)ConvertFormat.With<AnimatedFullImage2Gif>(animatedImage);
+            actualGif.Stream.Compare(expectedGif).Should().BeTrue("GIF streams must be identical");
+
+            string infoPath = GetAniInfoFile(bannerPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
+            string yaml = File.ReadAllText(infoPath);
+            IconAnimationSequence expectedInfo = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build()
+                .Deserialize<IconAnimationSequence>(yaml);
+
+            animated.Children["animation"].GetFormatAs<IconAnimationSequence>()
+                .Should().BeEquivalentTo(expectedInfo);
+        }
+
+        [Test]
+        public void FrameCannotHaveMoreThan8ImagesPalettes()
+        {
+            var frame = new IconAnimationFrame();
+            frame.Invoking(f => f.BitmapIndex = 8)
+                .Should().Throw<ArgumentOutOfRangeException>();
+            frame.Invoking(f => f.BitmapIndex = -1)
+                .Should().Throw<ArgumentOutOfRangeException>();
+            frame.Invoking(f => f.PaletteIndex = 8)
+                .Should().Throw<ArgumentOutOfRangeException>();
+            frame.Invoking(f => f.PaletteIndex = -1)
+                .Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void TwoWaysIdenticalBannerStream(string bannerPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
 
@@ -116,31 +195,20 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(banner);
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
-
-            // TODO: After implementing animations, can compare streams
-            // generatedStream.Stream.Compare(node.Stream).Should().BeTrue()
+            generatedStream.Stream.Compare(node.Stream).Should().BeTrue();
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void ThreeWaysIdenticalBannerObjects(string bannerPath, string infoPath, string iconPath)
+        public void ThreeWaysIdenticalBannerObjects(string bannerPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
 
-            using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
+            using var originalStream = new BinaryFormat(DataStreamFactory.FromFile(bannerPath, FileOpenMode.Read));
+            using var originalNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(originalStream);
+            using var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(originalNode);
+            using var generatedNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(generatedStream);
 
-            var originalNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(node.Format!);
-            var originalBanner = originalNode.Root.Children["info"].GetFormatAs<Banner>();
-            var originalIcon = originalNode.Root.Children["icon"].GetFormatAs<IndexedPaletteImage>();
-
-            var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(originalNode);
-
-            var generatedNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(generatedStream);
-            var generatedBanner = generatedNode.Root.Children["info"].GetFormatAs<Banner>();
-            var generatedIcon = generatedNode.Root.Children["icon"].GetFormatAs<IndexedPaletteImage>();
-
-            // TODO: Implement icon animations
-            generatedBanner.Should().BeEquivalentTo(originalBanner, opts => opts.Excluding(f => f.ChecksumAnimatedIcon));
-            generatedIcon.Should().BeEquivalentTo(originalIcon);
+            generatedNode.Should().BeEquivalentTo(originalNode, opts => opts.IgnoringCyclicReferences());
         }
     }
 }

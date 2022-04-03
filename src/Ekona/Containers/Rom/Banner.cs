@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +55,11 @@ namespace SceneGate.Ekona.Containers.Rom
                 version = value;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the banner supports animated icons (version >= 1.3).
+        /// </summary>
+        public bool SupportAnimatedIcon => Version is { Major: > 1 } or { Major: 1, Minor: >= 3 };
 
         /// <summary>
         /// Gets or sets the CRC-16 checksum for the banner binary data of version 0.1.
