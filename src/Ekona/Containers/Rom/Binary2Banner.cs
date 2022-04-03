@@ -185,9 +185,9 @@ namespace SceneGate.Ekona.Containers.Rom
 
             reader.Stream.Position = 0x1240;
 
+            var swizzling = new TileSwizzling<IndexedPixel>(IconWidth);
             for (int i = 0; i < NumAnimatedImages; i++) {
                 IndexedPixel[] pixels = reader.ReadPixels<Indexed4Bpp>(IconWidth * IconHeight);
-                var swizzling = new TileSwizzling<IndexedPixel>(IconWidth);
                 pixels = swizzling.Unswizzle(pixels);
 
                 var bitmap = new IndexedImage(IconWidth, IconHeight, pixels);

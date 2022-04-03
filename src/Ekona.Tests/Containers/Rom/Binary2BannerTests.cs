@@ -187,8 +187,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(banner);
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
-
-            // generatedStream.Stream.Compare(node.Stream).Should().BeTrue()
+            generatedStream.Stream.Compare(node.Stream).Should().BeTrue();
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -196,22 +195,12 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         {
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
 
-            using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
+            using var originalStream = new BinaryFormat(DataStreamFactory.FromFile(bannerPath, FileOpenMode.Read));
+            using var originalNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(originalStream);
+            using var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(originalNode);
+            using var generatedNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(generatedStream);
 
-            var originalNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(node.Format!);
-            var originalBanner = originalNode.Root.Children["info"].GetFormatAs<Banner>();
-            var originalIcon = originalNode.Root.Children["icon"].GetFormatAs<IndexedPaletteImage>();
-
-            var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(originalNode);
-
-            var generatedNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(generatedStream);
-            var generatedBanner = generatedNode.Root.Children["info"].GetFormatAs<Banner>();
-            var generatedIcon = generatedNode.Root.Children["icon"].GetFormatAs<IndexedPaletteImage>();
-
-            generatedBanner.Should().BeEquivalentTo(originalBanner, opts => opts.Excluding(f => f.ChecksumAnimatedIcon));
-            generatedIcon.Should().BeEquivalentTo(originalIcon);
-
-            // TODO: compare animated
+            generatedNode.Should().BeEquivalentTo(originalNode, opts => opts.IgnoringCyclicReferences());
         }
     }
 }
