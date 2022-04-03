@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,11 @@ namespace SceneGate.Ekona.Containers.Rom
         private const int IconHeight = 32;
 
         /// <summary>
+        /// Gets the maxmimum number of animated images.
+        /// </summary>
+        public static int NumAnimatedImages => 8;
+
+        /// <summary>
         /// Gets the serialized size of the banner including padding.
         /// </summary>
         /// <param name="stream">The stream to analyze.</param>
@@ -91,14 +96,15 @@ namespace SceneGate.Ekona.Containers.Rom
                 DefaultEncoding = Encoding.Unicode,
             };
 
-            // TODO: Support animated icon.
             Banner banner = ReadHeader(reader);
             IndexedPaletteImage icon = ReadIcon(reader);
             ReadTitles(reader, banner);
+            Node animated = ReadAnimatedIcon(reader, banner);
 
             var container = new NodeContainerFormat();
             container.Root.Add(new Node("info", banner));
             container.Root.Add(new Node("icon", icon));
+            container.Root.Add(animated);
 
             return container;
         }
@@ -167,6 +173,53 @@ namespace SceneGate.Ekona.Containers.Rom
             if (banner.Version.Minor > 2) {
                 banner.KoreanTitle = reader.ReadString(0x100).Replace("\0", string.Empty);
             }
+        }
+
+        private static Node ReadAnimatedIcon(DataReader reader, Banner banner)
+        {
+            Node container = NodeFactory.CreateContainer("animated");
+
+            if (banner.Version is { Major: < 1 } or { Major: 1, Minor: < 3 }) {
+                return container;
+            }
+
+            reader.Stream.Position = 0x1240;
+
+            for (int i = 0; i < NumAnimatedImages; i++) {
+                IndexedPixel[] pixels = reader.ReadPixels<Indexed4Bpp>(IconWidth * IconHeight);
+                var swizzling = new TileSwizzling<IndexedPixel>(IconWidth);
+                pixels = swizzling.Unswizzle(pixels);
+
+                var bitmap = new IndexedImage(IconWidth, IconHeight, pixels);
+                container.Add(new Node($"bitmap{i}", bitmap));
+            }
+
+            var palettes = new PaletteCollection();
+            container.Add(new Node("palettes", palettes));
+            for (int i = 0; i < NumAnimatedImages; i++) {
+                var palette = new Palette(reader.ReadColors<Bgr555>(16));
+                palettes.Palettes.Add(palette);
+            }
+
+            var animation = new IconAnimationSequence();
+            container.Add(new Node("animation", animation));
+            for (int i = 0; i < 64; i++) {
+                ushort aniData = reader.ReadUInt16();
+                if (aniData == 0x00) {
+                    break;
+                }
+
+                var frame = new IconAnimationFrame {
+                    FrameDuration = (int)((aniData & 0xFF) * 1000.0 / 60),
+                    BitmapIndex = (aniData >> 8) & 0x3,
+                    PaletteIndex = (aniData >> 11) & 0x3,
+                    FlipHorizontal = ((aniData >> 14) & 0x1) != 0,
+                    FlipVertical = ((aniData >> 15) & 0x1) != 0,
+                };
+                animation.Frames.Add(frame);
+            }
+
+            return container;
         }
     }
 }

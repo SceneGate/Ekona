@@ -177,6 +177,7 @@ dotnet_diagnostic.IDE0058.severity = suggestion # Expression value is never used
 
 ### SonarAnalyzer
 dotnet_diagnostic.S1135.severity = suggestion # It's almost inevitable to have TODO but add bug ID
+dotnet_diagnostic.S1172.severity = silent # Buggy
 
 # Special rules for test projects
 [*Tests/**]

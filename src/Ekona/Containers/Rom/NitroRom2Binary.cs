@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2022 SceneGate
+// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -80,11 +80,12 @@ public class NitroRom2Binary :
         binary.Stream.Position = 0;
         writer = new DataWriter(binary.Stream);
 
-        // Write the header at the end, when we got all the new offsets and sizes
         programInfo = GetChildFormatSafe<RomInfo>("system/info");
         sectionInfo = new RomSectionInfo {
             HeaderSize = 0x4000,
         };
+
+        // Write the header at the end, when we got all the new offsets and sizes
         writer.WriteTimes(0, sectionInfo.HeaderSize);
 
         // Sort nodes by ID
@@ -158,6 +159,10 @@ public class NitroRom2Binary :
 
     private void WriteBanner()
     {
+        if (root.Children["system"]?.Children["banner"] is null) {
+            return;
+        }
+
         writer.Stream.Position = sectionInfo.BannerOffset;
         GetChildSafe("system/banner")
             .TransformWith<Banner2Binary>()

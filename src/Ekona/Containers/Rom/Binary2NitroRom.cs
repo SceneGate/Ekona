@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -84,6 +84,10 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ReadBanner()
         {
+            if (header.SectionInfo.BannerOffset == 0) {
+                return;
+            }
+
             reader.Stream.Position = header.SectionInfo.BannerOffset;
             int bannerSize = Binary2Banner.GetSize(reader.Stream);
             var binaryBanner = new BinaryFormat(reader.Stream, header.SectionInfo.BannerOffset, bannerSize);
