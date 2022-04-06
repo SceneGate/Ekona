@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -45,14 +45,14 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.GameTitle, 12, nullTerminator: false);
         writer.Write(source.ProgramInfo.GameCode, 4, nullTerminator: false);
         writer.Write(source.ProgramInfo.MakerCode, 2, nullTerminator: false);
-        writer.Write(source.ProgramInfo.UnitCode);
+        writer.Write((byte)source.ProgramInfo.UnitCode);
         writer.Write(source.ProgramInfo.EncryptionSeed);
         double relativeSize = (double)source.ProgramInfo.CartridgeSize / RomInfo.MinimumCartridgeSize;
         byte power2Size = (byte)Math.Ceiling(Math.Log2(relativeSize));
         writer.Write(power2Size);
 
         writer.WriteTimes(0, 7); // reserved
-        writer.Write(source.ProgramInfo.DsiFlags);
+        writer.Write((byte)source.ProgramInfo.DsiFlags);
         writer.Write(source.ProgramInfo.Region);
         writer.Write(source.ProgramInfo.Version);
         writer.Write(source.ProgramInfo.AutoStartFlag);
@@ -77,23 +77,49 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.FlagsRead);
         writer.Write(source.ProgramInfo.FlagsInit);
         writer.Write(source.SectionInfo.BannerOffset);
-        writer.Write(source.ProgramInfo.ChecksumSecureArea.Expected);
+        writer.Write(source.ProgramInfo.ChecksumSecureArea.Expected); // not calculated as we can't have secure area
         writer.Write(source.ProgramInfo.SecureAreaDelay);
         writer.Write(source.ProgramInfo.Arm9Autoload);
         writer.Write(source.ProgramInfo.Arm7Autoload);
         writer.Write(source.ProgramInfo.SecureDisable);
         writer.Write(source.SectionInfo.RomSize);
         writer.Write(source.SectionInfo.HeaderSize);
-        writer.Write(source.ProgramInfo.Unknown88);
+        writer.Write(source.ProgramInfo.Arm9ParametersTableOffset);
+        writer.Write(source.ProgramInfo.Arm7ParametersTableOffset);
+        writer.Write(source.ProgramInfo.NitroRegionEnd);
+        writer.Write(source.ProgramInfo.TwilightRegionStart);
 
-        writer.WriteTimes(0, 0x34);
+        writer.WriteTimes(0, 0x2C);
         writer.Write(source.CopyrightLogo);
-        writer.Write(source.ProgramInfo.ChecksumLogo.Expected);
-        writer.Write(source.ProgramInfo.ChecksumHeader.Expected);
+        writer.WriteComputedCrc16(0xC0, 0x9C);
+        writer.WriteComputedCrc16(0x00, 0x15E);
 
         writer.Write(source.ProgramInfo.DebugRomOffset);
         writer.Write(source.ProgramInfo.DebugSize);
         writer.Write(source.ProgramInfo.DebugRamAddress);
+
+        writer.WriteUntilLength(0, 0x1BF);
+        writer.Write((byte)source.ProgramInfo.DsiRomFeatures);
+
+        if (source.ProgramInfo.BannerMac is not null) {
+            writer.WriteUntilLength(0, 0x33C);
+            writer.Write(source.ProgramInfo.BannerMac.Hash);
+        }
+
+        if (source.ProgramInfo.HeaderMac is not null) {
+            writer.WriteUntilLength(0, 0x378);
+            writer.Write(source.ProgramInfo.HeaderMac.Hash);
+        }
+
+        if (source.ProgramInfo.FatMac is not null) {
+            writer.WriteUntilLength(0, 0x38C);
+            writer.Write(source.ProgramInfo.FatMac.Hash);
+        }
+
+        if (source.ProgramInfo.Signature is not null) {
+            writer.WriteUntilLength(0, 0xF80);
+            writer.Write(source.ProgramInfo.Signature.Signature);
+        }
 
         writer.WriteUntilLength(0, source.SectionInfo.HeaderSize);
 

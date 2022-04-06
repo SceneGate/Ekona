@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
 
-            // TODO: After identical header and banner
+            // TODO: After implementing ARM9 tail and DSi fields
             // generatedStream.Stream!.Compare(node.Stream).Should().BeTrue()
         }
 

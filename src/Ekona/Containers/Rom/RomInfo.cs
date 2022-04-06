@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the unit code.
         /// </summary>
-        public byte UnitCode { get; set; }
+        public DeviceUnitKind UnitCode { get; set; }
 
         /// <summary>
         /// Gets or sets the index to encryption seed byte for KEY2.
@@ -65,7 +65,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the modcrypt flags for DSi.
         /// </summary>
-        public byte DsiFlags { get; set; }
+        public DsiSecurityRomMode DsiFlags { get; set; }
 
         /// <summary>
         /// Gets or sets the special game region.
@@ -163,13 +163,72 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint DebugRamAddress { get; set; }
 
         /// <summary>
-        /// Gets or sets an unknown value at 0x88.
+        /// Gets or sets the offset in the ARM9 pointing to some parameter values.
+        /// Relative to the base RAM address for ARM9.
         /// </summary>
         /// <remarks>
-        /// In DS games it looks like an offset pointing to the SDK information
-        /// inside the arm9.bin.
+        /// Only for DSi games and DS games released after the DSi. Otherwise 0.
         /// </remarks>
-        public uint Unknown88 { get; set; }
+        public uint Arm9ParametersTableOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset in the ARM7 pointing to some parameter values.
+        /// Relative to the base RAM address for ARM7.
+        /// </summary>
+        /// <remarks>
+        /// Only for DSi games and DS games released after the DSi. Otherwise 0.
+        /// </remarks>
+        public uint Arm7ParametersTableOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DS region end.
+        /// </summary>
+        public ushort NitroRegionEnd { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DSi region start.
+        /// </summary>
+        public ushort TwilightRegionStart { get; set; }
+
+        /// <summary>
+        /// Gets or sets flags related to ROM features.
+        /// </summary>
+        /// <remarks>
+        /// Only for DSi games and DS games released after the DSi. Otherwise 0.
+        /// </remarks>
+        public DsiRomFeatures DsiRomFeatures { get; set; }
+
+        /// <summary>
+        /// Gets or sets the SHA-1 HMAC of the banner.
+        /// </summary>
+        /// <remarks>
+        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// </remarks>
+        public HMACInfo BannerMac { get; set; }
+
+        /// <summary>
+        /// Gets or sets the SHA-1 HMAC of the header and ARM9/7.
+        /// </summary>
+        /// <remarks>
+        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// </remarks>
+        public HMACInfo HeaderMac { get; set; }
+
+        /// <summary>
+        /// Gets or sets the SHA-1 HMAC of the file access table (FAT).
+        /// </summary>
+        /// <remarks>
+        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// </remarks>
+        public HMACInfo FatMac { get; set; }
+
+        /// <summary>
+        /// Gets or sets the RSA SHA-1 signature of the ROM.
+        /// </summary>
+        /// <remarks>
+        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// </remarks>
+        public SignatureInfo Signature { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of information of overlays for ARM-9.

@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -45,14 +45,14 @@ namespace SceneGate.Ekona.Containers.Rom
             var header = new RomHeader();
             header.ProgramInfo.GameTitle = reader.ReadString(12).Replace("\0", string.Empty);
             header.ProgramInfo.GameCode = reader.ReadString(4);
-            header.ProgramInfo.MakerCode = reader.ReadString(2);
 
             // Pos: 0x10
-            header.ProgramInfo.UnitCode = reader.ReadByte();
+            header.ProgramInfo.MakerCode = reader.ReadString(2);
+            header.ProgramInfo.UnitCode = (DeviceUnitKind)reader.ReadByte();
             header.ProgramInfo.EncryptionSeed = reader.ReadByte();
             header.ProgramInfo.CartridgeSize = RomInfo.MinimumCartridgeSize * (1 << reader.ReadByte());
             source.Stream.Position += 7; // reserved
-            header.ProgramInfo.DsiFlags = reader.ReadByte();
+            header.ProgramInfo.DsiFlags = (DsiSecurityRomMode)reader.ReadByte();
             header.ProgramInfo.Region = reader.ReadByte();
             header.ProgramInfo.Version = reader.ReadByte();
             header.ProgramInfo.AutoStartFlag = reader.ReadByte();
@@ -96,16 +96,40 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0x80
             header.SectionInfo.RomSize = reader.ReadUInt32();
             header.SectionInfo.HeaderSize = reader.ReadUInt32();
-            header.ProgramInfo.Unknown88 = reader.ReadUInt32();
+            header.ProgramInfo.Arm9ParametersTableOffset = reader.ReadUInt32();
+            header.ProgramInfo.Arm7ParametersTableOffset = reader.ReadUInt32();
 
-            source.Stream.Position += 0x34;
+            // Pos: 0x90
+            header.ProgramInfo.NitroRegionEnd = reader.ReadUInt16();
+            header.ProgramInfo.TwilightRegionStart = reader.ReadUInt16();
+
+            // Pos: 0xC0
+            source.Stream.Position = 0xC0;
             header.CopyrightLogo = reader.ReadBytes(156);
             header.ProgramInfo.ChecksumLogo = reader.ValidateCrc16(0xC0, 0x9C);
             header.ProgramInfo.ChecksumHeader = reader.ValidateCrc16(0x00, 0x15E);
 
+            // Pos: 0x160
             header.ProgramInfo.DebugRomOffset = reader.ReadUInt32();
             header.ProgramInfo.DebugSize = reader.ReadUInt32();
             header.ProgramInfo.DebugRamAddress = reader.ReadUInt32();
+
+            // Pos: 0x1BF
+            source.Stream.Position = 0x1BF;
+            header.ProgramInfo.DsiRomFeatures = (DsiRomFeatures)reader.ReadByte();
+
+            // Pos: 0x33C
+            source.Stream.Position = 0x33C;
+            header.ProgramInfo.BannerMac = reader.ReadHMACSHA1();
+
+            // Pos: 0x378
+            source.Stream.Position = 0x378;
+            header.ProgramInfo.HeaderMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.FatMac = reader.ReadHMACSHA1();
+
+            // Pos: 0xF80
+            source.Stream.Position = 0xF80;
+            header.ProgramInfo.Signature = reader.ReadSignatureSHA1RSA();
 
             return header;
         }

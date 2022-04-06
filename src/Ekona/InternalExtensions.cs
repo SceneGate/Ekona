@@ -1,5 +1,7 @@
-﻿using System.Data.HashFunction;
+using System.Data.HashFunction;
 using System.Data.HashFunction.CRC;
+using System.Linq;
+using System.Security.Cryptography;
 using Yarhl.IO;
 
 namespace SceneGate.Ekona
@@ -29,6 +31,28 @@ namespace SceneGate.Ekona
                 Expected = expected,
                 Actual = actual,
             };
+        }
+
+        /// <summary>
+        /// Read a SHA-1 HMAC.
+        /// </summary>
+        /// <param name="reader">The data reader with the stream to read the HMAC.</param>
+        /// <returns>The information about the HMAC verification.</returns>
+        public static HMACInfo ReadHMACSHA1(this DataReader reader)
+        {
+            byte[] hmac = reader.ReadBytes(0x14);
+            return new HMACInfo("HMACSHA1", hmac);
+        }
+
+        /// <summary>
+        /// Read a RSA-SHA1 signature with the provided padding scheme.
+        /// </summary>
+        /// <param name="reader">The data reader with the stream to read the signature.</param>
+        /// <returns>The information about the signature.</returns>
+        public static SignatureInfo ReadSignatureSHA1RSA(this DataReader reader)
+        {
+            byte[] signature = reader.ReadBytes(128);
+            return new SignatureInfo(HashAlgorithmName.SHA1, null, signature);
         }
 
         /// <summary>

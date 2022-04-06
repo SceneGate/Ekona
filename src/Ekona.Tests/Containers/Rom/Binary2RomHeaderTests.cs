@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,43 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             node.GetFormatAs<RomHeader>().Should().BeEquivalentTo(
                 expected,
-                opts => opts.Excluding(p => p.CopyrightLogo));
+                opts => opts
+                    .Excluding(p => p.CopyrightLogo)
+                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HMACInfo))
+                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(ChecksumInfo<ushort>))
+                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(SignatureInfo)));
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void DeserializeRomHeaderHasValidHashes(string infoPath, string headerPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(headerPath);
+
+            using Node node = NodeFactory.FromFile(headerPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith<Binary2RomHeader>()).Should().NotThrow();
+
+            RomInfo programInfo = node.GetFormatAs<RomHeader>().ProgramInfo;
+            programInfo.ChecksumSecureArea.IsValid.Should().BeFalse();
+            programInfo.ChecksumLogo.IsValid.Should().BeTrue();
+            programInfo.ChecksumHeader.IsValid.Should().BeTrue();
+
+            // TODO: Get hmac key and public cert for tests
+            if (programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
+                programInfo.BannerMac.Should().NotBeNull();
+
+                // programInfo.BannerMac.IsValid.Should().BeTrue()
+            }
+
+            if (programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+                programInfo.FatMac.Should().NotBeNull();
+                programInfo.HeaderMac.Should().NotBeNull();
+                programInfo.Signature.Should().NotBeNull();
+
+                // programInfo.FatMac.IsValid.Should().BeTrue()
+                // programInfo.HeaderMac?.IsValid.Should().BeTrue()
+                // programInfo.Signature?.IsValid.Should().BeTrue()
+            }
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -79,8 +115,10 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var originalStream = new DataStream(node.Stream!, 0, header.SectionInfo.HeaderSize);
             generatedStream.Stream.Length.Should().Be(originalStream.Length);
 
-            // TODO: After DSi support
-            // generatedStream.Stream.Compare(originalStream).Should().BeTrue()
+            // TODO: Enable after adding the DSi flags
+            if (header.ProgramInfo.UnitCode == DeviceUnitKind.DS) {
+                generatedStream.Stream.Compare(originalStream).Should().BeTrue();
+            }
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -91,13 +129,10 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             using Node node = NodeFactory.FromFile(headerPath, FileOpenMode.Read);
 
             var originalHeader = (RomHeader)ConvertFormat.With<Binary2RomHeader>(node.Format!);
-            var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(originalHeader);
+            using var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(originalHeader);
             var generatedHeader = (RomHeader)ConvertFormat.With<Binary2RomHeader>(generatedStream);
 
-            // Ignore ChecksumHeader as we are not generating identical headers due to DSi flags yet (#9).
-            generatedHeader.Should().BeEquivalentTo(
-                originalHeader,
-                opts => opts.Excluding(p => p.ProgramInfo.ChecksumHeader));
+            generatedHeader.Should().BeEquivalentTo(originalHeader);
         }
     }
 }
