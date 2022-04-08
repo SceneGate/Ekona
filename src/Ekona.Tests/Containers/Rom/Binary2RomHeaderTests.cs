@@ -65,13 +65,12 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 expected,
                 opts => opts
                     .Excluding(p => p.CopyrightLogo)
-                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HMACInfo))
                     .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(ChecksumInfo<ushort>))
-                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(SignatureInfo)));
+                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HashInfo)));
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        public void DeserializeRomHeaderHasValidHashes(string infoPath, string headerPath)
+        public void DeserializeRomHeaderWithoutKeysHasHashes(string infoPath, string headerPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(infoPath);
             TestDataBase.IgnoreIfFileDoesNotExist(headerPath);
@@ -84,21 +83,23 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             programInfo.ChecksumLogo.IsValid.Should().BeTrue();
             programInfo.ChecksumHeader.IsValid.Should().BeTrue();
 
-            // TODO: Get hmac key and public cert for tests
-            if (programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
+            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+            if (isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
                 programInfo.BannerMac.Should().NotBeNull();
-
-                // programInfo.BannerMac.IsValid.Should().BeTrue()
+                programInfo.BannerMac.Status.Should().Be(HashStatus.NotValidated);
             }
 
             if (programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
                 programInfo.FatMac.Should().NotBeNull();
-                programInfo.HeaderMac.Should().NotBeNull();
-                programInfo.Signature.Should().NotBeNull();
+                programInfo.FatMac.Status.Should().Be(HashStatus.NotValidated);
 
-                // programInfo.FatMac.IsValid.Should().BeTrue()
-                // programInfo.HeaderMac?.IsValid.Should().BeTrue()
-                // programInfo.Signature?.IsValid.Should().BeTrue()
+                programInfo.HeaderMac.Should().NotBeNull();
+                programInfo.HeaderMac.Status.Should().Be(HashStatus.NotValidated);
+            }
+
+            if (isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+                programInfo.Signature.Should().NotBeNull();
+                programInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }
         }
 

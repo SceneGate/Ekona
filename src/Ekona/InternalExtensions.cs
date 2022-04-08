@@ -38,21 +38,21 @@ namespace SceneGate.Ekona
         /// </summary>
         /// <param name="reader">The data reader with the stream to read the HMAC.</param>
         /// <returns>The information about the HMAC verification.</returns>
-        public static HMACInfo ReadHMACSHA1(this DataReader reader)
+        public static HashInfo ReadHMACSHA1(this DataReader reader)
         {
             byte[] hmac = reader.ReadBytes(0x14);
-            return new HMACInfo("HMACSHA1", hmac);
+            return new HashInfo("HMACSHA1", hmac);
         }
 
         /// <summary>
-        /// Read a RSA-SHA1 signature with the provided padding scheme.
+        /// Read a RSA-SHA1 signature.
         /// </summary>
         /// <param name="reader">The data reader with the stream to read the signature.</param>
         /// <returns>The information about the signature.</returns>
-        public static SignatureInfo ReadSignatureSHA1RSA(this DataReader reader)
+        public static HashInfo ReadSignatureSHA1RSA(this DataReader reader)
         {
             byte[] signature = reader.ReadBytes(128);
-            return new SignatureInfo(HashAlgorithmName.SHA1, null, signature);
+            return new HashInfo("RawRSASHA1", signature);
         }
 
         /// <summary>

@@ -139,6 +139,7 @@ public class NitroRom2Binary :
             SectionInfo = sectionInfo,
         };
 
+        // TODO: Recalculate HMACs.
         // Set the new copyright logo if it exists
         Node? logoNode = root.Children["system"]?.Children["copyright_logo"];
         if (logoNode is not null) {

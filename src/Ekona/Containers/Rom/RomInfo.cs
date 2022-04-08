@@ -204,7 +204,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <remarks>
         /// Only for DSi games and DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public HMACInfo BannerMac { get; set; }
+        public HashInfo BannerMac { get; set; }
 
         /// <summary>
         /// Gets or sets the SHA-1 HMAC of the header and ARM9/7.
@@ -212,7 +212,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <remarks>
         /// Only for DSi games and DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public HMACInfo HeaderMac { get; set; }
+        public HashInfo HeaderMac { get; set; }
 
         /// <summary>
         /// Gets or sets the SHA-1 HMAC of the file access table (FAT).
@@ -220,7 +220,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <remarks>
         /// Only for DSi games and DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public HMACInfo FatMac { get; set; }
+        public HashInfo FatMac { get; set; }
 
         /// <summary>
         /// Gets or sets the RSA SHA-1 signature of the ROM.
@@ -228,7 +228,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <remarks>
         /// Only for DSi games and DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public SignatureInfo Signature { get; set; }
+        public HashInfo Signature { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of information of overlays for ARM-9.

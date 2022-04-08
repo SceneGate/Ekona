@@ -64,6 +64,39 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
+        [Ignore("Missing key loading")]
+        public void DeserializeRomWithKeysHasValidSignatures(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+
+            var keys = new DsiKeyStore(); // TODO: Set keys
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith<Binary2NitroRom, DsiKeyStore>(keys)).Should().NotThrow();
+
+            NitroRom rom = node.GetFormatAs<NitroRom>();
+            RomInfo programInfo = rom.Information;
+            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+
+            if (isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
+                programInfo.BannerMac.Status.Should().Be(HashStatus.Valid);
+            }
+
+            if (programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+                // TODO: Verify FAT and Header HMACs.
+                // programInfo.FatMac.Status.Should().Be(HashStatus.Valid)
+                // programInfo.HeaderMac.Status.Should().Be(HashStatus.Valid)
+                programInfo.Signature.Status.Should().Be(HashStatus.Valid);
+            }
+
+            if (isDsi) {
+                programInfo.FatMac.IsNull.Should().BeTrue();
+                programInfo.HeaderMac.IsNull.Should().BeTrue();
+                programInfo.Signature.Status.Should().Be(HashStatus.Valid);
+            }
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
         public void TwoWaysIdenticalRomStream(string infoPath, string romPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);

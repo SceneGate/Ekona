@@ -32,14 +32,26 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <summary>
     /// Converter for binary formats into a NitroRom container.
     /// </summary>
-    public class Binary2NitroRom : IConverter<IBinary, NitroRom>
+    public class Binary2NitroRom : IConverter<IBinary, NitroRom>, IInitializer<DsiKeyStore>
     {
         private static readonly FileAddressOffsetComparer FileAddressComparer = new FileAddressOffsetComparer();
+
+        private DsiKeyStore keyStore;
+
         private DataReader reader;
         private NitroRom rom;
         private RomHeader header;
         private FileAddress[] addresses;
         private List<FileAddress> addressesByOffset;
+
+        /// <summary>
+        /// Initializes the converter with the key store to validate signatures.
+        /// </summary>
+        /// <param name="parameters">The key store.</param>
+        public void Initialize(DsiKeyStore parameters)
+        {
+            keyStore = parameters;
+        }
 
         /// <summary>
         /// Read the internal info of a ROM file.
@@ -60,6 +72,7 @@ namespace SceneGate.Ekona.Containers.Rom
             ReadFat();
             ReadPrograms();
             ReadFileSystem();
+            ValidateSignatures();
 
             return rom;
         }
@@ -204,6 +217,39 @@ namespace SceneGate.Ekona.Containers.Rom
 
                     nodeType = reader.ReadByte();
                 }
+            }
+        }
+
+        private void ValidateSignatures()
+        {
+            RomInfo programInfo = header.ProgramInfo;
+            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+
+            if (keyStore is null) {
+                return;
+            }
+
+            // TODO: Verify HMAC of FAT and Header.
+            byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
+            bool checkBannerHmac = isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac);
+            if (bannerKey?.Length > 0 && checkBannerHmac) {
+                int bannerSize = Binary2Banner.GetSize(rom.Banner.Version);
+                var hmacGenerator = new TwilightHMacGenerator(bannerKey);
+                programInfo.BannerMac.Status = hmacGenerator.Validate(
+                    reader.Stream,
+                    header.SectionInfo.BannerOffset,
+                    bannerSize,
+                    programInfo.BannerMac.Hash);
+            }
+
+            bool checkSignature = isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader);
+            if (keyStore.PublicModulusRetailGames?.Length > 0 && checkSignature) {
+                var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
+                programInfo.Signature.Status = signer.VerifySignature(
+                    programInfo.Signature.Hash,
+                    reader.Stream,
+                    0x00,
+                    0x0E00);
             }
         }
 

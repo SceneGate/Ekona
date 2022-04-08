@@ -101,6 +101,7 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.WriteUntilLength(0, 0x1BF);
         writer.Write((byte)source.ProgramInfo.DsiRomFeatures);
 
+        // Write the HMAC if they exist. NitroRom2Binary regenerates them.
         if (source.ProgramInfo.BannerMac is not null) {
             writer.WriteUntilLength(0, 0x33C);
             writer.Write(source.ProgramInfo.BannerMac.Hash);
@@ -116,9 +117,13 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
             writer.Write(source.ProgramInfo.FatMac.Hash);
         }
 
+        // We only write the signature if it exists (just to have more identical bytes).
+        // Unfortunately we can't generate a new one as the private keys are unknown.
+        // Custom firmwares like Unlaunch remove the device checks of the signature
+        // so actually the content doesn't matter.
         if (source.ProgramInfo.Signature is not null) {
             writer.WriteUntilLength(0, 0xF80);
-            writer.Write(source.ProgramInfo.Signature.Signature);
+            writer.Write(source.ProgramInfo.Signature.Hash);
         }
 
         writer.WriteUntilLength(0, source.SectionInfo.HeaderSize);
