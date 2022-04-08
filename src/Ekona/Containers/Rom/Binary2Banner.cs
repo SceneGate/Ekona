@@ -20,6 +20,7 @@
 using System;
 using System.IO;
 using System.Text;
+using SceneGate.Ekona.Security;
 using Texim.Colors;
 using Texim.Images;
 using Texim.Palettes;
@@ -115,22 +116,27 @@ namespace SceneGate.Ekona.Containers.Rom
             ushort versionData = reader.ReadUInt16();
             banner.Version = new Version(versionData >> 8, versionData & 0xFF);
 
-            banner.ChecksumBase = reader.ValidateCrc16(0x20, 0x820);
+            var crcGen = new NitroCrcGenerator();
+            banner.ChecksumBase = reader.ReadCrc16();
+            banner.ChecksumBase.Validate(crcGen.GenerateCrc16(reader.Stream, 0x20, 0x820));
 
             if (banner.Version.Minor > 1) {
-                banner.ChecksumChinese = reader.ValidateCrc16(0x20, 0x920);
+                banner.ChecksumChinese = reader.ReadCrc16();
+                banner.ChecksumChinese.Validate(crcGen.GenerateCrc16(reader.Stream, 0x20, 0x920));
             } else {
                 reader.Stream.Position += 2;
             }
 
             if (banner.Version.Minor > 2) {
-                banner.ChecksumKorean = reader.ValidateCrc16(0x20, 0xA20);
+                banner.ChecksumKorean = reader.ReadCrc16();
+                banner.ChecksumKorean.Validate(crcGen.GenerateCrc16(reader.Stream, 0x20, 0xA20));
             } else {
                 reader.Stream.Position += 2;
             }
 
             if (banner.Version.Major > 0) {
-                banner.ChecksumAnimatedIcon = reader.ValidateCrc16(0x1240, 0x1180);
+                banner.ChecksumAnimatedIcon = reader.ReadCrc16();
+                banner.ChecksumAnimatedIcon.Validate(crcGen.GenerateCrc16(reader.Stream, 0x1240, 0x1180));
             } else {
                 reader.Stream.Position += 2;
             }

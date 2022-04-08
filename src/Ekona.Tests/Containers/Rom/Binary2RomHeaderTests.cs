@@ -23,6 +23,7 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
+using SceneGate.Ekona.Security;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Yarhl.FileFormat;
@@ -65,7 +66,6 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 expected,
                 opts => opts
                     .Excluding(p => p.CopyrightLogo)
-                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(ChecksumInfo<ushort>))
                     .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HashInfo)));
         }
 
@@ -78,18 +78,18 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             using Node node = NodeFactory.FromFile(headerPath, FileOpenMode.Read);
             node.Invoking(n => n.TransformWith<Binary2RomHeader>()).Should().NotThrow();
 
-            RomInfo programInfo = node.GetFormatAs<RomHeader>().ProgramInfo;
-            programInfo.ChecksumSecureArea.IsValid.Should().BeFalse();
-            programInfo.ChecksumLogo.IsValid.Should().BeTrue();
-            programInfo.ChecksumHeader.IsValid.Should().BeTrue();
+            ProgramInfo programInfo = node.GetFormatAs<RomHeader>().ProgramInfo;
+            programInfo.ChecksumSecureArea.Status.Should().Be(HashStatus.NotValidated);
+            programInfo.ChecksumLogo.Status.Should().Be(HashStatus.Valid);
+            programInfo.ChecksumHeader.Status.Should().Be(HashStatus.Valid);
 
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
-            if (isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
                 programInfo.BannerMac.Should().NotBeNull();
                 programInfo.BannerMac.Status.Should().Be(HashStatus.NotValidated);
             }
 
-            if (programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
                 programInfo.FatMac.Should().NotBeNull();
                 programInfo.FatMac.Status.Should().Be(HashStatus.NotValidated);
 
@@ -97,7 +97,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 programInfo.HeaderMac.Status.Should().Be(HashStatus.NotValidated);
             }
 
-            if (isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
                 programInfo.Signature.Should().NotBeNull();
                 programInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }

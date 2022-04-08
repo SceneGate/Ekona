@@ -29,7 +29,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the information of the program.
         /// </summary>
-        public RomInfo ProgramInfo { get; set; } = new RomInfo();
+        public ProgramInfo ProgramInfo { get; set; } = new ProgramInfo();
 
         /// <summary>
         /// Gets or sets the information of the sections of the ROM.

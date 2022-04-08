@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System.Collections.ObjectModel;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 
 namespace SceneGate.Ekona.Containers.Rom
@@ -25,7 +26,7 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <summary>
     /// Information about the content of the program.
     /// </summary>
-    public class RomInfo : IFormat
+    public class ProgramInfo : IFormat
     {
         /// <summary>
         /// Gets the minimum cartridge size.
@@ -65,7 +66,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the modcrypt flags for DSi.
         /// </summary>
-        public DsiSecurityRomMode DsiFlags { get; set; }
+        public DsiCryptoMode DsiCryptoFlags { get; set; }
 
         /// <summary>
         /// Gets or sets the special game region.
@@ -115,7 +116,10 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the checksum of the ARM-9 secure area.
         /// </summary>
-        public ChecksumInfo<ushort> ChecksumSecureArea { get; set; }
+        /// <remarks>
+        /// This checksum will always fail as the secure area is not easy dumpeable.
+        /// </remarks>
+        public HashInfo ChecksumSecureArea { get; set; }
 
         /// <summary>
         /// Gets or sets the secure area delay in 131kHz units.
@@ -140,12 +144,12 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the checksum of the copyright logo.
         /// </summary>
-        public ChecksumInfo<ushort> ChecksumLogo { get; set; }
+        public HashInfo ChecksumLogo { get; set; }
 
         /// <summary>
         /// Gets or sets the checksum of the header.
         /// </summary>
-        public ChecksumInfo<ushort> ChecksumHeader { get; set; }
+        public HashInfo ChecksumHeader { get; set; }
 
         /// <summary>
         /// Gets or sets the debug ROM offset.
@@ -196,7 +200,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <remarks>
         /// Only for DSi games and DS games released after the DSi. Otherwise 0.
         /// </remarks>
-        public DsiRomFeatures DsiRomFeatures { get; set; }
+        public DsiRomFeatures ProgramFeatures { get; set; }
 
         /// <summary>
         /// Gets or sets the SHA-1 HMAC of the banner.

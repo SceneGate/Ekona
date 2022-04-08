@@ -17,26 +17,25 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-namespace SceneGate.Ekona
+namespace SceneGate.Ekona.Security;
+
+/// <summary>
+/// Validation status of a hash.
+/// </summary>
+public enum HashStatus
 {
     /// <summary>
-    /// Validation status of a hash.
+    /// The hash has not been validated yet.
     /// </summary>
-    public enum HashStatus
-    {
-        /// <summary>
-        /// The hash has not been validated yet.
-        /// </summary>
-        NotValidated,
+    NotValidated,
 
-        /// <summary>
-        /// The hash has been validated and is valid.
-        /// </summary>
-        Valid,
+    /// <summary>
+    /// The hash has been validated and is valid.
+    /// </summary>
+    Valid,
 
-        /// <summary>
-        /// The hash has been validated and is not valid.
-        /// </summary>
-        Invalid,
-    }
+    /// <summary>
+    /// The hash has been validated and is not valid.
+    /// </summary>
+    Invalid,
 }

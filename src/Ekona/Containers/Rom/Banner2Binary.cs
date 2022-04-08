@@ -20,6 +20,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using SceneGate.Ekona.Security;
 using Texim.Colors;
 using Texim.Images;
 using Texim.Palettes;
@@ -71,6 +72,7 @@ public class Banner2Binary : IConverter<NodeContainerFormat, BinaryFormat>
             WriteAnimatedIcon(writer, GetChildSafe(source.Root, "animated"));
         }
 
+        RegenerateChecksums(banner, binary.Stream);
         writer.Stream.Position = 0;
         WriteHeader(writer, banner);
 
@@ -88,27 +90,45 @@ public class Banner2Binary : IConverter<NodeContainerFormat, BinaryFormat>
             ?? throw new FormatException($"Child '{childName}' has not the expected format: {typeof(T).Name}");
     }
 
+    private static void RegenerateChecksums(Banner banner, DataStream stream)
+    {
+        var crcGen = new NitroCrcGenerator();
+        banner.ChecksumBase.ChangeHash(crcGen.GenerateCrc16(stream, 0x20, 0x820));
+
+        if (banner.Version.Minor > 1) {
+            banner.ChecksumChinese.ChangeHash(crcGen.GenerateCrc16(stream, 0x20, 0x920));
+        }
+
+        if (banner.Version.Minor > 2) {
+            banner.ChecksumKorean.ChangeHash(crcGen.GenerateCrc16(stream, 0x20, 0xA20));
+        }
+
+        if (banner.SupportAnimatedIcon) {
+            banner.ChecksumAnimatedIcon.ChangeHash(crcGen.GenerateCrc16(stream, 0x1240, 0x1180));
+        }
+    }
+
     private static void WriteHeader(DataWriter writer, Banner banner)
     {
         writer.Write((byte)banner.Version.Minor);
         writer.Write((byte)banner.Version.Major);
 
-        writer.WriteComputedCrc16(0x20, 0x820);
+        writer.Write(banner.ChecksumBase.Hash);
 
         if (banner.Version.Minor > 1) {
-            writer.WriteComputedCrc16(0x20, 0x920);
+            writer.Write(banner.ChecksumChinese.Hash);
         } else {
             writer.Write((ushort)0x00);
         }
 
         if (banner.Version.Minor > 2) {
-            writer.WriteComputedCrc16(0x20, 0xA20);
+            writer.Write(banner.ChecksumKorean.Hash);
         } else {
             writer.Write((ushort)0x00);
         }
 
-        if (banner.Version.Major > 0) {
-            writer.WriteComputedCrc16(0x1240, 0x1180);
+        if (banner.SupportAnimatedIcon) {
+            writer.Write(banner.ChecksumAnimatedIcon.Hash);
         } else {
             writer.Write((ushort)0x00);
         }

@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 
 namespace SceneGate.Ekona.Containers.Rom
@@ -65,27 +66,27 @@ namespace SceneGate.Ekona.Containers.Rom
         /// Gets or sets the CRC-16 checksum for the banner binary data of version 0.1.
         /// </summary>
         /// <remarks>This field may be null if the model was not deserialized from binary data.</remarks>
-        public ChecksumInfo<ushort> ChecksumBase { get; set; }
+        public HashInfo ChecksumBase { get; set; }
 
         /// <summary>
         /// Gets or sets the CRC-16 checksum for the banner binary data of version 0.2
         /// that includes Chinese title.
         /// </summary>
         /// <remarks>This field may be null if the model was not deserialized from binary data.</remarks>
-        public ChecksumInfo<ushort> ChecksumChinese { get; set; }
+        public HashInfo ChecksumChinese { get; set; }
 
         /// <summary>
         /// Gets or sets the CRC-16 checksum for the banner binary data of version 0.3
         /// that includes Chinese and Korean titles.
         /// </summary>
         /// <remarks>This field may be null if the model was not deserialized from binary data.</remarks>
-        public ChecksumInfo<ushort> ChecksumKorean { get; set; }
+        public HashInfo ChecksumKorean { get; set; }
 
         /// <summary>
         /// Gets or sets the CRC-16 checksum for the animated DSi icon.
         /// </summary>
         /// <remarks>This field may be null if the model was not deserialized from binary data.</remarks>
-        public ChecksumInfo<ushort> ChecksumAnimatedIcon { get; set; }
+        public HashInfo ChecksumAnimatedIcon { get; set; }
 
         /// <summary>
         /// Gets or sets the Japenese title.

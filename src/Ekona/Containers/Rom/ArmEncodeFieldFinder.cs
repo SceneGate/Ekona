@@ -46,7 +46,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <param name="arm">The ARM file to analyze.</param>
         /// <param name="info">The information of the program.</param>
         /// <returns>The encoded size address. 0 if not found.</returns>
-        public static int SearchEncodedSizeAddress(IBinary arm, RomInfo info)
+        public static int SearchEncodedSizeAddress(IBinary arm, ProgramInfo info)
         {
             // Steps to find the ARM9 size address that we need to change
             // in order to fix the BLZ decoded error.

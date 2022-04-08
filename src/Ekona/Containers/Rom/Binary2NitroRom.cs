@@ -23,6 +23,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
@@ -222,7 +223,7 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ValidateSignatures()
         {
-            RomInfo programInfo = header.ProgramInfo;
+            ProgramInfo programInfo = header.ProgramInfo;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
 
             if (keyStore is null) {
@@ -231,18 +232,15 @@ namespace SceneGate.Ekona.Containers.Rom
 
             // TODO: Verify HMAC of FAT and Header.
             byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
-            bool checkBannerHmac = isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac);
+            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerHmac);
             if (bannerKey?.Length > 0 && checkBannerHmac) {
                 int bannerSize = Binary2Banner.GetSize(rom.Banner.Version);
                 var hmacGenerator = new TwilightHMacGenerator(bannerKey);
-                programInfo.BannerMac.Status = hmacGenerator.Validate(
-                    reader.Stream,
-                    header.SectionInfo.BannerOffset,
-                    bannerSize,
-                    programInfo.BannerMac.Hash);
+                byte[] newHmac = hmacGenerator.Generate(reader.Stream, header.SectionInfo.BannerOffset, bannerSize);
+                programInfo.BannerMac.Validate(newHmac);
             }
 
-            bool checkSignature = isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader);
+            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader);
             if (keyStore.PublicModulusRetailGames?.Length > 0 && checkSignature) {
                 var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
                 programInfo.Signature.Status = signer.VerifySignature(

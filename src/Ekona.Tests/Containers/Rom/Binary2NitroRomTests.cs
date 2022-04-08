@@ -23,6 +23,7 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
+using SceneGate.Ekona.Security;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Yarhl.FileFormat;
@@ -75,14 +76,14 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             node.Invoking(n => n.TransformWith<Binary2NitroRom, DsiKeyStore>(keys)).Should().NotThrow();
 
             NitroRom rom = node.GetFormatAs<NitroRom>();
-            RomInfo programInfo = rom.Information;
+            ProgramInfo programInfo = rom.Information;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
 
-            if (isDsi || programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
                 programInfo.BannerMac.Status.Should().Be(HashStatus.Valid);
             }
 
-            if (programInfo.DsiRomFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
                 // TODO: Verify FAT and Header HMACs.
                 // programInfo.FatMac.Status.Should().Be(HashStatus.Valid)
                 // programInfo.HeaderMac.Status.Should().Be(HashStatus.Valid)

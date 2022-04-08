@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 
@@ -47,12 +48,12 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.MakerCode, 2, nullTerminator: false);
         writer.Write((byte)source.ProgramInfo.UnitCode);
         writer.Write(source.ProgramInfo.EncryptionSeed);
-        double relativeSize = (double)source.ProgramInfo.CartridgeSize / RomInfo.MinimumCartridgeSize;
+        double relativeSize = (double)source.ProgramInfo.CartridgeSize / ProgramInfo.MinimumCartridgeSize;
         byte power2Size = (byte)Math.Ceiling(Math.Log2(relativeSize));
         writer.Write(power2Size);
 
         writer.WriteTimes(0, 7); // reserved
-        writer.Write((byte)source.ProgramInfo.DsiFlags);
+        writer.Write((byte)source.ProgramInfo.DsiCryptoFlags);
         writer.Write(source.ProgramInfo.Region);
         writer.Write(source.ProgramInfo.Version);
         writer.Write(source.ProgramInfo.AutoStartFlag);
@@ -77,7 +78,7 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.FlagsRead);
         writer.Write(source.ProgramInfo.FlagsInit);
         writer.Write(source.SectionInfo.BannerOffset);
-        writer.Write(source.ProgramInfo.ChecksumSecureArea.Expected); // not calculated as we can't have secure area
+        writer.Write(source.ProgramInfo.ChecksumSecureArea.Hash);
         writer.Write(source.ProgramInfo.SecureAreaDelay);
         writer.Write(source.ProgramInfo.Arm9Autoload);
         writer.Write(source.ProgramInfo.Arm7Autoload);
@@ -91,15 +92,20 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
 
         writer.WriteTimes(0, 0x2C);
         writer.Write(source.CopyrightLogo);
-        writer.WriteComputedCrc16(0xC0, 0x9C);
-        writer.WriteComputedCrc16(0x00, 0x15E);
+
+        var crcGen = new NitroCrcGenerator();
+        source.ProgramInfo.ChecksumLogo.ChangeHash(crcGen.GenerateCrc16(writer.Stream, 0xC0, 0x9C));
+        writer.Write(source.ProgramInfo.ChecksumLogo.Hash);
+
+        source.ProgramInfo.ChecksumHeader.ChangeHash(crcGen.GenerateCrc16(writer.Stream, 0x00, 0x015E));
+        writer.Write(source.ProgramInfo.ChecksumHeader.Hash);
 
         writer.Write(source.ProgramInfo.DebugRomOffset);
         writer.Write(source.ProgramInfo.DebugSize);
         writer.Write(source.ProgramInfo.DebugRamAddress);
 
         writer.WriteUntilLength(0, 0x1BF);
-        writer.Write((byte)source.ProgramInfo.DsiRomFeatures);
+        writer.Write((byte)source.ProgramInfo.ProgramFeatures);
 
         // Write the HMAC if they exist. NitroRom2Binary regenerates them.
         if (source.ProgramInfo.BannerMac is not null) {

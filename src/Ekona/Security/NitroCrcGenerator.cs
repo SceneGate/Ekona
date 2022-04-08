@@ -17,33 +17,38 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-using System;
+using System.Data.HashFunction;
+using System.Data.HashFunction.CRC;
+using System.IO;
+using Yarhl.IO;
 
-namespace SceneGate.Ekona.Containers.Rom;
+namespace SceneGate.Ekona.Security;
 
 /// <summary>
-/// Security mode for DSi ROMs.
+/// Generate CRC compatible with Nitro devices.
 /// </summary>
-[Flags]
-public enum DsiSecurityRomMode
+public class NitroCrcGenerator
 {
     /// <summary>
-    /// ROM contains a TWL-exclusive region (DSi games).
+    /// Generate a CRC16-MODBUS of the data.
     /// </summary>
-    TwlExclusiveRegion = 1 << 0,
+    /// <param name="stream">The data to read.</param>
+    /// <returns>The CRC of the data in little endian.</returns>
+    public byte[] GenerateCrc16(Stream stream) => GenerateCrc16(stream, 0, stream.Length);
 
     /// <summary>
-    /// ROM is encrypted with modcrypt.
+    /// Generate a CRC16-MODBUS of the data.
     /// </summary>
-    Modcrypted = 1 << 1,
+    /// <param name="stream">The data to read.</param>
+    /// <param name="offset">The offset to start reading data.</param>
+    /// <param name="length">The length of the data.</param>
+    /// <returns>The CRC of the data in little endian.</returns>
+    public byte[] GenerateCrc16(Stream stream, long offset, long length)
+    {
+        using var segment = new DataStream(stream, offset, length);
 
-    /// <summary>
-    /// ROM modcryption uses debug key.
-    /// </summary>
-    ModcryptKeyDebug = 1 << 2,
-
-    /// <summary>
-    /// Disable debug features.
-    /// </summary>
-    DisableDebug = 1 << 3,
+        ICRC crc = CRCFactory.Instance.Create(CRCConfig.MODBUS);
+        IHashValue hash = crc.ComputeHash(segment);
+        return new byte[] { hash.Hash[0], hash.Hash[1] };
+    }
 }

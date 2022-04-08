@@ -17,44 +17,33 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
+
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
-/// Store of DSi (and new DS games) keys.
+/// Security mode for DSi ROMs.
 /// </summary>
-public class DsiKeyStore
+[Flags]
+public enum DsiCryptoMode
 {
     /// <summary>
-    /// Gets or sets the HMAC key for the DS whitelist phases 1 and 2.
+    /// ROM contains a TWL-exclusive region (DSi games).
     /// </summary>
-    /// <remarks>
-    /// The key can be found in the DSi launcher application ARM9.
-    /// For instance, at position 0270EC90h of the RAM.
-    /// </remarks>
-    public byte[] HMacKeyWhitelist12 { get; set; }
+    TwlExclusiveRegion = 1 << 0,
 
     /// <summary>
-    /// Gets or sets the HMAC key for the DS whitelist phases 3 and 4.
+    /// ROM is encrypted with modcrypt.
     /// </summary>
-    /// <remarks>
-    /// The key can be found in the DSi launcher application ARM9.
-    /// For instance, at position 0270ECD0h of the RAM.
-    /// </remarks>
-    public byte[] HMacKeyWhitelist34 { get; set; }
+    Modcrypted = 1 << 1,
 
     /// <summary>
-    /// Gets or sets the HMAC key used in DSi games (like banner HMAC).
+    /// ROM modcryption uses debug key.
     /// </summary>
-    /// <remarks>
-    /// The key can be found inside the ARM9 of most DSi games and in the launcher.
-    /// </remarks>
-    public byte[] HMacKeyDSiGames { get; set; }
+    ModcryptKeyDebug = 1 << 2,
 
     /// <summary>
-    /// Gets or sets the modulus of the RSA public key used to sign DSi retail games.
+    /// Disable debug features.
     /// </summary>
-    /// <remarks>
-    /// The data can be found in the ARM9 BIOS of the DSi at position 0x8974.
-    /// </remarks>
-    public byte[] PublicModulusRetailGames { get; set; }
+    DisableDebug = 1 << 3,
 }

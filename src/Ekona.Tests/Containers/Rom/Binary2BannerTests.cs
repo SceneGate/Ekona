@@ -24,6 +24,7 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
+using SceneGate.Ekona.Security;
 using Texim.Formats;
 using Texim.Images;
 using Texim.Palettes;
@@ -75,19 +76,19 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             var actual = node.Children["info"].GetFormatAs<Banner>();
             actual.Version.Should().Be(expected.Version);
-            actual.ChecksumBase.IsValid.Should().BeTrue();
+            actual.ChecksumBase.Status.Should().Be(HashStatus.Valid);
 
             if (actual.Version.Minor > 1) {
-                actual.ChecksumChinese.IsValid.Should().BeTrue();
+                actual.ChecksumChinese.Status.Should().Be(HashStatus.Valid);
             }
 
             if (actual.Version.Minor > 2) {
-                actual.ChecksumKorean.IsValid.Should().BeTrue();
+                actual.ChecksumKorean.Status.Should().Be(HashStatus.Valid);
             }
 
             if (actual.Version is { Major: > 1 } or { Major: 1, Minor: >= 3 }) {
                 actual.SupportAnimatedIcon.Should().BeTrue();
-                actual.ChecksumAnimatedIcon.IsValid.Should().BeTrue();
+                actual.ChecksumAnimatedIcon.Status.Should().Be(HashStatus.Valid);
             } else {
                 actual.SupportAnimatedIcon.Should().BeFalse();
             }

@@ -51,7 +51,7 @@ namespace SceneGate.Ekona.Containers.Rom
         public NitroRom()
         {
             Node system = NodeFactory.CreateContainer("system");
-            system.Add(new Node("info", new RomInfo()));
+            system.Add(new Node("info", new ProgramInfo()));
             system.Add(new Node("copyright_logo"));
             system.Add(NodeFactory.CreateContainer("banner"));
             system.Add(new Node("arm9"));
@@ -77,7 +77,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets the information of the program.
         /// </summary>
-        public RomInfo Information => System?.Children["info"]?.GetFormatAs<RomInfo>();
+        public ProgramInfo Information => System?.Children["info"]?.GetFormatAs<ProgramInfo>();
 
         /// <summary>
         /// Gets the banner of the program.

@@ -18,13 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Yarhl.IO;
 
-namespace SceneGate.Ekona;
+namespace SceneGate.Ekona.Security;
 
 /// <summary>
 /// Generate and verify Twilight HMACs (SHA-1 HMAC).
@@ -66,27 +65,5 @@ public class TwilightHMacGenerator
         using var algo = HMAC.Create("HMACSHA1");
         algo.Key = Key;
         return algo.ComputeHash(segment);
-    }
-
-    /// <summary>
-    /// Validate the HMAC against the provided data segment.
-    /// </summary>
-    /// <param name="stream">The stream to validate the data.</param>
-    /// <param name="hmac">The expected HMAC.</param>
-    /// <returns>The validity of the hash.</returns>
-    public HashStatus Validate(Stream stream, byte[] hmac) => Validate(stream, 0, stream.Length, hmac);
-
-    /// <summary>
-    /// Validate the HMAC against the provided data segment.
-    /// </summary>
-    /// <param name="stream">The stream to validate the data.</param>
-    /// <param name="offset">The offset of the region of the data where the HMAC applies.</param>
-    /// <param name="length">The length of the region of data.</param>
-    /// <param name="hmac">The expected HMAC.</param>
-    /// <returns>The validity of the hash.</returns>
-    public HashStatus Validate(Stream stream, long offset, long length, byte[] hmac)
-    {
-        byte[] actualHash = Generate(stream, offset, length);
-        return hmac.SequenceEqual(actualHash) ? HashStatus.Valid : HashStatus.Invalid;
     }
 }

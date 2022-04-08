@@ -44,7 +44,7 @@ public class NitroRom2Binary :
     private Stream? initializedOutputStream;
     private DataWriter writer = null!;
     private Node root = null!;
-    private RomInfo programInfo = null!;
+    private ProgramInfo programInfo = null!;
     private RomSectionInfo sectionInfo = null!;
 
     /// <summary>
@@ -80,7 +80,7 @@ public class NitroRom2Binary :
         binary.Stream.Position = 0;
         writer = new DataWriter(binary.Stream);
 
-        programInfo = GetChildFormatSafe<RomInfo>("system/info");
+        programInfo = GetChildFormatSafe<ProgramInfo>("system/info");
         sectionInfo = new RomSectionInfo {
             HeaderSize = 0x4000,
         };
@@ -355,14 +355,13 @@ public class NitroRom2Binary :
 
         int fileIndex = 0;
         int dirIndex = 0;
-        int physicalIndex = 0;
 
         // Overlays are written like regular files but in a special location.
         // Skip the index here, added later when writing the file that we know the ID.
         string systemPath = $"/{root.Name}/system";
         fileIndex += GetChildSafe("system/overlays9").Children.Count;
         fileIndex += GetChildSafe("system/overlays7").Children.Count;
-        physicalIndex = fileIndex;
+        int physicalIndex = fileIndex;
 
         foreach (Node node in Navigator.IterateNodes(root, NavigationMode.DepthFirst)) {
             // Skip system as they are written in a special way
