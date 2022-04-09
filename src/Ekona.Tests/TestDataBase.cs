@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using SceneGate.Ekona.Security;
+using YamlDotNet.Serialization;
 
 namespace SceneGate.Ekona.Tests
 {
@@ -38,6 +40,17 @@ namespace SceneGate.Ekona.Tests
                 string path = Path.Combine(programDir, "Resources");
                 return Path.GetFullPath(path);
             }
+        }
+
+        public static DsiKeyStore GetDsiKeyStore()
+        {
+            string keysPath = Path.Combine(RootFromOutputPath, "dsi_keys.yml");
+            TestDataBase.IgnoreIfFileDoesNotExist(keysPath);
+
+            string keysYaml = File.ReadAllText(keysPath);
+            return new DeserializerBuilder()
+                .Build()
+                .Deserialize<DsiKeyStore>(keysYaml);
         }
 
         public static void IgnoreIfFileDoesNotExist(string file)

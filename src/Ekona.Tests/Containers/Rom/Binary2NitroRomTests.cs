@@ -65,12 +65,10 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
-        [Ignore("Missing key loading")]
         public void DeserializeRomWithKeysHasValidSignatures(string infoPath, string romPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);
-
-            var keys = new DsiKeyStore(); // TODO: Set keys
+            DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
             node.Invoking(n => n.TransformWith<Binary2NitroRom, DsiKeyStore>(keys)).Should().NotThrow();
