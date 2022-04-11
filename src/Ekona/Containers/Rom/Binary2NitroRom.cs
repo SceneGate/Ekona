@@ -171,6 +171,11 @@ namespace SceneGate.Ekona.Containers.Rom
             programParams.BssOffset = reader.ReadUInt32();
             programParams.BssEndOffset = reader.ReadUInt32();
             programParams.CompressedLength = reader.ReadUInt32() - header.ProgramInfo.Arm9RamAddress;
+
+            ushort build = reader.ReadUInt16();
+            byte minor = reader.ReadByte();
+            byte major = reader.ReadByte();
+            programParams.SdkVersion = new Version(major, minor, build);
         }
 
         private void ReadOverlayTable(Collection<OverlayInfo> infos, uint offset, int size)

@@ -278,6 +278,10 @@ public class NitroRom2Binary :
             writer.Write(0);
         }
 
+        writer.Write((ushort)programParams.SdkVersion.Build);
+        writer.Write((byte)programParams.SdkVersion.Minor);
+        writer.Write((byte)programParams.SdkVersion.Major);
+
         writer.Stream.PopPosition();
     }
 

@@ -17,6 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
+
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
@@ -73,4 +75,9 @@ public class NitroProgramCodeParameters
     /// If 0, then the program is not compressed.
     /// </summary>
     public uint CompressedLength { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SDK version.
+    /// </summary>
+    public Version SdkVersion { get; set; }
 }
