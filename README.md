@@ -13,11 +13,13 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
 
 ## Supported formats
 
-_Encryption, decryption or signature validation not supported yet._
+_Encryption and decryption not supported yet._
 
 - DS cartridge filesystem: read and write
-  - Header: read and write
-  - Banner and icon: read and write
+  - Header: read and write, including extended header
+  - Banner and icon: read and write, including animated icons from DSi.
+  - HMAC validation and re-generation when keys are provided.
+  - Signature validation when keys are provided.
 
 ## Documentation
 
