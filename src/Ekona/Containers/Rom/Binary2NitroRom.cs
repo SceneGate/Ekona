@@ -22,7 +22,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
@@ -32,14 +34,26 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <summary>
     /// Converter for binary formats into a NitroRom container.
     /// </summary>
-    public class Binary2NitroRom : IConverter<IBinary, NitroRom>
+    public class Binary2NitroRom : IConverter<IBinary, NitroRom>, IInitializer<DsiKeyStore>
     {
         private static readonly FileAddressOffsetComparer FileAddressComparer = new FileAddressOffsetComparer();
+
+        private DsiKeyStore keyStore;
+
         private DataReader reader;
         private NitroRom rom;
         private RomHeader header;
         private FileAddress[] addresses;
         private List<FileAddress> addressesByOffset;
+
+        /// <summary>
+        /// Initializes the converter with the key store to validate signatures.
+        /// </summary>
+        /// <param name="parameters">The key store.</param>
+        public void Initialize(DsiKeyStore parameters)
+        {
+            keyStore = parameters;
+        }
 
         /// <summary>
         /// Read the internal info of a ROM file.
@@ -60,6 +74,7 @@ namespace SceneGate.Ekona.Containers.Rom
             ReadFat();
             ReadPrograms();
             ReadFileSystem();
+            ValidateSignatures();
 
             return rom;
         }
@@ -204,6 +219,38 @@ namespace SceneGate.Ekona.Containers.Rom
 
                     nodeType = reader.ReadByte();
                 }
+            }
+        }
+
+        private void ValidateSignatures()
+        {
+            // TODO: Encrypt secure area and check checksums
+            if (keyStore is null) {
+                return;
+            }
+
+            ProgramInfo programInfo = header.ProgramInfo;
+            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+            var hashGenerator = new TwilightHMacGenerator(keyStore);
+
+            // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
+            bool checkOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
+            if (keyStore.HMacKeyWhitelist12?.Length > 0 && checkOverlayHmac) {
+                byte[] actualHash = hashGenerator.GeneratePhase2Hmac(reader.Stream, header.SectionInfo);
+                programInfo.OverlaysMac.Validate(actualHash);
+            }
+
+            byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
+            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned);
+            if (bannerKey?.Length > 0 && checkBannerHmac) {
+                byte[] actualHash = hashGenerator.GeneratePhase3Hmac(reader.Stream, programInfo, header.SectionInfo);
+                programInfo.BannerMac.Validate(actualHash);
+            }
+
+            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
+            if (keyStore.PublicModulusRetailGames?.Length > 0 && checkSignature) {
+                var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
+                programInfo.Signature.Status = signer.VerifySignature(programInfo.Signature.Hash, reader.Stream);
             }
         }
 

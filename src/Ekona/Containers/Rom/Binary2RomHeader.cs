@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,6 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 
@@ -39,20 +41,31 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <returns>The new ROM header.</returns>
         public RomHeader Convert(IBinary source)
         {
+            ArgumentNullException.ThrowIfNull(source);
+
             source.Stream.Position = 0;
             var reader = new DataReader(source.Stream);
-
             var header = new RomHeader();
+
+            ReadDsFields(reader, header);
+            ValidateChecksums(reader.Stream, header.ProgramInfo);
+
+            return header;
+        }
+
+        private static void ReadDsFields(DataReader reader, RomHeader header)
+        {
+            // Pos: 0x00
             header.ProgramInfo.GameTitle = reader.ReadString(12).Replace("\0", string.Empty);
             header.ProgramInfo.GameCode = reader.ReadString(4);
-            header.ProgramInfo.MakerCode = reader.ReadString(2);
 
             // Pos: 0x10
-            header.ProgramInfo.UnitCode = reader.ReadByte();
+            header.ProgramInfo.MakerCode = reader.ReadString(2);
+            header.ProgramInfo.UnitCode = (DeviceUnitKind)reader.ReadByte();
             header.ProgramInfo.EncryptionSeed = reader.ReadByte();
-            header.ProgramInfo.CartridgeSize = RomInfo.MinimumCartridgeSize * (1 << reader.ReadByte());
-            source.Stream.Position += 7; // reserved
-            header.ProgramInfo.DsiFlags = reader.ReadByte();
+            header.ProgramInfo.CartridgeSize = ProgramInfo.MinimumCartridgeSize * (1 << reader.ReadByte());
+            reader.Stream.Position += 7; // reserved
+            header.ProgramInfo.DsiCryptoFlags = (DsiCryptoMode)reader.ReadByte();
             header.ProgramInfo.Region = reader.ReadByte();
             header.ProgramInfo.Version = reader.ReadByte();
             header.ProgramInfo.AutoStartFlag = reader.ReadByte();
@@ -85,7 +98,7 @@ namespace SceneGate.Ekona.Containers.Rom
             header.ProgramInfo.FlagsRead = reader.ReadUInt32();
             header.ProgramInfo.FlagsInit = reader.ReadUInt32();
             header.SectionInfo.BannerOffset = reader.ReadUInt32();
-            header.ProgramInfo.ChecksumSecureArea = new ChecksumInfo<ushort>(reader.ReadUInt16());
+            header.ProgramInfo.ChecksumSecureArea = reader.ReadCrc16();
             header.ProgramInfo.SecureAreaDelay = reader.ReadUInt16();
 
             // Pos: 0x70
@@ -96,18 +109,48 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0x80
             header.SectionInfo.RomSize = reader.ReadUInt32();
             header.SectionInfo.HeaderSize = reader.ReadUInt32();
-            header.ProgramInfo.Unknown88 = reader.ReadUInt32();
+            header.ProgramInfo.Arm9ParametersTableOffset = reader.ReadUInt32();
+            header.ProgramInfo.Arm7ParametersTableOffset = reader.ReadUInt32();
 
-            source.Stream.Position += 0x34;
+            // Pos: 0x90
+            header.ProgramInfo.NitroRegionEnd = reader.ReadUInt16();
+            header.ProgramInfo.TwilightRegionStart = reader.ReadUInt16();
+
+            // Pos: 0xC0
+            reader.Stream.Position = 0xC0;
             header.CopyrightLogo = reader.ReadBytes(156);
-            header.ProgramInfo.ChecksumLogo = reader.ValidateCrc16(0xC0, 0x9C);
-            header.ProgramInfo.ChecksumHeader = reader.ValidateCrc16(0x00, 0x15E);
+            header.ProgramInfo.ChecksumLogo = reader.ReadCrc16();
+            header.ProgramInfo.ChecksumHeader = reader.ReadCrc16();
 
+            // Pos: 0x160
             header.ProgramInfo.DebugRomOffset = reader.ReadUInt32();
             header.ProgramInfo.DebugSize = reader.ReadUInt32();
             header.ProgramInfo.DebugRamAddress = reader.ReadUInt32();
 
-            return header;
+            // Pos: 0x1BF
+            reader.Stream.Position = 0x1BF;
+            header.ProgramInfo.ProgramFeatures = (DsiRomFeatures)reader.ReadByte();
+
+            // Pos: 0x33C
+            reader.Stream.Position = 0x33C;
+            header.ProgramInfo.BannerMac = reader.ReadHMACSHA1();
+
+            // Pos: 0x378
+            reader.Stream.Position = 0x378;
+            header.ProgramInfo.ProgramMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.OverlaysMac = reader.ReadHMACSHA1();
+
+            // Pos: 0xF80
+            reader.Stream.Position = 0xF80;
+            header.ProgramInfo.Signature = reader.ReadSignatureSHA1RSA();
+        }
+
+        private static void ValidateChecksums(DataStream stream, ProgramInfo info)
+        {
+            // We don't validate the checksum of the secure area as it's outside the header. Same for HMAC.
+            var crcGen = new NitroCrcGenerator();
+            info.ChecksumLogo.Validate(crcGen.GenerateCrc16(stream, 0xC0, 0x9C));
+            info.ChecksumHeader.Validate(crcGen.GenerateCrc16(stream, 0x00, 0x15E));
         }
     }
 }

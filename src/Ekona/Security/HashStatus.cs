@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,32 +17,25 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-using Yarhl.FileFormat;
+namespace SceneGate.Ekona.Security;
 
-namespace SceneGate.Ekona.Containers.Rom
+/// <summary>
+/// Validation status of a hash.
+/// </summary>
+public enum HashStatus
 {
     /// <summary>
-    /// Header of the program in a ROM.
+    /// The hash has not been validated yet.
     /// </summary>
-    public class RomHeader : IFormat
-    {
-        /// <summary>
-        /// Gets or sets the information of the program.
-        /// </summary>
-        public ProgramInfo ProgramInfo { get; set; } = new ProgramInfo();
+    NotValidated,
 
-        /// <summary>
-        /// Gets or sets the information of the sections of the ROM.
-        /// </summary>
-        public RomSectionInfo SectionInfo { get; set; } = new RomSectionInfo();
+    /// <summary>
+    /// The hash has been validated and is valid.
+    /// </summary>
+    Valid,
 
-        /// <summary>
-        /// Gets or sets the compressed copyright logo.
-        /// </summary>
-        /// <remarks>
-        /// <para>The logo is compressed with Huffman with a header present in the BIOS.</para>
-        /// <para>The logo must be the original or the device won't boot the game.</para>
-        /// </remarks>
-        public byte[] CopyrightLogo { get; set; }
-    }
+    /// <summary>
+    /// The hash has been validated and is not valid.
+    /// </summary>
+    Invalid,
 }

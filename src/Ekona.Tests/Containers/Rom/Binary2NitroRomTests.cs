@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
+using SceneGate.Ekona.Security;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Yarhl.FileFormat;
@@ -64,6 +65,37 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
+        public void DeserializeRomWithKeysHasValidSignatures(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+            DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith<Binary2NitroRom, DsiKeyStore>(keys)).Should().NotThrow();
+
+            NitroRom rom = node.GetFormatAs<NitroRom>();
+            ProgramInfo programInfo = rom.Information;
+            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned)) {
+                programInfo.BannerMac.Status.Should().Be(HashStatus.Valid);
+            }
+
+            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
+                // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
+                // programInfo.ProgramMac.Status.Should().Be(HashStatus.Valid)
+                programInfo.OverlaysMac.Status.Should().Be(HashStatus.Valid);
+                programInfo.Signature.Status.Should().Be(HashStatus.Valid);
+            }
+
+            if (isDsi) {
+                programInfo.OverlaysMac.IsNull.Should().BeTrue();
+                programInfo.ProgramMac.IsNull.Should().BeTrue();
+                programInfo.Signature.Status.Should().Be(HashStatus.Valid);
+            }
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
         public void TwoWaysIdenticalRomStream(string infoPath, string romPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);
@@ -75,7 +107,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
 
-            // TODO: After identical header and banner
+            // TODO: After implementing ARM9 tail and DSi fields
             // generatedStream.Stream!.Compare(node.Stream).Should().BeTrue()
         }
 
@@ -93,10 +125,38 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>().Information;
+
             node.Invoking(n => n.TransformWith<NitroRom2Binary>()).Should().NotThrow();
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo newInfo = node.GetFormatAs<NitroRom>().Information;
 
             node.Should().MatchInfo(expected);
+
+            // Keep old hashes
+            newInfo.OverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.OverlaysMac.Hash);
+            newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void ReadWriteThreeWaysRomWithKeyGeneratesSameHashes(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+            DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+
+            node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>().Information;
+
+            var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
+            node.Invoking(n => n.TransformWith<NitroRom2Binary, NitroRom2BinaryParams>(nitroParameters)).Should().NotThrow();
+
+            node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo newInfo = node.GetFormatAs<NitroRom>().Information;
+
+            newInfo.OverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.OverlaysMac.Hash);
+            newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
         }
     }
 }

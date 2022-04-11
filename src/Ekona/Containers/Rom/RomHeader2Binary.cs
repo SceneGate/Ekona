@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 
@@ -45,14 +46,14 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.GameTitle, 12, nullTerminator: false);
         writer.Write(source.ProgramInfo.GameCode, 4, nullTerminator: false);
         writer.Write(source.ProgramInfo.MakerCode, 2, nullTerminator: false);
-        writer.Write(source.ProgramInfo.UnitCode);
+        writer.Write((byte)source.ProgramInfo.UnitCode);
         writer.Write(source.ProgramInfo.EncryptionSeed);
-        double relativeSize = (double)source.ProgramInfo.CartridgeSize / RomInfo.MinimumCartridgeSize;
+        double relativeSize = (double)source.ProgramInfo.CartridgeSize / ProgramInfo.MinimumCartridgeSize;
         byte power2Size = (byte)Math.Ceiling(Math.Log2(relativeSize));
         writer.Write(power2Size);
 
         writer.WriteTimes(0, 7); // reserved
-        writer.Write(source.ProgramInfo.DsiFlags);
+        writer.Write((byte)source.ProgramInfo.DsiCryptoFlags);
         writer.Write(source.ProgramInfo.Region);
         writer.Write(source.ProgramInfo.Version);
         writer.Write(source.ProgramInfo.AutoStartFlag);
@@ -77,23 +78,59 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.FlagsRead);
         writer.Write(source.ProgramInfo.FlagsInit);
         writer.Write(source.SectionInfo.BannerOffset);
-        writer.Write(source.ProgramInfo.ChecksumSecureArea.Expected);
+        writer.Write(source.ProgramInfo.ChecksumSecureArea.Hash);
         writer.Write(source.ProgramInfo.SecureAreaDelay);
         writer.Write(source.ProgramInfo.Arm9Autoload);
         writer.Write(source.ProgramInfo.Arm7Autoload);
         writer.Write(source.ProgramInfo.SecureDisable);
         writer.Write(source.SectionInfo.RomSize);
         writer.Write(source.SectionInfo.HeaderSize);
-        writer.Write(source.ProgramInfo.Unknown88);
+        writer.Write(source.ProgramInfo.Arm9ParametersTableOffset);
+        writer.Write(source.ProgramInfo.Arm7ParametersTableOffset);
+        writer.Write(source.ProgramInfo.NitroRegionEnd);
+        writer.Write(source.ProgramInfo.TwilightRegionStart);
 
-        writer.WriteTimes(0, 0x34);
+        writer.WriteTimes(0, 0x2C);
         writer.Write(source.CopyrightLogo);
-        writer.Write(source.ProgramInfo.ChecksumLogo.Expected);
-        writer.Write(source.ProgramInfo.ChecksumHeader.Expected);
+
+        var crcGen = new NitroCrcGenerator();
+        source.ProgramInfo.ChecksumLogo.ChangeHash(crcGen.GenerateCrc16(writer.Stream, 0xC0, 0x9C));
+        writer.Write(source.ProgramInfo.ChecksumLogo.Hash);
+
+        source.ProgramInfo.ChecksumHeader.ChangeHash(crcGen.GenerateCrc16(writer.Stream, 0x00, 0x015E));
+        writer.Write(source.ProgramInfo.ChecksumHeader.Hash);
 
         writer.Write(source.ProgramInfo.DebugRomOffset);
         writer.Write(source.ProgramInfo.DebugSize);
         writer.Write(source.ProgramInfo.DebugRamAddress);
+
+        writer.WriteUntilLength(0, 0x1BF);
+        writer.Write((byte)source.ProgramInfo.ProgramFeatures);
+
+        // Write the HMAC if they exist. NitroRom2Binary regenerates them.
+        if (source.ProgramInfo.BannerMac is not null) {
+            writer.WriteUntilLength(0, 0x33C);
+            writer.Write(source.ProgramInfo.BannerMac.Hash);
+        }
+
+        if (source.ProgramInfo.ProgramMac is not null) {
+            writer.WriteUntilLength(0, 0x378);
+            writer.Write(source.ProgramInfo.ProgramMac.Hash);
+        }
+
+        if (source.ProgramInfo.OverlaysMac is not null) {
+            writer.WriteUntilLength(0, 0x38C);
+            writer.Write(source.ProgramInfo.OverlaysMac.Hash);
+        }
+
+        // We only write the signature if it exists (just to have more identical bytes).
+        // Unfortunately we can't generate a new one as the private keys are unknown.
+        // Custom firmwares like Unlaunch remove the device checks of the signature
+        // so actually the content doesn't matter.
+        if (source.ProgramInfo.Signature is not null) {
+            writer.WriteUntilLength(0, 0xF80);
+            writer.Write(source.ProgramInfo.Signature.Hash);
+        }
 
         writer.WriteUntilLength(0, source.SectionInfo.HeaderSize);
 

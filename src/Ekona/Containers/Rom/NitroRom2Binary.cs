@@ -24,6 +24,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
@@ -34,17 +35,17 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// Converter from NitroRom containers into binary format.
 /// </summary>
 public class NitroRom2Binary :
-    IInitializer<Stream>,
-
+    IInitializer<NitroRom2BinaryParams>,
     IConverter<NodeContainerFormat, BinaryFormat>
 {
     private const int PaddingSize = 0x200;
     private readonly SortedList<int, NodeInfo> nodesById = new SortedList<int, NodeInfo>();
     private readonly SortedList<int, NodeInfo> nodesByOffset = new SortedList<int, NodeInfo>();
     private Stream? initializedOutputStream;
+    private DsiKeyStore? keyStore;
     private DataWriter writer = null!;
     private Node root = null!;
-    private RomInfo programInfo = null!;
+    private ProgramInfo programInfo = null!;
     private RomSectionInfo sectionInfo = null!;
 
     /// <summary>
@@ -52,8 +53,12 @@ public class NitroRom2Binary :
     /// </summary>
     /// <param name="parameters">The output stream for the next conversion.</param>
     /// <exception cref="ArgumentNullException">The argument is null.</exception>
-    public void Initialize(Stream parameters) =>
-        initializedOutputStream = parameters ?? throw new ArgumentNullException(nameof(parameters));
+    public void Initialize(NitroRom2BinaryParams parameters)
+    {
+        ArgumentNullException.ThrowIfNull(parameters);
+        initializedOutputStream = parameters.OutputStream;
+        keyStore = parameters.KeyStore;
+    }
 
     /// <summary>
     /// Serializes a ROM container into NDS binary format.
@@ -80,7 +85,7 @@ public class NitroRom2Binary :
         binary.Stream.Position = 0;
         writer = new DataWriter(binary.Stream);
 
-        programInfo = GetChildFormatSafe<RomInfo>("system/info");
+        programInfo = GetChildFormatSafe<ProgramInfo>("system/info");
         sectionInfo = new RomSectionInfo {
             HeaderSize = 0x4000,
         };
@@ -150,11 +155,45 @@ public class NitroRom2Binary :
 
         sectionInfo.RomSize = (uint)writer.Stream.Length;
 
+        GenerateSignatures();
+
         // We don't calculate the header length but we expect it's preset.
         // It's used inside the converter to pad.
         var binaryHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
         writer.Stream.Position = 0;
         binaryHeader.Stream.WriteTo(writer.Stream);
+    }
+
+    private void GenerateSignatures()
+    {
+        // TODO: Encrypt secure area and generate checksums
+        if (keyStore is null) {
+            return;
+        }
+
+        var generator = new TwilightHMacGenerator(keyStore);
+        bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+
+        bool requireOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
+        if (keyStore.HMacKeyWhitelist12?.Length > 0 && requireOverlayHmac) {
+            byte[] newHash = generator.GeneratePhase2Hmac(writer.Stream, sectionInfo);
+            programInfo.OverlaysMac.ChangeHash(newHash);
+        }
+
+        byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
+        bool requireBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned);
+        if (bannerKey?.Length > 0 && requireBannerHmac) {
+            byte[] newHash2 = generator.GeneratePhase3Hmac(writer.Stream, programInfo, sectionInfo);
+            programInfo.BannerMac.ChangeHash(newHash2);
+        }
+
+        bool requireSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
+        if (keyStore.PublicModulusRetailGames?.Length > 0 && requireSignature) {
+            // While we could add the code to sign the data with a provided private key...
+            // In practice it won't ever happen that we know the actual private key.
+            // We could modify the NAND with our own public/private key but at that point
+            // just replacing the verification sign code is easier with launch, so I won't add that dead code.
+        }
     }
 
     private void WriteBanner()
@@ -354,14 +393,13 @@ public class NitroRom2Binary :
 
         int fileIndex = 0;
         int dirIndex = 0;
-        int physicalIndex = 0;
 
         // Overlays are written like regular files but in a special location.
         // Skip the index here, added later when writing the file that we know the ID.
         string systemPath = $"/{root.Name}/system";
         fileIndex += GetChildSafe("system/overlays9").Children.Count;
         fileIndex += GetChildSafe("system/overlays7").Children.Count;
-        physicalIndex = fileIndex;
+        int physicalIndex = fileIndex;
 
         foreach (Node node in Navigator.IterateNodes(root, NavigationMode.DepthFirst)) {
             // Skip system as they are written in a special way

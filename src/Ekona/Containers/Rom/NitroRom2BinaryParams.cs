@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,32 +17,25 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-using Yarhl.FileFormat;
+using System.IO;
+using SceneGate.Ekona.Security;
 
-namespace SceneGate.Ekona.Containers.Rom
+namespace SceneGate.Ekona.Containers.Rom;
+
+/// <summary>
+/// Additional parameters for the <see cref="NitroRom2Binary"/> converter.
+/// </summary>
+public class NitroRom2BinaryParams
 {
     /// <summary>
-    /// Header of the program in a ROM.
+    /// Gets or sets the output stream for the converter. If not set, the
+    /// converter will create a new one in-memory.
     /// </summary>
-    public class RomHeader : IFormat
-    {
-        /// <summary>
-        /// Gets or sets the information of the program.
-        /// </summary>
-        public ProgramInfo ProgramInfo { get; set; } = new ProgramInfo();
+    public Stream OutputStream { get; set; }
 
-        /// <summary>
-        /// Gets or sets the information of the sections of the ROM.
-        /// </summary>
-        public RomSectionInfo SectionInfo { get; set; } = new RomSectionInfo();
-
-        /// <summary>
-        /// Gets or sets the compressed copyright logo.
-        /// </summary>
-        /// <remarks>
-        /// <para>The logo is compressed with Huffman with a header present in the BIOS.</para>
-        /// <para>The logo must be the original or the device won't boot the game.</para>
-        /// </remarks>
-        public byte[] CopyrightLogo { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the key store to re-generate the HMAC hashes. If not set,
+    /// the hashes are not regenerated.
+    /// </summary>
+    public DsiKeyStore KeyStore { get; set; }
 }
