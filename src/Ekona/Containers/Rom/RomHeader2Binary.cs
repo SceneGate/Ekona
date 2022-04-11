@@ -113,14 +113,14 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
             writer.Write(source.ProgramInfo.BannerMac.Hash);
         }
 
-        if (source.ProgramInfo.HeaderMac is not null) {
+        if (source.ProgramInfo.ProgramMac is not null) {
             writer.WriteUntilLength(0, 0x378);
-            writer.Write(source.ProgramInfo.HeaderMac.Hash);
+            writer.Write(source.ProgramInfo.ProgramMac.Hash);
         }
 
-        if (source.ProgramInfo.FatMac is not null) {
+        if (source.ProgramInfo.OverlaysMac is not null) {
             writer.WriteUntilLength(0, 0x38C);
-            writer.Write(source.ProgramInfo.FatMac.Hash);
+            writer.Write(source.ProgramInfo.OverlaysMac.Hash);
         }
 
         // We only write the signature if it exists (just to have more identical bytes).

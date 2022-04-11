@@ -84,20 +84,20 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             programInfo.ChecksumHeader.Status.Should().Be(HashStatus.Valid);
 
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
-            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned)) {
                 programInfo.BannerMac.Should().NotBeNull();
                 programInfo.BannerMac.Status.Should().Be(HashStatus.NotValidated);
             }
 
-            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
-                programInfo.FatMac.Should().NotBeNull();
-                programInfo.FatMac.Status.Should().Be(HashStatus.NotValidated);
+            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
+                programInfo.OverlaysMac.Should().NotBeNull();
+                programInfo.OverlaysMac.Status.Should().Be(HashStatus.NotValidated);
 
-                programInfo.HeaderMac.Should().NotBeNull();
-                programInfo.HeaderMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.ProgramMac.Should().NotBeNull();
+                programInfo.ProgramMac.Status.Should().Be(HashStatus.NotValidated);
             }
 
-            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
                 programInfo.Signature.Should().NotBeNull();
                 programInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }

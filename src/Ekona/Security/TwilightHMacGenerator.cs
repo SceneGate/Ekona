@@ -19,61 +19,113 @@
 // SOFTWARE.
 using System;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
+using SceneGate.Ekona.Containers.Rom;
+using SceneGate.Ekona.Security;
 using Yarhl.IO;
 
 namespace SceneGate.Ekona.Security;
 
 /// <summary>
-/// Generate and verify Twilight HMACs (SHA-1 HMAC).
+/// Generate different hashes, HMAC and signatures of DS and DSi ROMs.
 /// </summary>
 public class TwilightHMacGenerator
 {
+    private const int PaddingSize = 512;
+    private readonly DsiKeyStore keyStore;
+
     /// <summary>
-    /// Initializes a new instance of the <see cref="TwilightHMacGenerator"/>  class.
+    /// Initializes a new instance of the <see cref="TwilightHMacGenerator"/> class.
     /// </summary>
-    /// <param name="key">The key to generate HMACs.</param>
-    public TwilightHMacGenerator(byte[] key)
+    /// <param name="keyStore">Store with the keys.</param>
+    public TwilightHMacGenerator(DsiKeyStore keyStore)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        Key = key;
+        this.keyStore = keyStore;
     }
 
     /// <summary>
-    /// Gets the HMAC key.
+    /// Generate the whitelist phase 2 HMAC (overlay9).
     /// </summary>
-    public byte[] Key { get; }
+    /// <param name="romStream">ROM stream with the content to generate the hash.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>HMAC for the whitelist phase 2.</returns>
+    /// <exception cref="InvalidOperationException">The key for the whitelist phase 2 is missing.</exception>
+    public byte[] GeneratePhase2Hmac(Stream romStream, RomSectionInfo sectionInfo)
+    {
+        byte[] phase2Key = keyStore.HMacKeyWhitelist12;
+        if (phase2Key is not { Length: > 0 }) {
+            throw new InvalidOperationException($"Missing {nameof(DsiKeyStore.HMacKeyWhitelist12)} key");
+        }
+
+        using HMAC generator = CreateGenerator(phase2Key);
+        var reader = new DataReader(romStream);
+
+        // First hash the overlay 9 table info.
+        reader.Stream.Position = sectionInfo.Overlay9TableOffset;
+        byte[] infoData = reader.ReadBytes(sectionInfo.Overlay9TableSize);
+        _ = generator.TransformBlock(infoData, 0, infoData.Length, null, 0);
+
+        // Then hash the FAT entries for overlay 9 files.
+        int numOverlays = sectionInfo.Overlay9TableSize / 0x20;
+        reader.Stream.Position = sectionInfo.FatOffset;
+        byte[] overlaysFat = reader.ReadBytes(numOverlays * 8);
+        _ = generator.TransformBlock(overlaysFat, 0, overlaysFat.Length, null, 0);
+
+        // Finally hash each overlay in an fun, unncessary and complex way.
+        // Hash each overlay including its hash, without exceeding a maximum size per file.
+        // The maximum file size to hash is changing depending how many bytes are hashed already.
+        int blocksRead = 0;
+        for (int i = 0; i < numOverlays; i++) {
+            reader.Stream.Position = sectionInfo.FatOffset + (i * 8);
+            uint overlayOffset = reader.ReadUInt32();
+            int overlaySize = (int)(reader.ReadUInt32() - overlayOffset).Pad(PaddingSize);
+
+            int remainingOverlays = numOverlays - i;
+            int maxSize = ((1 << 0xA) - blocksRead) / remainingOverlays * PaddingSize;
+            int hashSize = (overlaySize > maxSize) ? maxSize : overlaySize;
+
+            reader.Stream.Position = overlayOffset;
+            byte[] overlayData = reader.ReadBytes(hashSize);
+
+            _ = generator.TransformBlock(overlayData, 0, overlayData.Length, null, 0);
+            blocksRead += hashSize / PaddingSize;
+        }
+
+        // Dummy but necessary call to get the hash...
+        _ = generator.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+
+        return generator.Hash;
+    }
 
     /// <summary>
-    /// Create an HMAC generator for complex generations.
+    /// Generate the whitelist phase 3 HMAC (banner with titles and icons).
     /// </summary>
-    /// <returns>A prepared HMAC generator.</returns>
-    public HMAC CreateGenerator()
+    /// <param name="romStream">ROM stream with the content to generate the hash.</param>
+    /// <param name="programInfo">Program information to determine if the target is DSi or DS.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>HMAC for the whitelist phase 3.</returns>
+    /// <exception cref="InvalidOperationException">The key for the whitelist phase 3 is missing.</exception>
+    public byte[] GeneratePhase3Hmac(Stream romStream, ProgramInfo programInfo, RomSectionInfo sectionInfo)
+    {
+        bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+        byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
+
+        romStream.Position = sectionInfo.BannerOffset;
+        int bannerSize = Binary2Banner.GetSize(romStream);
+        return Generate(bannerKey, romStream, sectionInfo.BannerOffset, bannerSize);
+    }
+
+    private static HMAC CreateGenerator(byte[] key)
     {
         var hmac = HMAC.Create("HMACSHA1");
-        hmac.Key = Key;
+        hmac.Key = key;
         return hmac;
     }
 
-    /// <summary>
-    /// Generate an HMAC from the provided data.
-    /// </summary>
-    /// <param name="stream">The data to generate the HMAC.</param>
-    /// <returns>The new HMAC.</returns>
-    public byte[] Generate(Stream stream) => Generate(stream, 0, stream.Length);
-
-    /// <summary>
-    /// Generate an HMAC from the provided data segment.
-    /// </summary>
-    /// <param name="stream">The data to generate the HMAC.</param>
-    /// <param name="offset">The offset to the data to read.</param>
-    /// <param name="length">The length of the data to read.</param>
-    /// <returns>The new HMAC.</returns>
-    public byte[] Generate(Stream stream, long offset, long length)
+    private static byte[] Generate(byte[] key, Stream stream, long offset, long length)
     {
         using var segment = new DataStream(stream, offset, length);
-        using HMAC algo = CreateGenerator();
+        using HMAC algo = CreateGenerator(key);
         return algo.ComputeHash(segment);
     }
 }

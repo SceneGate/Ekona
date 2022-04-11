@@ -77,20 +77,20 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             ProgramInfo programInfo = rom.Information;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
 
-            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerHmac)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned)) {
                 programInfo.BannerMac.Status.Should().Be(HashStatus.Valid);
             }
 
-            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
+            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
                 // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
-                // programInfo.HeaderMac.Status.Should().Be(HashStatus.Valid)
-                programInfo.FatMac.Status.Should().Be(HashStatus.Valid);
+                // programInfo.ProgramMac.Status.Should().Be(HashStatus.Valid)
+                programInfo.OverlaysMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
             }
 
             if (isDsi) {
-                programInfo.FatMac.IsNull.Should().BeTrue();
-                programInfo.HeaderMac.IsNull.Should().BeTrue();
+                programInfo.OverlaysMac.IsNull.Should().BeTrue();
+                programInfo.ProgramMac.IsNull.Should().BeTrue();
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
             }
         }

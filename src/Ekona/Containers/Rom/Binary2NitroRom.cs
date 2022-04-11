@@ -224,66 +224,33 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ValidateSignatures()
         {
-            ProgramInfo programInfo = header.ProgramInfo;
-            RomSectionInfo sectionInfo = header.SectionInfo;
-            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
-
+            // TODO: Encrypt secure area and check checksums
             if (keyStore is null) {
                 return;
             }
 
+            ProgramInfo programInfo = header.ProgramInfo;
+            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+            var hashGenerator = new TwilightHMacGenerator(keyStore);
+
             // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
-            byte[] phase2Key = keyStore.HMacKeyWhitelist12;
-            bool checkOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader);
-            if (checkOverlayHmac && phase2Key?.Length > 0) {
-                using HMAC generator = new TwilightHMacGenerator(phase2Key).CreateGenerator();
-
-                reader.Stream.Position = sectionInfo.Overlay9TableOffset;
-                byte[] infoData = reader.ReadBytes(sectionInfo.Overlay9TableSize);
-                _ = generator.TransformBlock(infoData, 0, infoData.Length, null, 0);
-
-                reader.Stream.Position = sectionInfo.FatOffset;
-                byte[] overlaysFat = reader.ReadBytes(programInfo.Overlays9Info.Count * 8);
-                _ = generator.TransformBlock(overlaysFat, 0, overlaysFat.Length, null, 0);
-
-                Node overlays = rom.System.Children["overlays9"];
-                int blocksRead = 0;
-                int remainingOverlays = overlays.Children.Count;
-                foreach (DataStream overlay in overlays.Children.Select(n => n.Stream)) {
-                    // This is just fun how unncessary complex can some stuff be
-                    int overlaySize = (int)overlay.Length.Pad(512);
-                    int maxSize = ((1 << 0xA) - blocksRead) / remainingOverlays * 512;
-                    int hashSize = (overlaySize > maxSize) ? maxSize : overlaySize;
-
-                    reader.Stream.Position = overlay.Offset - reader.Stream.Offset;
-                    byte[] overlayData = reader.ReadBytes(hashSize);
-
-                    _ = generator.TransformBlock(overlayData, 0, overlayData.Length, null, 0);
-                    blocksRead += hashSize / 512;
-                    remainingOverlays--;
-                }
-
-                _ = generator.TransformFinalBlock(new byte[0], 0, 0);
-                programInfo.FatMac.Validate(generator.Hash);
+            bool checkOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
+            if (keyStore.HMacKeyWhitelist12?.Length > 0 && checkOverlayHmac) {
+                byte[] actualHash = hashGenerator.GeneratePhase2Hmac(reader.Stream, header.SectionInfo);
+                programInfo.OverlaysMac.Validate(actualHash);
             }
 
             byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
-            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerHmac);
+            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned);
             if (bannerKey?.Length > 0 && checkBannerHmac) {
-                int bannerSize = Binary2Banner.GetSize(rom.Banner.Version);
-                var hmacGenerator = new TwilightHMacGenerator(bannerKey);
-                byte[] newHmac = hmacGenerator.Generate(reader.Stream, header.SectionInfo.BannerOffset, bannerSize);
-                programInfo.BannerMac.Validate(newHmac);
+                byte[] actualHash = hashGenerator.GeneratePhase3Hmac(reader.Stream, programInfo, header.SectionInfo);
+                programInfo.BannerMac.Validate(actualHash);
             }
 
-            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader);
+            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
             if (keyStore.PublicModulusRetailGames?.Length > 0 && checkSignature) {
                 var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
-                programInfo.Signature.Status = signer.VerifySignature(
-                    programInfo.Signature.Hash,
-                    reader.Stream,
-                    0x00,
-                    0x0E00);
+                programInfo.Signature.Status = signer.VerifySignature(programInfo.Signature.Hash, reader.Stream);
             }
         }
 

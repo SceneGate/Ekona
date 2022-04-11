@@ -55,12 +55,12 @@ public enum DsiRomFeatures
     /// <summary>
     /// ROM contains an HMAC of the icon.
     /// </summary>
-    BannerHmac = 1 << 5,
+    BannerSigned = 1 << 5,
 
     /// <summary>
-    /// ROM contains an HMAC and RSA signature of the header.
+    /// Program contains an HMAC and RSA signature of the header and programs.
     /// </summary>
-    SignedHeader = 1 << 6,
+    ProgramSigned = 1 << 6,
 
     /// <summary>
     /// ROM is a developer application.

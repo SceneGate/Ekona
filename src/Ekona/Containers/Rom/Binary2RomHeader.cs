@@ -137,8 +137,8 @@ namespace SceneGate.Ekona.Containers.Rom
 
             // Pos: 0x378
             reader.Stream.Position = 0x378;
-            header.ProgramInfo.HeaderMac = reader.ReadHMACSHA1();
-            header.ProgramInfo.FatMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.ProgramMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.OverlaysMac = reader.ReadHMACSHA1();
 
             // Pos: 0xF80
             reader.Stream.Position = 0xF80;

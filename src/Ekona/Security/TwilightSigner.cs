@@ -33,6 +33,9 @@ namespace SceneGate.Ekona.Security;
 /// </summary>
 public class TwilightSigner
 {
+    private const int SignedDataOffset = 0;
+    private const int SignedDataLength = 0xE00;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TwilightSigner"/> class.
     /// </summary>
@@ -57,23 +60,12 @@ public class TwilightSigner
     public byte[] PublicModulus { get; }
 
     /// <summary>
-    /// Verify a signature.
+    /// Verify the program signature.
     /// </summary>
     /// <param name="signature">Signature to verify.</param>
-    /// <param name="data">Data to verify the signature against.</param>
-    /// <returns>The vailidity of the signature.</returns>
-    public HashStatus VerifySignature(byte[] signature, Stream data) =>
-        VerifySignature(signature, data, 0, data.Length);
-
-    /// <summary>
-    /// Verify a signature.
-    /// </summary>
-    /// <param name="signature">Signature to verify.</param>
-    /// <param name="data">Data to verify the signature against.</param>
-    /// <param name="offset">Offset to the data to verify the signature.</param>
-    /// <param name="length">Length of the data to verify.</param>
+    /// <param name="romStream">Data to verify the signature against.</param>
     /// <returns>The validity of the signature.</returns>
-    public HashStatus VerifySignature(byte[] signature, Stream data, long offset, long length)
+    public HashStatus VerifySignature(byte[] signature, Stream romStream)
     {
         var exponent = new Org.BouncyCastle.Math.BigInteger(Exponent);
         var modulus = new Org.BouncyCastle.Math.BigInteger(PublicModulus);
@@ -89,7 +81,7 @@ public class TwilightSigner
         byte[] expectedHash = rsaCipher.DoFinal(signature);
 
         // 2. Calculate actual SHA-1 hash
-        using var segment = new DataStream(data, offset, length);
+        using var segment = new DataStream(romStream, SignedDataOffset, SignedDataLength);
         using var sha1 = SHA1.Create();
         byte[] actualHash = sha1.ComputeHash(segment);
 
