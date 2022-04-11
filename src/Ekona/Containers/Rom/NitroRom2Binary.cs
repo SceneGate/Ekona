@@ -43,6 +43,7 @@ public class NitroRom2Binary :
     private readonly SortedList<int, NodeInfo> nodesByOffset = new SortedList<int, NodeInfo>();
     private Stream? initializedOutputStream;
     private DsiKeyStore? keyStore;
+    private bool decompressedProgram;
     private DataWriter writer = null!;
     private Node root = null!;
     private ProgramInfo programInfo = null!;
@@ -58,6 +59,7 @@ public class NitroRom2Binary :
         ArgumentNullException.ThrowIfNull(parameters);
         initializedOutputStream = parameters.OutputStream;
         keyStore = parameters.KeyStore;
+        decompressedProgram = parameters.DecompressedProgram;
     }
 
     /// <summary>
@@ -211,6 +213,7 @@ public class NitroRom2Binary :
     private void WritePrograms()
     {
         WriteProgram(true);
+        WriteProgramCodeParameters();
         WriteOverlays(true);
 
         WriteProgram(false);
@@ -221,8 +224,6 @@ public class NitroRom2Binary :
     {
         string armPath = isArm9 ? "system/arm9" : "system/arm7";
 
-        // TODO: Update ARM9 compressed size before writing.
-        // TODO: Write ARM9 tail
         BinaryFormat binaryArm = GetChildFormatSafe<BinaryFormat>(armPath);
         uint armLength = (uint)binaryArm.Stream.Length;
         uint armOffset = armLength > 0 ? (uint)writer.Stream.Position : 0;
@@ -232,10 +233,56 @@ public class NitroRom2Binary :
         if (isArm9) {
             sectionInfo.Arm9Offset = armOffset;
             sectionInfo.Arm9Size = armLength;
+            if (programInfo.ProgramCodeParameters is not null) {
+                programInfo.ProgramCodeParameters.CompressedLength = decompressedProgram ? 0 : armLength;
+            }
         } else {
             sectionInfo.Arm7Offset = armOffset;
             sectionInfo.Arm7Size = armLength;
         }
+    }
+
+    private void WriteProgramCodeParameters()
+    {
+        NitroProgramCodeParameters? programParams = programInfo.ProgramCodeParameters;
+        if (programParams is null) {
+            return;
+        }
+
+        writer.Stream.PushCurrentPosition();
+
+        // DS games don't have this header value with ARM9 param table offset.
+        // Instead, the ARM9 has a "tail" with three uint: the nitrocode, the offset and an offset to hashes.
+        uint paramsOffset = programInfo.Arm9ParametersTableOffset;
+        if (programParams.ProgramParameterOffset != 0) {
+            writer.Stream.Position = sectionInfo.Arm9Offset + sectionInfo.Arm9Size;
+            writer.Write(NitroRom.NitroCode);
+            writer.Write(programParams.ProgramParameterOffset);
+            writer.Write(programParams.ExtraHashesOffset);
+            paramsOffset = programParams.ProgramParameterOffset;
+        }
+
+        // This ARM9 code parameters are inside the ARM9.
+        // Usually, we can find the nitrocode (or their DSi variants) before and after.
+        // DSi games has more (unknown) parameters.
+        writer.Stream.Position = sectionInfo.Arm9Offset + paramsOffset;
+        writer.Write(programParams.ItcmBlockInfoOffset);
+        writer.Write(programParams.ItcmBlockInfoEndOffset);
+        writer.Write(programParams.ItcmInputDataOffset);
+        writer.Write(programParams.BssOffset);
+        writer.Write(programParams.BssEndOffset);
+
+        if (programParams.CompressedLength > 0) {
+            writer.Write(programParams.CompressedLength + programInfo.Arm9RamAddress);
+        } else {
+            writer.Write(0);
+        }
+
+        writer.Write((ushort)programParams.SdkVersion.Build);
+        writer.Write((byte)programParams.SdkVersion.Minor);
+        writer.Write((byte)programParams.SdkVersion.Major);
+
+        writer.Stream.PopPosition();
     }
 
     private void WriteOverlays(bool isArm9)

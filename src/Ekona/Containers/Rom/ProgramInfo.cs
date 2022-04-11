@@ -235,6 +235,11 @@ namespace SceneGate.Ekona.Containers.Rom
         public HashInfo Signature { get; set; }
 
         /// <summary>
+        /// Gets or sets the program code (arm9) parameters.
+        /// </summary>
+        public NitroProgramCodeParameters ProgramCodeParameters { get; set; } = new NitroProgramCodeParameters();
+
+        /// <summary>
         /// Gets or sets the collection of information of overlays for ARM-9.
         /// </summary>
         public Collection<OverlayInfo> Overlays9Info { get; set; } = new Collection<OverlayInfo>();
