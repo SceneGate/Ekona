@@ -102,13 +102,15 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
 
-            var rom = (NodeContainerFormat)ConvertFormat.With<Binary2NitroRom>(node.Format!);
+            var rom = (NitroRom)ConvertFormat.With<Binary2NitroRom>(node.Format!);
             var generatedStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
 
-            // TODO: After implementing ARM9 tail and DSi fields
-            // generatedStream.Stream!.Compare(node.Stream).Should().BeTrue()
+            // TODO: After implementing DSi fields
+            if (rom.Information.UnitCode == DeviceUnitKind.DS) {
+                generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
+            }
         }
 
         [TestCaseSource(nameof(GetFiles))]

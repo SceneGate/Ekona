@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -63,6 +63,12 @@ namespace SceneGate.Ekona.Containers.Rom
             Node data = NodeFactory.CreateContainer("data");
             Root.Add(data);
         }
+
+        /// <summary>
+        /// Gets the Nitro constant in little endian: 2-10-6 (NiToRo in Japanese numbers) + 0xCODE.
+        /// It's a marker for the program code to find constants.
+        /// </summary>
+        public static uint NitroCode => 0xDEC00621;
 
         /// <summary>
         /// Gets the container with the system files of the program.

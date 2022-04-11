@@ -73,6 +73,7 @@ namespace SceneGate.Ekona.Containers.Rom
             ReadBanner();
             ReadFat();
             ReadPrograms();
+            ReadProgramCodeParameters();
             ReadFileSystem();
             ValidateSignatures();
 
@@ -145,6 +146,31 @@ namespace SceneGate.Ekona.Containers.Rom
                 header.ProgramInfo.Overlays7Info,
                 header.SectionInfo.Overlay7TableOffset,
                 header.SectionInfo.Overlay7TableSize);
+        }
+
+        private void ReadProgramCodeParameters()
+        {
+            var programParams = header.ProgramInfo.ProgramCodeParameters;
+            uint paramsOffset = header.ProgramInfo.Arm9ParametersTableOffset;
+
+            reader.Stream.Position = header.SectionInfo.Arm9Offset + header.SectionInfo.Arm9Size;
+            if (reader.ReadUInt32() == NitroRom.NitroCode) {
+                programParams.ProgramParameterOffset = reader.ReadUInt32();
+                programParams.ExtraHashesOffset = reader.ReadUInt32(); // TODO: investigate hashes
+                paramsOffset = programParams.ProgramParameterOffset;
+            }
+
+            if (paramsOffset == 0) {
+                return;
+            }
+
+            reader.Stream.Position = header.SectionInfo.Arm9Offset + paramsOffset;
+            programParams.ItcmBlockInfoOffset = reader.ReadUInt32();
+            programParams.ItcmBlockInfoEndOffset = reader.ReadUInt32();
+            programParams.ItcmInputDataOffset = reader.ReadUInt32();
+            programParams.BssOffset = reader.ReadUInt32();
+            programParams.BssEndOffset = reader.ReadUInt32();
+            programParams.DecompressedLength = reader.ReadUInt32() - header.ProgramInfo.Arm9RamAddress;
         }
 
         private void ReadOverlayTable(Collection<OverlayInfo> infos, uint offset, int size)

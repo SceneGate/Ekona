@@ -38,4 +38,10 @@ public class NitroRom2BinaryParams
     /// the hashes are not regenerated.
     /// </summary>
     public DsiKeyStore KeyStore { get; set; }
+
+    /// <summary>
+    /// Gets or sets the program (arm9) decompressed length.
+    /// If set to 0, then the program is assumed to be decompressed.
+    /// </summary>
+    public uint? DecompressedProgramLength { get; set; }
 }
