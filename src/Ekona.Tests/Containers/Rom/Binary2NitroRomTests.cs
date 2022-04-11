@@ -82,9 +82,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             }
 
             if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader)) {
-                // TODO: Verify FAT and Header HMACs.
-                // programInfo.FatMac.Status.Should().Be(HashStatus.Valid)
+                // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
                 // programInfo.HeaderMac.Status.Should().Be(HashStatus.Valid)
+                programInfo.FatMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
             }
 

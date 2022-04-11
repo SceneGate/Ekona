@@ -46,6 +46,17 @@ public class TwilightHMacGenerator
     public byte[] Key { get; }
 
     /// <summary>
+    /// Create an HMAC generator for complex generations.
+    /// </summary>
+    /// <returns>A prepared HMAC generator.</returns>
+    public HMAC CreateGenerator()
+    {
+        var hmac = HMAC.Create("HMACSHA1");
+        hmac.Key = Key;
+        return hmac;
+    }
+
+    /// <summary>
     /// Generate an HMAC from the provided data.
     /// </summary>
     /// <param name="stream">The data to generate the HMAC.</param>
@@ -62,8 +73,7 @@ public class TwilightHMacGenerator
     public byte[] Generate(Stream stream, long offset, long length)
     {
         using var segment = new DataStream(stream, offset, length);
-        using var algo = HMAC.Create("HMACSHA1");
-        algo.Key = Key;
+        using HMAC algo = CreateGenerator();
         return algo.ComputeHash(segment);
     }
 }

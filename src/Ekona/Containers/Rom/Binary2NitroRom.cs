@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
@@ -224,13 +225,48 @@ namespace SceneGate.Ekona.Containers.Rom
         private void ValidateSignatures()
         {
             ProgramInfo programInfo = header.ProgramInfo;
+            RomSectionInfo sectionInfo = header.SectionInfo;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
 
             if (keyStore is null) {
                 return;
             }
 
-            // TODO: Verify HMAC of FAT and Header.
+            // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
+            byte[] phase2Key = keyStore.HMacKeyWhitelist12;
+            bool checkOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.SignedHeader);
+            if (checkOverlayHmac && phase2Key?.Length > 0) {
+                using HMAC generator = new TwilightHMacGenerator(phase2Key).CreateGenerator();
+
+                reader.Stream.Position = sectionInfo.Overlay9TableOffset;
+                byte[] infoData = reader.ReadBytes(sectionInfo.Overlay9TableSize);
+                _ = generator.TransformBlock(infoData, 0, infoData.Length, null, 0);
+
+                reader.Stream.Position = sectionInfo.FatOffset;
+                byte[] overlaysFat = reader.ReadBytes(programInfo.Overlays9Info.Count * 8);
+                _ = generator.TransformBlock(overlaysFat, 0, overlaysFat.Length, null, 0);
+
+                Node overlays = rom.System.Children["overlays9"];
+                int blocksRead = 0;
+                int remainingOverlays = overlays.Children.Count;
+                foreach (DataStream overlay in overlays.Children.Select(n => n.Stream)) {
+                    // This is just fun how unncessary complex can some stuff be
+                    int overlaySize = (int)overlay.Length.Pad(512);
+                    int maxSize = ((1 << 0xA) - blocksRead) / remainingOverlays * 512;
+                    int hashSize = (overlaySize > maxSize) ? maxSize : overlaySize;
+
+                    reader.Stream.Position = overlay.Offset - reader.Stream.Offset;
+                    byte[] overlayData = reader.ReadBytes(hashSize);
+
+                    _ = generator.TransformBlock(overlayData, 0, overlayData.Length, null, 0);
+                    blocksRead += hashSize / 512;
+                    remainingOverlays--;
+                }
+
+                _ = generator.TransformFinalBlock(new byte[0], 0, 0);
+                programInfo.FatMac.Validate(generator.Hash);
+            }
+
             byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
             bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerHmac);
             if (bannerKey?.Length > 0 && checkBannerHmac) {
