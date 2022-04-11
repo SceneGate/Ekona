@@ -125,10 +125,38 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>().Information;
+
             node.Invoking(n => n.TransformWith<NitroRom2Binary>()).Should().NotThrow();
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo newInfo = node.GetFormatAs<NitroRom>().Information;
 
             node.Should().MatchInfo(expected);
+
+            // Keep old hashes
+            newInfo.OverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.OverlaysMac.Hash);
+            newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void ReadWriteThreeWaysRomWithKeyGeneratesSameHashes(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+            DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+
+            node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>().Information;
+
+            var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
+            node.Invoking(n => n.TransformWith<NitroRom2Binary, NitroRom2BinaryParams>(nitroParameters)).Should().NotThrow();
+
+            node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            ProgramInfo newInfo = node.GetFormatAs<NitroRom>().Information;
+
+            newInfo.OverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.OverlaysMac.Hash);
+            newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
         }
     }
 }
