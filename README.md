@@ -1,7 +1,6 @@
 # Ekona [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://choosealicense.com/licenses/mit/) ![Build and release](https://github.com/SceneGate/Ekona/workflows/Build%20and%20release/badge.svg)
 
-[Yarhl](https://github.com/SceneGate/yarhl) plugin for Nintendo DS common
-formats.
+[Yarhl](https://github.com/SceneGate/yarhl) plugin for DS common formats.
 
 The library supports .NET 6.0 and above on Linux, Window and MacOS.
 

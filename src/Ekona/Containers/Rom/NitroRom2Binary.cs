@@ -43,7 +43,7 @@ public class NitroRom2Binary :
     private readonly SortedList<int, NodeInfo> nodesByOffset = new SortedList<int, NodeInfo>();
     private Stream? initializedOutputStream;
     private DsiKeyStore? keyStore;
-    private uint? decompressedProgramLength;
+    private bool decompressedProgram;
     private DataWriter writer = null!;
     private Node root = null!;
     private ProgramInfo programInfo = null!;
@@ -59,7 +59,7 @@ public class NitroRom2Binary :
         ArgumentNullException.ThrowIfNull(parameters);
         initializedOutputStream = parameters.OutputStream;
         keyStore = parameters.KeyStore;
-        decompressedProgramLength = parameters.DecompressedProgramLength;
+        decompressedProgram = parameters.DecompressedProgram;
     }
 
     /// <summary>
@@ -233,6 +233,9 @@ public class NitroRom2Binary :
         if (isArm9) {
             sectionInfo.Arm9Offset = armOffset;
             sectionInfo.Arm9Size = armLength;
+            if (programInfo.ProgramCodeParameters is not null) {
+                programInfo.ProgramCodeParameters.CompressedLength = decompressedProgram ? 0 : armLength;
+            }
         } else {
             sectionInfo.Arm7Offset = armOffset;
             sectionInfo.Arm7Size = armLength;
@@ -269,11 +272,11 @@ public class NitroRom2Binary :
         writer.Write(programParams.BssOffset);
         writer.Write(programParams.BssEndOffset);
 
-        if (decompressedProgramLength.HasValue) {
-            programParams.DecompressedLength = decompressedProgramLength.Value;
+        if (programParams.CompressedLength > 0) {
+            writer.Write(programParams.CompressedLength + programInfo.Arm9RamAddress);
+        } else {
+            writer.Write(0);
         }
-
-        writer.Write(programParams.DecompressedLength + programInfo.Arm9RamAddress);
 
         writer.Stream.PopPosition();
     }

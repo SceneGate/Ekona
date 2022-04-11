@@ -69,8 +69,8 @@ public class NitroProgramCodeParameters
     public uint BssEndOffset { get; set; }
 
     /// <summary>
-    /// Gets or sets the program (arm9) decompressed length.
+    /// Gets or sets the program (arm9) compressed length.
     /// If 0, then the program is not compressed.
     /// </summary>
-    public uint DecompressedLength { get; set; }
+    public uint CompressedLength { get; set; }
 }

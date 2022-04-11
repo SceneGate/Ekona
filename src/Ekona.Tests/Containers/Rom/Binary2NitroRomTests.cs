@@ -65,6 +65,32 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
+        public void DeserializeRomMatchHeaderInfo(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+            string resourceDir = Path.GetDirectoryName(romPath);
+            string headerInfoPath = Path.GetFileNameWithoutExtension(romPath) + ".header.yml";
+            headerInfoPath = Path.Combine(resourceDir, headerInfoPath);
+            TestDataBase.IgnoreIfFileDoesNotExist(headerInfoPath);
+
+            string yaml = File.ReadAllText(headerInfoPath);
+            ProgramInfo expectedInfo = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build()
+                .Deserialize<RomHeader>(yaml)
+                .ProgramInfo;
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
+            node.GetFormatAs<NitroRom>().Information.Should().BeEquivalentTo(
+                expectedInfo,
+                opts => opts
+                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HashInfo))
+                    .Excluding(p => p.Overlays9Info)
+                    .Excluding(p => p.Overlays7Info));
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
         public void DeserializeRomWithKeysHasValidSignatures(string infoPath, string romPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);

@@ -40,8 +40,7 @@ public class NitroRom2BinaryParams
     public DsiKeyStore KeyStore { get; set; }
 
     /// <summary>
-    /// Gets or sets the program (arm9) decompressed length.
-    /// If set to 0, then the program is assumed to be decompressed.
+    /// Gets or sets a value indicating whether the program (arm9) is decompressed.
     /// </summary>
-    public uint? DecompressedProgramLength { get; set; }
+    public bool DecompressedProgram { get; set; }
 }

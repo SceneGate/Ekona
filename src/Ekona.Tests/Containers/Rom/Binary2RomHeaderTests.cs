@@ -66,6 +66,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 expected,
                 opts => opts
                     .Excluding(p => p.CopyrightLogo)
+                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(NitroProgramCodeParameters))
                     .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HashInfo)));
         }
 
