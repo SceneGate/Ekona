@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
@@ -255,7 +254,6 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ValidateSignatures()
         {
-            // TODO: Encrypt secure area and check checksums
             if (keyStore is null) {
                 return;
             }
@@ -263,6 +261,18 @@ namespace SceneGate.Ekona.Containers.Rom
             ProgramInfo programInfo = header.ProgramInfo;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
             var hashGenerator = new TwilightHMacGenerator(keyStore);
+            var crcGenerator = new NitroCrcGenerator();
+
+            DataStream arm9 = rom.System.Children["arm9"].Stream!;
+            DataStream encryptedArm9;
+            if (!NitroKey1Encryption.HasEncryptedArm9(arm9, programInfo, keyStore)) {
+                encryptedArm9 = NitroKey1Encryption.EncryptArm9(arm9, programInfo.GameCode, keyStore);
+            } else {
+                encryptedArm9 = new DataStream(arm9);
+            }
+
+            byte[] actualCrc = crcGenerator.GenerateCrc16(encryptedArm9, 0, 16 * 1024);
+            programInfo.ChecksumSecureArea.Validate(actualCrc);
 
             // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
             bool checkOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
@@ -283,6 +293,8 @@ namespace SceneGate.Ekona.Containers.Rom
                 var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
                 programInfo.Signature.Status = signer.VerifySignature(programInfo.Signature.Hash, reader.Stream);
             }
+
+            encryptedArm9.Dispose();
         }
 
         private struct FileAddress

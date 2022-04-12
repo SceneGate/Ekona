@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using SceneGate.Ekona.Security;
@@ -103,6 +104,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             ProgramInfo programInfo = rom.Information;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
 
+            programInfo.ChecksumSecureArea.Status.Should().Be(HashStatus.Valid);
+
             if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned)) {
                 programInfo.BannerMac.Status.Should().Be(HashStatus.Valid);
             }
@@ -175,13 +178,13 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
 
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
-            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>().Information;
+            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>()!.Information;
 
             var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
             node.Invoking(n => n.TransformWith<NitroRom2Binary, NitroRom2BinaryParams>(nitroParameters)).Should().NotThrow();
 
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
-            ProgramInfo newInfo = node.GetFormatAs<NitroRom>().Information;
+            ProgramInfo newInfo = node.GetFormatAs<NitroRom>()!.Information;
 
             newInfo.OverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.OverlaysMac.Hash);
             newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
