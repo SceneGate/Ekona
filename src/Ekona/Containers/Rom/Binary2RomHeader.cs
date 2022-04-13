@@ -27,12 +27,21 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <summary>
     /// Converter for binary ROM header into an object.
     /// </summary>
-    public class Binary2RomHeader : IConverter<IBinary, RomHeader>
+    public class Binary2RomHeader :
+        IInitializer<DsiKeyStore>,
+        IConverter<IBinary, RomHeader>
     {
+        private DsiKeyStore keyStore;
+
         /// <summary>
         /// Gets the offset in the header containing the header size value.
         /// </summary>
         public static int HeaderSizeOffset => 0x84;
+
+        public void Initialize(DsiKeyStore parameters)
+        {
+            keyStore = parameters ?? throw new ArgumentNullException(nameof(parameters));
+        }
 
         /// <summary>
         /// Convert a binary format into a ROM header object.
@@ -53,7 +62,7 @@ namespace SceneGate.Ekona.Containers.Rom
             return header;
         }
 
-        private static void ReadDsFields(DataReader reader, RomHeader header)
+        private void ReadDsFields(DataReader reader, RomHeader header)
         {
             // Pos: 0x00
             header.ProgramInfo.GameTitle = reader.ReadString(12).Replace("\0", string.Empty);
@@ -104,7 +113,15 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0x70
             header.ProgramInfo.Arm9Autoload = reader.ReadUInt32();
             header.ProgramInfo.Arm7Autoload = reader.ReadUInt32();
-            header.ProgramInfo.SecureDisable = reader.ReadUInt64();
+
+            if (keyStore is { BlowfishDsKey: not null }) {
+                var encryption = new NitroKey1Encryption(header.ProgramInfo.GameCode, keyStore);
+                byte[] disableToken = reader.ReadBytes(8);
+                header.ProgramInfo.DisableSecureArea = encryption.HasDisabledSecureArea(disableToken);
+            } else {
+                reader.Stream.Position += 8;
+                header.ProgramInfo.DisableSecureArea = false;
+            }
 
             // Pos: 0x80
             header.SectionInfo.RomSize = reader.ReadUInt32();

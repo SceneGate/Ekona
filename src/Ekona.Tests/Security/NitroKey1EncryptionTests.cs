@@ -33,7 +33,8 @@ public class NitroKey1EncryptionTests
     {
         DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
 
-        byte[] decrypted = NitroKey1Encryption.DecryptSecureAreaId(encrypted, idCode, keys);
+        var encryption = new NitroKey1Encryption(idCode, keys);
+        byte[] decrypted = encryption.DecryptSecureAreaId(encrypted);
 
         string actualToken = Encoding.ASCII.GetString(decrypted);
         actualToken.Should().BeEquivalentTo("encryObj");
@@ -44,9 +45,10 @@ public class NitroKey1EncryptionTests
     public void EncryptSecureAreaId(byte[] encrypted, string idCode)
     {
         DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
+        var encryption = new NitroKey1Encryption(idCode, keys);
 
         byte[] token = Encoding.ASCII.GetBytes("encryObj");
-        byte[] actualEncrypted = NitroKey1Encryption.EncryptSecureAreaId(token, idCode, keys);
+        byte[] actualEncrypted = encryption.EncryptSecureAreaId(token);
 
         actualEncrypted.Should().BeEquivalentTo(encrypted);
     }

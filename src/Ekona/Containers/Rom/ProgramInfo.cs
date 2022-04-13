@@ -116,9 +116,6 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the checksum of the ARM-9 secure area.
         /// </summary>
-        /// <remarks>
-        /// This checksum will always fail as the secure area is not easy dumpeable.
-        /// </remarks>
         public HashInfo ChecksumSecureArea { get; set; }
 
         /// <summary>
@@ -137,9 +134,9 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint Arm7Autoload { get; set; }
 
         /// <summary>
-        /// Gets or sets the special value that disables the secure area encryption.
+        /// Gets or sets a value indicating whether the ARM9 secure are encryption is disabled.
         /// </summary>
-        public ulong SecureDisable { get; set; }
+        public bool DisableSecureArea { get; set; }
 
         /// <summary>
         /// Gets or sets the checksum of the copyright logo.

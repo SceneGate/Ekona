@@ -260,13 +260,14 @@ namespace SceneGate.Ekona.Containers.Rom
 
             ProgramInfo programInfo = header.ProgramInfo;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+            var encryption = new NitroKey1Encryption(programInfo.GameCode, keyStore);
             var hashGenerator = new TwilightHMacGenerator(keyStore);
             var crcGenerator = new NitroCrcGenerator();
 
             DataStream arm9 = rom.System.Children["arm9"].Stream!;
             DataStream encryptedArm9;
-            if (!NitroKey1Encryption.HasEncryptedArm9(arm9, programInfo, keyStore)) {
-                encryptedArm9 = NitroKey1Encryption.EncryptArm9(arm9, programInfo.GameCode, keyStore);
+            if (!encryption.HasEncryptedArm9(arm9)) {
+                encryptedArm9 = encryption.EncryptArm9(arm9);
             } else {
                 encryptedArm9 = new DataStream(arm9);
             }
