@@ -133,7 +133,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
 
-            // TODO: After implementing DSi fields
+            // TODO: After implementing DSi disgest, HMAC and armXi
             if (rom.Information.UnitCode == DeviceUnitKind.DS) {
                 generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
             }

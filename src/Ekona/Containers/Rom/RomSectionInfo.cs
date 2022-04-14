@@ -1,4 +1,4 @@
-﻿// Copyright(c) 2021 SceneGate
+// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -98,5 +98,105 @@ namespace SceneGate.Ekona.Containers.Rom
         /// Gets or sets the size of the header.
         /// </summary>
         public uint HeaderSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the ARM-9 program for DSi devices.
+        /// </summary>
+        public uint Arm9iOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the size of the ARM-9 program for DSi devices.
+        /// </summary>
+        public uint Arm9iSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the ARM-7 program for DSi devices.
+        /// </summary>
+        public uint Arm7iOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the size of the ARM-7 program for DSi devices.
+        /// </summary>
+        public uint Arm7iSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the data to digest (hash) of the DS ROM section.
+        /// </summary>
+        public uint DigestNitroOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length for the data to digest (hash) for the DS ROM section.
+        /// </summary>
+        public uint DigestNitroLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the data to digest (hash) of the DSi ROM section.
+        /// </summary>
+        public uint DigestTwilightOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the data to digest (hash) of the DSi ROM section.
+        /// </summary>
+        public uint DigestTwilightLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the digest hash table of sectors.
+        /// </summary>
+        public uint DigestSectorHashtableOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length of the digest hash table of sectors.
+        /// </summary>
+        public uint DigestSectorHashtableLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the digest hash table of blocks (hashes of sectors).
+        /// </summary>
+        public uint DigestBlockHashtableOffset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length of the digest hash table of blocks (hashes of sectors).
+        /// </summary>
+        public uint DigestBlockHashtableLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the size for each sector digest.
+        /// </summary>
+        public uint DigestSectorSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of sectors to hash per block.
+        /// </summary>
+        public uint DigestBlockSectorCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the banner length.
+        /// </summary>
+        public uint BannerLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ROM size including the DSi section.
+        /// </summary>
+        public uint DsiRomLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the first area modcrypted in the ROM.
+        /// </summary>
+        public uint ModcryptArea1Offset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length for the first area modcrypted in the ROM.
+        /// </summary>
+        public uint ModcryptArea1Length { get; set; }
+
+        /// <summary>
+        /// Gets or sets the offset for the second area modcrypted in the ROM.
+        /// </summary>
+        public uint ModcryptArea2Offset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length for the second area modcrypted in the ROM.
+        /// </summary>
+        public uint ModcryptArea2Length { get; set; }
     }
 }

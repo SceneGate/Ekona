@@ -43,6 +43,17 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         var binary = new BinaryFormat();
         var writer = new DataWriter(binary.Stream);
 
+        WriteDsFields(writer, source);
+
+        if (source.ProgramInfo.UnitCode != DeviceUnitKind.DS) {
+            WriteDsiFields(writer, source);
+        }
+
+        return binary;
+    }
+
+    private static void WriteDsFields(DataWriter writer, RomHeader source)
+    {
         writer.Write(source.ProgramInfo.GameTitle, 12, nullTerminator: false);
         writer.Write(source.ProgramInfo.GameCode, 4, nullTerminator: false);
         writer.Write(source.ProgramInfo.MakerCode, 2, nullTerminator: false);
@@ -133,7 +144,86 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         }
 
         writer.WriteUntilLength(0, source.SectionInfo.HeaderSize);
+    }
 
-        return binary;
+    private static void WriteDsiFields(DataWriter writer, RomHeader source)
+    {
+        DsiProgramInfo info = source.ProgramInfo.DsiInfo;
+        RomSectionInfo sections = source.SectionInfo;
+
+        writer.Stream.Position = 0x180;
+        writer.Write(info.GlobalMbkSettings);
+        writer.Write(info.LocalMbkArm9Settings);
+        writer.Write(info.LocalMbkArm7Settings);
+        writer.Write(info.GlobalMbk9Settings | (info.GlobalWramCntSettings << 24));
+
+        writer.Write(info.Region);
+        writer.Write(info.AccessControl);
+        writer.Write(info.Arm7ScfgExt7Setting);
+        writer.Stream.Position += 4; // ProgramFeatures written with DS fields
+
+        writer.Write(sections.Arm9iOffset);
+        writer.Write(0);
+        writer.Write(info.Arm9iRamAddress);
+        writer.Write(sections.Arm9iSize);
+        writer.Write(sections.Arm7iOffset);
+        writer.Write(info.SdDeviceListArm7RamAddress);
+        writer.Write(info.Arm7iRamAddress);
+        writer.Write(sections.Arm7iSize);
+
+        writer.Write(sections.DigestNitroOffset);
+        writer.Write(sections.DigestNitroLength);
+        writer.Write(sections.DigestTwilightOffset);
+        writer.Write(sections.DigestTwilightLength);
+        writer.Write(sections.DigestSectorHashtableOffset);
+        writer.Write(sections.DigestSectorHashtableLength);
+        writer.Write(sections.DigestBlockHashtableOffset);
+        writer.Write(sections.DigestBlockHashtableLength);
+        writer.Write(sections.DigestSectorSize);
+        writer.Write(sections.DigestBlockSectorCount);
+
+        writer.Write(sections.BannerLength);
+        writer.Write((byte)info.SdShared200Length);
+        writer.Write((byte)info.SdShared201Length);
+        writer.Write(info.EulaVersion);
+        writer.Write(info.UseRatings);
+        writer.Write(sections.DsiRomLength);
+        writer.Write((byte)info.SdShared202Length);
+        writer.Write((byte)info.SdShared203Length);
+        writer.Write((byte)info.SdShared204Length);
+        writer.Write((byte)info.SdShared205Length);
+        writer.Write(info.Arm9iParametersTableOffset);
+        writer.Write(info.Arm7iParametersTableOffset);
+
+        writer.Write(sections.ModcryptArea1Offset);
+        writer.Write(sections.ModcryptArea1Length);
+        writer.Write(sections.ModcryptArea2Offset);
+        writer.Write(sections.ModcryptArea2Length);
+
+        writer.Write(info.TitleId);
+        writer.Write(info.SdPublicSaveLength);
+        writer.Write(info.SdPrivateSaveLength);
+
+        writer.Stream.Position = 0x2F0;
+        writer.Write(info.AgeRatingCero);
+        writer.Write(info.AgeRatingEsrb);
+        writer.Write((byte)0);
+        writer.Write(info.AgeRatingUsk);
+        writer.Write(info.AgeRatingPegiEurope);
+        writer.Write((byte)0);
+        writer.Write(info.AgeRatingPegiPortugal);
+        writer.Write(info.AgeRatingPegiUk);
+        writer.Write(info.AgeRatingAgcb);
+        writer.Write(info.AgeRatingGrb);
+
+        writer.Stream.Position = 0x300;
+        writer.Write(info.Arm9SecureMac.Hash);
+        writer.Write(info.Arm7Mac.Hash);
+        writer.Write(info.DigestMain.Hash);
+        writer.Stream.Position += 0x14; // Banner HMAC read with DS fields
+        writer.Write(info.Arm9iMac.Hash);
+        writer.Write(info.Arm7iMac.Hash);
+        writer.Stream.Position += 0x28; // DS whitelist macs
+        writer.Write(info.Arm9Mac.Hash);
     }
 }

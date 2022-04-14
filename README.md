@@ -1,6 +1,6 @@
 # Ekona [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://choosealicense.com/licenses/mit/) ![Build and release](https://github.com/SceneGate/Ekona/workflows/Build%20and%20release/badge.svg)
 
-[Yarhl](https://github.com/SceneGate/yarhl) plugin for DS common formats.
+[Yarhl](https://github.com/SceneGate/yarhl) plugin for DS and DSi formats.
 
 The library supports .NET 6.0 and above on Linux, Window and MacOS.
 
@@ -14,11 +14,15 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
 
 _Encryption and decryption not supported yet._
 
-- DS cartridge filesystem: read and write
+- DS cartridge:
+  - Filesystem: read and write
   - Header: read and write, including extended header
-  - Banner and icon: read and write, including animated icons from DSi.
+  - Banner and icon: read and write.
   - HMAC validation and re-generation when keys are provided.
   - Signature validation when keys are provided.
+- DSi cartridge:
+  - Header: read and write
+  - Animated banner icons
 
 ## Documentation
 

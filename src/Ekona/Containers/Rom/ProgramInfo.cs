@@ -235,6 +235,11 @@ namespace SceneGate.Ekona.Containers.Rom
         public HashInfo Signature { get; set; }
 
         /// <summary>
+        /// Gets or sets the information exclusive to DSi programs.
+        /// </summary>
+        public DsiProgramInfo DsiInfo { get; set; } = new DsiProgramInfo();
+
+        /// <summary>
         /// Gets or sets the program code (arm9) parameters.
         /// </summary>
         public NitroProgramCodeParameters ProgramCodeParameters { get; set; } = new NitroProgramCodeParameters();

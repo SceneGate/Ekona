@@ -48,6 +48,11 @@ namespace SceneGate.Ekona.Containers.Rom
             var header = new RomHeader();
 
             ReadDsFields(reader, header);
+
+            if (header.ProgramInfo.UnitCode != DeviceUnitKind.DS) {
+                ReadDsiFields(reader, header);
+            }
+
             ValidateChecksums(reader.Stream, header.ProgramInfo);
 
             return header;
@@ -143,6 +148,107 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0xF80
             reader.Stream.Position = 0xF80;
             header.ProgramInfo.Signature = reader.ReadSignatureSHA1RSA();
+        }
+
+        private static void ReadDsiFields(DataReader reader, RomHeader header)
+        {
+            DsiProgramInfo info = header.ProgramInfo.DsiInfo;
+            RomSectionInfo sections = header.SectionInfo;
+
+            // Pos: 0x180
+            reader.Stream.Position = 0x180;
+            info.GlobalMbkSettings = reader.ReadBytes(5 * 4);
+
+            // Pos: 0x194
+            info.LocalMbkArm9Settings = reader.ReadBytes(3 * 4);
+
+            // Pos: 0x1A0
+            info.LocalMbkArm7Settings = reader.ReadBytes(3 * 4);
+            info.GlobalMbk9Settings = reader.ReadInt24();
+            info.GlobalWramCntSettings = reader.ReadByte();
+
+            // Pos: 0x1B0
+            info.Region = reader.ReadUInt32();
+            info.AccessControl = reader.ReadUInt32();
+            info.Arm7ScfgExt7Setting = reader.ReadUInt32();
+            reader.Stream.Position += 4; // ProgramFeatures flags read with DS fields
+
+            // Pos: 0x1C0
+            sections.Arm9iOffset = reader.ReadUInt32();
+            reader.Stream.Position += 4; // reserved
+            info.Arm9iRamAddress = reader.ReadUInt32();
+            sections.Arm9iSize = reader.ReadUInt32();
+
+            // Pos: 0x1D0
+            sections.Arm7iOffset = reader.ReadUInt32();
+            info.SdDeviceListArm7RamAddress = reader.ReadUInt32();
+            info.Arm7iRamAddress = reader.ReadUInt32();
+            sections.Arm7iSize = reader.ReadUInt32();
+
+            // Pos: 0x1E0
+            sections.DigestNitroOffset = reader.ReadUInt32();
+            sections.DigestNitroLength = reader.ReadUInt32();
+            sections.DigestTwilightOffset = reader.ReadUInt32();
+            sections.DigestTwilightLength = reader.ReadUInt32();
+
+            // Pos: 0x1F0
+            sections.DigestSectorHashtableOffset = reader.ReadUInt32();
+            sections.DigestSectorHashtableLength = reader.ReadUInt32();
+            sections.DigestBlockHashtableOffset = reader.ReadUInt32();
+            sections.DigestBlockHashtableLength = reader.ReadUInt32();
+
+            // Pos: 0x200
+            sections.DigestSectorSize = reader.ReadUInt32();
+            sections.DigestBlockSectorCount = reader.ReadUInt32();
+            sections.BannerLength = reader.ReadUInt32();
+            info.SdShared200Length = reader.ReadByte();
+            info.SdShared201Length = reader.ReadByte();
+            info.EulaVersion = reader.ReadByte();
+            info.UseRatings = reader.ReadByte();
+
+            // Pos: 0x210
+            sections.DsiRomLength = reader.ReadUInt32();
+            info.SdShared202Length = reader.ReadByte();
+            info.SdShared203Length = reader.ReadByte();
+            info.SdShared204Length = reader.ReadByte();
+            info.SdShared205Length = reader.ReadByte();
+            info.Arm9iParametersTableOffset = reader.ReadUInt32();
+            info.Arm7iParametersTableOffset = reader.ReadUInt32();
+
+            // Pos: 0x220
+            sections.ModcryptArea1Offset = reader.ReadUInt32();
+            sections.ModcryptArea1Length = reader.ReadUInt32();
+            sections.ModcryptArea2Offset = reader.ReadUInt32();
+            sections.ModcryptArea2Length = reader.ReadUInt32();
+
+            // Pos: 0x230
+            info.TitleId = reader.ReadUInt64();
+            info.SdPublicSaveLength = reader.ReadUInt32();
+            info.SdPrivateSaveLength = reader.ReadUInt32();
+
+            // Pos: 0x2F0
+            reader.Stream.Position = 0x2F0;
+            info.AgeRatingCero = reader.ReadByte();
+            info.AgeRatingEsrb = reader.ReadByte();
+            reader.Stream.Position++; // reserved
+            info.AgeRatingUsk = reader.ReadByte();
+            info.AgeRatingPegiEurope = reader.ReadByte();
+            reader.Stream.Position++; // reserved
+            info.AgeRatingPegiPortugal = reader.ReadByte();
+            info.AgeRatingPegiUk = reader.ReadByte();
+            info.AgeRatingAgcb = reader.ReadByte();
+            info.AgeRatingGrb = reader.ReadByte();
+            reader.Stream.Position += 6; // reserved
+
+            // Pos: 0x300
+            info.Arm9SecureMac = reader.ReadHMACSHA1();
+            info.Arm7Mac = reader.ReadHMACSHA1();
+            info.DigestMain = reader.ReadHMACSHA1();
+            reader.Stream.Position += 0x14; // Banner HMAC already read with DS fields
+            info.Arm9iMac = reader.ReadHMACSHA1();
+            info.Arm7iMac = reader.ReadHMACSHA1();
+            reader.Stream.Position += 0x28; // HMAC for whitelist DS games
+            info.Arm9Mac = reader.ReadHMACSHA1();
         }
 
         private static void ValidateChecksums(DataStream stream, ProgramInfo info)
