@@ -19,7 +19,6 @@
 // SOFTWARE.
 #nullable enable
 using System;
-using System.Text;
 using Yarhl.IO;
 
 namespace SceneGate.Ekona.Security;
@@ -29,42 +28,47 @@ namespace SceneGate.Ekona.Security;
 /// </summary>
 public class NitroBlowfish
 {
-    private readonly byte[] keyBuffer = new byte[KeyLength];
+    private readonly uint[] keyBuffer = new uint[KeyLength / 4];
 
     /// <summary>
     /// Gets the required length of the key.
     /// </summary>
-    public static int KeyLength => 0x1048;
+    public static int KeyLength => (0x12 + 0x400) * 4;
 
     /// <summary>
     /// Initialize the algorithm.
     /// </summary>
-    /// <param name="idCodeText">The ID code to initialize the key.</param>
+    /// <param name="idText">The ID code to initialize the key.</param>
     /// <param name="level">The level of key initialization.</param>
     /// <param name="modulo">The modulo to initialize the key.</param>
     /// <param name="key">The key data of 0x1048 bytes.</param>
-    public void Initialize(string idCodeText, int level, int modulo, byte[] key)
+    public void Initialize(string idText, int level, int modulo, byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(idCodeText);
+        ArgumentNullException.ThrowIfNull(idText);
         ArgumentNullException.ThrowIfNull(key);
-        if (idCodeText.Length != 4)
-            throw new ArgumentException("Length must be 4", nameof(idCodeText));
+        if (idText.Length != 4)
+            throw new ArgumentException("Length must be 4", nameof(idText));
         if (key.Length != KeyLength)
             throw new ArgumentException($"Length must be {KeyLength}", nameof(key));
+        if (modulo is not 4 and not 8 and not 12)
+            throw new ArgumentOutOfRangeException(nameof(modulo), "Must be 4, 8 or 12");
+        if (level is < 1 or > 3)
+            throw new ArgumentOutOfRangeException(nameof(level), "Must be 1, 2 or 3");
 
-        Array.Copy(key, keyBuffer, key.Length);
+        for (int i = 0; i < keyBuffer.Length; i ++) {
+            keyBuffer[i] = BitConverter.ToUInt32(key, i * 4);
+        }
+
+        uint idCode = (uint)(((byte)idText[3] << 24)
+            | ((byte)idText[2] << 16)
+            | ((byte)idText[1] << 8)
+            | ((byte)idText[0] << 0));
         uint[] keyCode = new uint[3];
-
-        byte[] idCodeBin = Encoding.ASCII.GetBytes(idCodeText);
-        uint idCode = BitConverter.ToUInt32(idCodeBin);
         keyCode[0] = idCode;
         keyCode[1] = idCode >> 1;
         keyCode[2] = idCode << 1;
 
-        if (level >= 1) {
-            ApplyKeyCode(modulo, keyCode);
-        }
-
+        ApplyKeyCode(modulo, keyCode); // level 1 (always)
         if (level >= 2) {
             ApplyKeyCode(modulo, keyCode);
         }
@@ -78,34 +82,43 @@ public class NitroBlowfish
     }
 
     /// <summary>
-    /// Encrypt or decrypt 64-bits.
+    /// Encrypt a 64-bits value as two pair of 64-bits.
     /// </summary>
-    /// <param name="encrypt">If set to `true`, the data is encrypted, otherwise it's decrypted.</param>
-    /// <param name="data0">The first pair of 32-bits to (d)encrypt.</param>
-    /// <param name="data1">The second pair of 32-bits to (d)encrypt.</param>
-    public void Encryption(bool encrypt, ref uint data0, ref uint data1)
+    /// <param name="data0">The first pair of 32-bits to encrypt and store result.</param>
+    /// <param name="data1">The second pair of 32-bits to encrypt and store result.</param>
+    public void Encrypt(ref uint data0, ref uint data1)
     {
-        uint y = data0;
         uint x = data1;
+        uint y = data0;
 
-        int iStart = encrypt ? 0 : 0x11;
-        int iEnd = encrypt ? 0x0F : 0x02;
-        int iDiff = encrypt ? 1 : -1;
-        for (int i = iStart; i != iEnd + iDiff; i += iDiff) {
-            uint z = GetKeyBuffer(i * 4) ^ x;
-            x = GetKeyBuffer(0x048 + (((z >> 24) & 0xFF) * 4));
-            x += GetKeyBuffer(0x448 + (((z >> 16) & 0xFF) * 4));
-            x ^= GetKeyBuffer(0x848 + (((z >> 8) & 0xFF) * 4));
-            x += GetKeyBuffer(0xC48 + (((z >> 0) & 0xFF) * 4));
-            x ^= y;
+        for (int i = 0; i < 0x10; i++) {
+            uint z = keyBuffer[i] ^ x;
+            x = GetMixer(z) ^ y;
             y = z;
         }
 
-        uint xorX = GetKeyBuffer(encrypt ? 0x40 : 0x04);
-        data0 = x ^ xorX;
+        data0 = x ^ keyBuffer[0x10];
+        data1 = y ^ keyBuffer[0x11];
+    }
 
-        uint xorY = GetKeyBuffer(encrypt ? 0x44 : 0x00);
-        data1 = y ^ xorY;
+    /// <summary>
+    /// Decrypt a 64-bits value as two pair of 32-bits.
+    /// </summary>
+    /// <param name="data0">The first pair of 32-bits to decrypt and store result.</param>
+    /// <param name="data1">The second pair of 32-bits to decrypt and store result.</param>
+    public void Decrypt(ref uint data0, ref uint data1)
+    {
+        uint x = data1;
+        uint y = data0;
+
+        for (int i = 0x11; i >= 0x2; i--) {
+            uint z = keyBuffer[i] ^ x;
+            x = GetMixer(z) ^ y;
+            y = z;
+        }
+
+        data0 = x ^ keyBuffer[0x01];
+        data1 = y ^ keyBuffer[0x00];
     }
 
     public void Encryption(bool encrypt, DataStream stream)
@@ -118,7 +131,11 @@ public class NitroBlowfish
             uint data0 = reader.ReadUInt32();
             uint data1 = reader.ReadUInt32();
 
-            Encryption(encrypt, ref data0, ref data1);
+            if (encrypt) {
+                Encrypt(ref data0, ref data1);
+            } else {
+                Decrypt(ref data0, ref data1);
+            }
 
             stream.Position -= 8;
             writer.Write(data0);
@@ -129,18 +146,25 @@ public class NitroBlowfish
     public byte[] Encryption(bool encrypt, byte[] data)
     {
         byte[] output = new byte[data.Length];
-
-        using DataStream inputStream = DataStreamFactory.FromArray(data);
-        var reader = new DataReader(inputStream);
-
         for (int i = 0; i + 8 <= data.Length; i += 8) {
-            uint data0 = reader.ReadUInt32();
-            uint data1 = reader.ReadUInt32();
+            uint data0 = BitConverter.ToUInt32(data, i);
+            uint data1 = BitConverter.ToUInt32(data, i + 4);
 
-            Encryption(encrypt, ref data0, ref data1);
+            if (encrypt) {
+                Encrypt(ref data0, ref data1);
+            } else {
+                Decrypt(ref data0, ref data1);
+            }
 
-            Array.Copy(BitConverter.GetBytes(data0), 0, output, i, 4);
-            Array.Copy(BitConverter.GetBytes(data1), 0, output, i + 4, 4);
+            output[i] = (byte)data0;
+            output[i + 1] = (byte)(data0 >> 8);
+            output[i + 2] = (byte)(data0 >> 16);
+            output[i + 3] = (byte)(data0 >> 24);
+
+            output[i + 4] = (byte)data1;
+            output[i + 5] = (byte)(data1 >> 8);
+            output[i + 6] = (byte)(data1 >> 16);
+            output[i + 7] = (byte)(data1 >> 24);
         }
 
         return output;
@@ -148,48 +172,36 @@ public class NitroBlowfish
 
     private void ApplyKeyCode(int modulo, uint[] keyCode)
     {
-        uint GetMixValue(uint[] array, int bytePos)
-        {
-            uint val = 0;
-            for (int i = 3; i >= 0; i--) {
-                val <<= 8;
+        uint ReverseEndianness(uint value) =>
+            (uint)((byte)(value >> 24)
+                | ((byte)(value >> 16) << 8)
+                | ((byte)(value >> 8) << 16)
+                | ((byte)(value) << 24));
 
-                int pos = bytePos + i;
-                int bPos = pos / 4;
-                int bitPos = (pos % 4) * 8;
-                val |= (byte)(array[bPos] >> (24 - bitPos));
-            }
+        Encrypt(ref keyCode[1], ref keyCode[2]);
+        Encrypt(ref keyCode[0], ref keyCode[1]);
 
-            return val;
-        }
-
-        Encryption(true, ref keyCode[1], ref keyCode[2]);
-        Encryption(true, ref keyCode[0], ref keyCode[1]);
-
-        for (int i = 0; i <= 0x44; i += 4) {
-            uint xorValue = GetMixValue(keyCode, i % modulo);
-            uint value = GetUInt32(keyBuffer, i);
-            SetUInt32(keyBuffer, i, value ^ xorValue);
+        modulo /= 4;
+        for (int i = 0; i <= 0x44 / 4; i++) {
+            uint xorValue = ReverseEndianness(keyCode[i % modulo]);
+            keyBuffer[i] ^= xorValue;
         }
 
         uint scratch0 = 0;
         uint scratch1 = 0;
-        for (int i = 0; i <= 0x1040; i += 8) {
-            Encryption(true, ref scratch0, ref scratch1);
-            SetUInt32(keyBuffer, i, scratch1);
-            SetUInt32(keyBuffer, i + 4, scratch0);
+        for (int i = 0; i <= 0x1040 / 4; i += 2) {
+            Encrypt(ref scratch0, ref scratch1);
+            keyBuffer[i] = scratch1;
+            keyBuffer[i + 1] = scratch0;
         }
     }
 
-    private uint GetKeyBuffer(int pos) => GetUInt32(keyBuffer, pos);
-
-    private uint GetKeyBuffer(uint pos) => GetKeyBuffer((int)pos);
-
-    private void SetUInt32(byte[] buffer, int pos, uint value)
+    private uint GetMixer(uint index)
     {
-        byte[] data = BitConverter.GetBytes(value);
-        Array.Copy(data, 0, buffer, pos, data.Length);
+        uint value = keyBuffer[0x12 + ((index >> 24) & 0xFF)];
+        value += keyBuffer[0x112 + ((index >> 16) & 0xFF)];
+        value ^= keyBuffer[0x212 + ((index >> 8) & 0xFF)];
+        value += keyBuffer[0x312 + (index & 0xFF)];
+        return value;
     }
-
-    private uint GetUInt32(byte[] buffer, int pos) => BitConverter.ToUInt32(buffer, pos);
 }
