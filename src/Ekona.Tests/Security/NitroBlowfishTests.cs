@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
 using FluentAssertions;
 using NUnit.Framework;
 using SceneGate.Ekona.Security;
@@ -27,6 +28,25 @@ namespace SceneGate.Ekona.Tests.Security;
 [TestFixture]
 public class NitroBlowfishTest
 {
+    [Test]
+    public void InitializationGuards()
+    {
+        byte[] keysValid = new byte[NitroBlowfish.KeyLength];
+        byte[] keysInvalid = new byte[8];
+
+        var blowfish = new NitroBlowfish();
+        blowfish.Invoking(b => b.Initialize(null, 2, 8, keysValid)).Should().ThrowExactly<ArgumentNullException>();
+        blowfish.Invoking(b => b.Initialize(string.Empty, 2, 8, keysValid)).Should().ThrowExactly<ArgumentException>();
+        blowfish.Invoking(b => b.Initialize("AAA", 2, 8, keysValid)).Should().ThrowExactly<ArgumentException>();
+        blowfish.Invoking(b => b.Initialize("AAAAA", 2, 8, keysValid)).Should().ThrowExactly<ArgumentException>();
+        blowfish.Invoking(b => b.Initialize("AAAA", 0, 8, keysValid)).Should().ThrowExactly<ArgumentOutOfRangeException>();
+        blowfish.Invoking(b => b.Initialize("AAAA", 4, 8, keysValid)).Should().ThrowExactly<ArgumentOutOfRangeException>();
+        blowfish.Invoking(b => b.Initialize("AAAA", 2, 0, keysValid)).Should().ThrowExactly<ArgumentOutOfRangeException>();
+        blowfish.Invoking(b => b.Initialize("AAAA", 2, 16, keysValid)).Should().ThrowExactly<ArgumentOutOfRangeException>();
+        blowfish.Invoking(b => b.Initialize("AAAA", 2, 8, null)).Should().ThrowExactly<ArgumentNullException>();
+        blowfish.Invoking(b => b.Initialize("AAAA", 2, 8, keysInvalid)).Should().ThrowExactly<ArgumentException>();
+    }
+
     [Test]
     [TestCase(new uint[] { 0x01234567, 0x89ABCDEF }, "AAAA", 2, 8, new uint[] { 0xECD83DAE, 0xAB3EF361 })]
     public void Decrypt(uint[] data, string idCode, int level, int modulo, uint[] expected)
@@ -63,14 +83,14 @@ public class NitroBlowfishTest
         var blowfish = new NitroBlowfish();
         blowfish.Initialize("AAAA", 2, 8, keys.BlowfishDsKey);
 
-        blowfish.Encryption(true, stream);
+        blowfish.Encrypt(stream);
 
         stream.Position = 0;
         var outputReader = new DataReader(stream);
         outputReader.ReadUInt32().Should().Be(0x01234567);
         outputReader.ReadUInt32().Should().Be(0x89ABCDEF);
 
-        blowfish.Encryption(false, stream);
+        blowfish.Decrypt(stream);
 
         stream.Position = 0;
         outputReader.ReadUInt32().Should().Be(0xECD83DAE);
@@ -92,14 +112,14 @@ public class NitroBlowfishTest
         var blowfish = new NitroBlowfish();
         blowfish.Initialize("AAAA", 2, 8, keys.BlowfishDsKey);
 
-        byte[] output = blowfish.Encryption(true, input);
+        byte[] output = blowfish.Encrypt(input);
 
         using var outputStream = DataStreamFactory.FromArray(output);
         var outputReader = new DataReader(outputStream);
         outputReader.ReadUInt32().Should().Be(0x01234567);
         outputReader.ReadUInt32().Should().Be(0x89ABCDEF);
 
-        byte[] finalEncryption = blowfish.Encryption(false, output);
+        byte[] finalEncryption = blowfish.Decrypt(output);
 
         finalEncryption.Should().BeEquivalentTo(input);
     }

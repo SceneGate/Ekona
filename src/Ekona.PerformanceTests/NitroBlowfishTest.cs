@@ -50,7 +50,7 @@ public class NitroBlowfishTest
         var data = buffer[..dataLength];
 
         blowfish.Initialize("YYYY", Level, Modulo, key);
-        blowfish.Encryption(true, data);
+        blowfish.Encrypt(data);
     }
 
     [Benchmark]
@@ -61,7 +61,7 @@ public class NitroBlowfishTest
         using var stream = DataStreamFactory.FromArray(buffer, 0, dataLength);
 
         blowfish.Initialize("YYYY", Level, Modulo, key);
-        blowfish.Encryption(true, stream);
+        blowfish.Encrypt(stream);
     }
 
     [Benchmark]

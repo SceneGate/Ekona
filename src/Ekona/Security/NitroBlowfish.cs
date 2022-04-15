@@ -19,6 +19,7 @@
 // SOFTWARE.
 #nullable enable
 using System;
+using System.IO;
 using Yarhl.IO;
 
 namespace SceneGate.Ekona.Security;
@@ -55,7 +56,7 @@ public class NitroBlowfish
         if (level is < 1 or > 3)
             throw new ArgumentOutOfRangeException(nameof(level), "Must be 1, 2 or 3");
 
-        for (int i = 0; i < keyBuffer.Length; i ++) {
+        for (int i = 0; i < keyBuffer.Length; i++) {
             keyBuffer[i] = BitConverter.ToUInt32(key, i * 4);
         }
 
@@ -102,6 +103,19 @@ public class NitroBlowfish
     }
 
     /// <summary>
+    /// Encrypt a complete stream over itself.
+    /// </summary>
+    /// <param name="stream">The stream with the decrypted the data that will be overwritten encrypted.</param>
+    public void Encrypt(Stream stream) => StreamEncryption(true, stream);
+
+    /// <summary>
+    /// Encrypt an array of bytes.
+    /// </summary>
+    /// <param name="data">Data to encrypt.</param>
+    /// <returns>A new array with the encrypted data.</returns>
+    public byte[] Encrypt(ReadOnlySpan<byte> data) => ArrayEncryption(true, data);
+
+    /// <summary>
     /// Decrypt a 64-bits value as two pair of 32-bits.
     /// </summary>
     /// <param name="data0">The first pair of 32-bits to decrypt and store result.</param>
@@ -121,8 +135,23 @@ public class NitroBlowfish
         data1 = y ^ keyBuffer[0x00];
     }
 
-    public void Encryption(bool encrypt, DataStream stream)
+    /// <summary>
+    /// Decrypt a complete stream over itself.
+    /// </summary>
+    /// <param name="stream">The stream with the decrypted the data that will be overwritten encrypted.</param>
+    public void Decrypt(Stream stream) => StreamEncryption(false, stream);
+
+    /// <summary>
+    /// Decrypt an array of bytes.
+    /// </summary>
+    /// <param name="data">Data to decrypt.</param>
+    /// <returns>A new array with the decrypted data.</returns>
+    public byte[] Decrypt(ReadOnlySpan<byte> data) => ArrayEncryption(false, data);
+
+    private void StreamEncryption(bool encrypt, Stream stream)
     {
+        ArgumentNullException.ThrowIfNull(stream);
+
         var reader = new DataReader(stream);
         var writer = new DataWriter(stream);
 
@@ -143,12 +172,12 @@ public class NitroBlowfish
         }
     }
 
-    public byte[] Encryption(bool encrypt, byte[] data)
+    private byte[] ArrayEncryption(bool encrypt, ReadOnlySpan<byte> data)
     {
         byte[] output = new byte[data.Length];
         for (int i = 0; i + 8 <= data.Length; i += 8) {
-            uint data0 = BitConverter.ToUInt32(data, i);
-            uint data1 = BitConverter.ToUInt32(data, i + 4);
+            uint data0 = BitConverter.ToUInt32(data.Slice(i, 4));
+            uint data1 = BitConverter.ToUInt32(data.Slice(i + 4, 4));
 
             if (encrypt) {
                 Encrypt(ref data0, ref data1);
@@ -176,7 +205,7 @@ public class NitroBlowfish
             (uint)((byte)(value >> 24)
                 | ((byte)(value >> 16) << 8)
                 | ((byte)(value >> 8) << 16)
-                | ((byte)(value) << 24));
+                | ((byte)value << 24));
 
         Encrypt(ref keyCode[1], ref keyCode[2]);
         Encrypt(ref keyCode[0], ref keyCode[1]);
