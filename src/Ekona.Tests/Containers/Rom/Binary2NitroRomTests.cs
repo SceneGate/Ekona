@@ -111,15 +111,14 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             }
 
             if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
-                // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
-                // programInfo.ProgramMac.Status.Should().Be(HashStatus.Valid)
+                programInfo.ProgramMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.OverlaysMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
             }
 
             if (isDsi) {
-                programInfo.OverlaysMac.IsNull.Should().BeTrue();
                 programInfo.ProgramMac.IsNull.Should().BeTrue();
+                programInfo.OverlaysMac.IsNull.Should().BeTrue();
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
             }
         }

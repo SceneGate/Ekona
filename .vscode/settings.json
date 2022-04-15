@@ -15,6 +15,7 @@
     "prettier.proseWrap": "always",
     "cSpell.words": [
         "cref",
-        "Ekona"
+        "Ekona",
+        "HMAC"
     ],
 }
