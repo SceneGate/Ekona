@@ -38,4 +38,9 @@ public enum HashStatus
     /// The hash has been validated and is not valid.
     /// </summary>
     Invalid,
+
+    /// <summary>
+    /// The hash has been regenerated from the data, so it's valid.
+    /// </summary>
+    Generated,
 }

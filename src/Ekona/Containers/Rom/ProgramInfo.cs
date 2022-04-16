@@ -211,17 +211,17 @@ namespace SceneGate.Ekona.Containers.Rom
         /// Gets or sets the SHA-1 HMAC of the header, encrypted ARM9 and ARM7 programs.
         /// </summary>
         /// <remarks>
-        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// Only for DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public HashInfo ProgramMac { get; set; }
+        public HashInfo NitroProgramMac { get; set; }
 
         /// <summary>
         /// Gets or sets the SHA-1 HMAC of the overlays of the ARM9.
         /// </summary>
         /// <remarks>
-        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// Only for DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public HashInfo OverlaysMac { get; set; }
+        public HashInfo NitroOverlaysMac { get; set; }
 
         /// <summary>
         /// Gets or sets the RSA SHA-1 signature of the ROM header.

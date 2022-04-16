@@ -276,26 +276,26 @@ namespace SceneGate.Ekona.Containers.Rom
             programInfo.ChecksumSecureArea.Validate(secureAreaCrc);
 
             // HMAC for phase 1 and 2 of DS games
-            bool checkPhase12 = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
+            bool checkPhase12 = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned);
             if (checkPhase12 && keyStore.HMacKeyWhitelist12 is { Length: > 0 }) {
                 byte[] phase1Hash = hashGenerator.GeneratePhase1Hmac(reader.Stream, encryptedArm9, header.SectionInfo);
-                programInfo.ProgramMac.Validate(phase1Hash);
+                programInfo.NitroProgramMac.Validate(phase1Hash);
 
                 byte[] phase2Hash = hashGenerator.GeneratePhase2Hmac(reader.Stream, header.SectionInfo);
-                programInfo.OverlaysMac.Validate(phase2Hash);
+                programInfo.NitroOverlaysMac.Validate(phase2Hash);
             }
 
-            // HMAC for banner of DS and DSi games
+            // HMAC for banner of DS (phase 3) and DSi games
             byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
-            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned);
-            if (bannerKey?.Length > 0 && checkBannerHmac) {
+            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned);
+            if (checkBannerHmac && bannerKey is { Length: > 0 }) {
                 byte[] actualHash = hashGenerator.GeneratePhase3Hmac(reader.Stream, programInfo, header.SectionInfo);
                 programInfo.BannerMac.Validate(actualHash);
             }
 
             // ROM signature of DS and DSi games
-            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
-            if (keyStore.PublicModulusRetailGames?.Length > 0 && checkSignature) {
+            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned);
+            if (checkSignature && keyStore.PublicModulusRetailGames is { Length: > 0 }) {
                 var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
                 programInfo.Signature.Status = signer.VerifySignature(programInfo.Signature.Hash, reader.Stream);
             }

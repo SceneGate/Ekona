@@ -33,6 +33,15 @@ public class RomHeader2Binary :
 {
     private DsiKeyStore keyStore;
 
+    /// <summary>
+    /// Initialize the converter with the key store to enable additional features.
+    /// </summary>
+    /// <remarks>
+    /// The key store is used to generate a special token if `DisableSecureArea` is `true`.
+    /// Otherwise, it will always write 0. The required key is `BlowfishDsKey`.
+    /// </remarks>
+    /// <param name="parameters">The converter parameters.</param>
+    /// <exception cref="ArgumentNullException">The argument is null.</exception>
     public void Initialize(DsiKeyStore parameters)
     {
         keyStore = parameters ?? throw new ArgumentNullException(nameof(parameters));
@@ -92,7 +101,7 @@ public class RomHeader2Binary :
         writer.Write(source.ProgramInfo.Arm9Autoload);
         writer.Write(source.ProgramInfo.Arm7Autoload);
 
-        if (keyStore is { BlowfishDsKey: not null } && source.ProgramInfo.DisableSecureArea) {
+        if (keyStore is { BlowfishDsKey: { Length: > 0 } } && source.ProgramInfo.DisableSecureArea) {
             var encryption = new NitroKey1Encryption(source.ProgramInfo.GameCode, keyStore);
             byte[] token = encryption.GenerateEncryptedDisabledSecureAreaToken();
             writer.Write(token);
@@ -130,14 +139,14 @@ public class RomHeader2Binary :
             writer.Write(source.ProgramInfo.BannerMac.Hash);
         }
 
-        if (source.ProgramInfo.ProgramMac is not null) {
+        if (source.ProgramInfo.NitroProgramMac is not null) {
             writer.WriteUntilLength(0, 0x378);
-            writer.Write(source.ProgramInfo.ProgramMac.Hash);
+            writer.Write(source.ProgramInfo.NitroProgramMac.Hash);
         }
 
-        if (source.ProgramInfo.OverlaysMac is not null) {
+        if (source.ProgramInfo.NitroOverlaysMac is not null) {
             writer.WriteUntilLength(0, 0x38C);
-            writer.Write(source.ProgramInfo.OverlaysMac.Hash);
+            writer.Write(source.ProgramInfo.NitroOverlaysMac.Hash);
         }
 
         // We only write the signature if it exists (just to have more identical bytes).

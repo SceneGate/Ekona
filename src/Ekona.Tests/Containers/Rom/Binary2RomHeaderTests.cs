@@ -85,20 +85,20 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             programInfo.ChecksumHeader.Status.Should().Be(HashStatus.Valid);
 
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
-            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
                 programInfo.BannerMac.Should().NotBeNull();
                 programInfo.BannerMac.Status.Should().Be(HashStatus.NotValidated);
             }
 
-            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
-                programInfo.OverlaysMac.Should().NotBeNull();
-                programInfo.OverlaysMac.Status.Should().Be(HashStatus.NotValidated);
+            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
+                programInfo.NitroOverlaysMac.Should().NotBeNull();
+                programInfo.NitroOverlaysMac.Status.Should().Be(HashStatus.NotValidated);
 
-                programInfo.ProgramMac.Should().NotBeNull();
-                programInfo.ProgramMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.NitroProgramMac.Should().NotBeNull();
+                programInfo.NitroProgramMac.Status.Should().Be(HashStatus.NotValidated);
             }
 
-            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
                 programInfo.Signature.Should().NotBeNull();
                 programInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }
@@ -134,7 +134,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             using var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(originalHeader);
             var generatedHeader = (RomHeader)ConvertFormat.With<Binary2RomHeader>(generatedStream);
 
-            generatedHeader.Should().BeEquivalentTo(originalHeader);
+            generatedHeader.Should().BeEquivalentTo(
+                originalHeader,
+                opts => opts.Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HashInfo)));
         }
     }
 }
