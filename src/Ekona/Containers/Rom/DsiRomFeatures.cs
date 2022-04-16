@@ -53,14 +53,14 @@ public enum DsiRomFeatures
     ShowWirelessIcon = 1 << 4,
 
     /// <summary>
-    /// ROM contains an HMAC of the icon.
+    /// DS ROM contains an HMAC of the icon.
     /// </summary>
-    BannerSigned = 1 << 5,
+    NitroBannerSigned = 1 << 5,
 
     /// <summary>
-    /// Program contains an HMAC and RSA signature of the header and programs.
+    /// DS Program contains an HMAC and RSA signature of the header and programs.
     /// </summary>
-    ProgramSigned = 1 << 6,
+    NitroProgramSigned = 1 << 6,
 
     /// <summary>
     /// ROM is a developer application.

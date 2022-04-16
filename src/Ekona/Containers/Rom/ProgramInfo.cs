@@ -116,9 +116,6 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the checksum of the ARM-9 secure area.
         /// </summary>
-        /// <remarks>
-        /// This checksum will always fail as the secure area is not easy dumpeable.
-        /// </remarks>
         public HashInfo ChecksumSecureArea { get; set; }
 
         /// <summary>
@@ -137,9 +134,9 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint Arm7Autoload { get; set; }
 
         /// <summary>
-        /// Gets or sets the special value that disables the secure area encryption.
+        /// Gets or sets a value indicating whether the ARM9 secure are encryption is disabled.
         /// </summary>
-        public ulong SecureDisable { get; set; }
+        public bool DisableSecureArea { get; set; }
 
         /// <summary>
         /// Gets or sets the checksum of the copyright logo.
@@ -214,17 +211,17 @@ namespace SceneGate.Ekona.Containers.Rom
         /// Gets or sets the SHA-1 HMAC of the header, encrypted ARM9 and ARM7 programs.
         /// </summary>
         /// <remarks>
-        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// Only for DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public HashInfo ProgramMac { get; set; }
+        public HashInfo NitroProgramMac { get; set; }
 
         /// <summary>
         /// Gets or sets the SHA-1 HMAC of the overlays of the ARM9.
         /// </summary>
         /// <remarks>
-        /// Only for DSi games and DS games released after the DSi. Otherwise null.
+        /// Only for DS games released after the DSi. Otherwise null.
         /// </remarks>
-        public HashInfo OverlaysMac { get; set; }
+        public HashInfo NitroOverlaysMac { get; set; }
 
         /// <summary>
         /// Gets or sets the RSA SHA-1 signature of the ROM header.

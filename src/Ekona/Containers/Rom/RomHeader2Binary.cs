@@ -27,8 +27,26 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// <summary>
 /// Converter for ROM header object into binary stream (serialization).
 /// </summary>
-public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
+public class RomHeader2Binary :
+    IInitializer<DsiKeyStore>,
+    IConverter<RomHeader, BinaryFormat>
 {
+    private DsiKeyStore keyStore;
+
+    /// <summary>
+    /// Initialize the converter with the key store to enable additional features.
+    /// </summary>
+    /// <remarks>
+    /// The key store is used to generate a special token if `DisableSecureArea` is `true`.
+    /// Otherwise, it will always write 0. The required key is `BlowfishDsKey`.
+    /// </remarks>
+    /// <param name="parameters">The converter parameters.</param>
+    /// <exception cref="ArgumentNullException">The argument is null.</exception>
+    public void Initialize(DsiKeyStore parameters)
+    {
+        keyStore = parameters ?? throw new ArgumentNullException(nameof(parameters));
+    }
+
     /// <summary>
     /// Serialize a ROM header object into a binary stream.
     /// </summary>
@@ -82,7 +100,15 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(source.ProgramInfo.SecureAreaDelay);
         writer.Write(source.ProgramInfo.Arm9Autoload);
         writer.Write(source.ProgramInfo.Arm7Autoload);
-        writer.Write(source.ProgramInfo.SecureDisable);
+
+        if (keyStore is { BlowfishDsKey: { Length: > 0 } } && source.ProgramInfo.DisableSecureArea) {
+            var encryption = new NitroKey1Encryption(source.ProgramInfo.GameCode, keyStore);
+            byte[] token = encryption.GenerateEncryptedDisabledSecureAreaToken();
+            writer.Write(token);
+        } else {
+            writer.WriteTimes(0, 8);
+        }
+
         writer.Write(source.SectionInfo.RomSize);
         writer.Write(source.SectionInfo.HeaderSize);
         writer.Write(source.ProgramInfo.Arm9ParametersTableOffset);
@@ -113,14 +139,14 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
             writer.Write(source.ProgramInfo.BannerMac.Hash);
         }
 
-        if (source.ProgramInfo.ProgramMac is not null) {
+        if (source.ProgramInfo.NitroProgramMac is not null) {
             writer.WriteUntilLength(0, 0x378);
-            writer.Write(source.ProgramInfo.ProgramMac.Hash);
+            writer.Write(source.ProgramInfo.NitroProgramMac.Hash);
         }
 
-        if (source.ProgramInfo.OverlaysMac is not null) {
+        if (source.ProgramInfo.NitroOverlaysMac is not null) {
             writer.WriteUntilLength(0, 0x38C);
-            writer.Write(source.ProgramInfo.OverlaysMac.Hash);
+            writer.Write(source.ProgramInfo.NitroOverlaysMac.Hash);
         }
 
         // We only write the signature if it exists (just to have more identical bytes).

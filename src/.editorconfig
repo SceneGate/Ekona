@@ -165,6 +165,7 @@ dotnet_diagnostic.IDE1006.severity = warning
 dotnet_diagnostic.CA1303.severity = none # We don't translate exception and log messages from English
 
 ### StyleCop
+dotnet_diagnostic.SA1009.severity = none # False positive due to nullables
 dotnet_diagnostic.SA1011.severity = none # False positive due to nullables
 dotnet_diagnostic.SA1101.severity = none # Do not force to prefix local calls with 'this'
 dotnet_diagnostic.SA1500.severity = none # Allow inline braces

@@ -84,6 +84,6 @@ public class HashInfo
     public void ChangeHash(byte[] newHash)
     {
         Hash = newHash;
-        Status = HashStatus.Valid;
+        Status = HashStatus.Generated;
     }
 }
