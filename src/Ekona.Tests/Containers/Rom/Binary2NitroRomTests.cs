@@ -182,13 +182,13 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
                 // Not regenerated but should keep it
                 newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
-                newInfo.NitroProgramMac.Status.Should().Be(HashStatus.NotValidated); // not generated
+                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
             }
 
             if (isDsi) {
                 // Not regenerated but should keep it
                 newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
-                newInfo.NitroProgramMac.Status.Should().Be(HashStatus.NotValidated); // not generated
+                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
             }
         }
 
