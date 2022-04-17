@@ -19,9 +19,12 @@
         "Ekona",
         "ESRB",
         "HMAC",
+        "Itcm",
         "NAND",
         "Pegi",
         "SCFG",
+        "Texim",
+        "Unswizzle",
         "WRAM"
     ],
 }

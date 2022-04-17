@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using SceneGate.Ekona.Security;

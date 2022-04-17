@@ -133,6 +133,7 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ReadPrograms()
         {
+            // TODO: Decrypt programs with modcrypt #11
             var arm9 = new BinaryFormat(reader.Stream, header.SectionInfo.Arm9Offset, header.SectionInfo.Arm9Size);
             rom.System.Children["arm9"].ChangeFormat(arm9);
             ReadOverlayTable(
@@ -146,6 +147,14 @@ namespace SceneGate.Ekona.Containers.Rom
                 header.ProgramInfo.Overlays7Info,
                 header.SectionInfo.Overlay7TableOffset,
                 header.SectionInfo.Overlay7TableSize);
+
+            if (header.ProgramInfo.UnitCode != DeviceUnitKind.DS) {
+                var arm9i = new BinaryFormat(reader.Stream, header.SectionInfo.Arm9iOffset, header.SectionInfo.Arm9iSize);
+                rom.System.Add(new Node("arm9i", arm9i));
+
+                var arm7i = new BinaryFormat(reader.Stream, header.SectionInfo.Arm7iOffset, header.SectionInfo.Arm7iSize);
+                rom.System.Add(new Node("arm7i", arm7i));
+            }
         }
 
         private void ReadProgramCodeParameters()
@@ -314,6 +323,8 @@ namespace SceneGate.Ekona.Containers.Rom
                 byte[] arm9Hash = hashGenerator.GenerateArm9NoSecureAreaHmac(reader.Stream, header.SectionInfo);
                 programInfo.DsiInfo.Arm9Mac.Validate(arm9Hash);
             }
+
+            // TODO: Verify digest hashes #12
         }
 
         private struct FileAddress

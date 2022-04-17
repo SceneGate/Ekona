@@ -39,7 +39,8 @@ public class NitroRom2Binary :
     IConverter<NodeContainerFormat, BinaryFormat>
 {
     private const int PaddingSize = 0x200;
-    private const long SecureAreaLength = 16 * 1024;
+    private const int TwilightPaddingSize = 0x400;
+    private const int SecureAreaLength = 16 * 1024;
     private readonly SortedList<int, NodeInfo> nodesById = new SortedList<int, NodeInfo>();
     private readonly SortedList<int, NodeInfo> nodesByOffset = new SortedList<int, NodeInfo>();
     private Stream? initializedOutputStream;
@@ -78,12 +79,20 @@ public class NitroRom2Binary :
 
         // Binary order is:
         // - Header
+        // - Unknown
         // - ARM9: program, table, overlays
         // - ARM7: program, table, overlays
         // - FNT: main tables, entry tables
         // - FAT: including overlays
         // - Banner
         // - Files
+        // - (DSi) Digest sector
+        // - (DSi) Digest block
+        // - Padding to round up to 16 MB (XX000000).
+        // ---- Twilight ROM content ----
+        // - Unknown, probably padding but due to cartridge protocol 3x 0x8000..0x9000
+        // - ARM9i
+        // - ARM7i
         var binary = new BinaryFormat(initializedOutputStream ?? new DataStream());
         binary.Stream.Position = 0;
         writer = new DataWriter(binary.Stream);
@@ -119,10 +128,32 @@ public class NitroRom2Binary :
 
         WriteBanner();
 
+        if (programInfo.UnitCode != DeviceUnitKind.DS) {
+            // TODO: Generate actual digest #12
+            WriteEmptyDigest();
+        }
+
+        sectionInfo.RomSize = (uint)writer.Stream.Length;
+
+        if (programInfo.UnitCode != DeviceUnitKind.DS) {
+            // Padding to start twilight section
+            writer.WritePadding(0xFF, 0x100000);
+
+            WriteTwilightPrograms();
+            sectionInfo.DigestTwilightOffset = sectionInfo.Arm9iOffset;
+
+            sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
+
+            // TODO: Encrypt arm9/arm7/arm9i/arm7i #11
+            var modcrypt1 = FakeModcryptEncrypt(programInfo.DsiInfo.ModcryptArea1Target);
+            var modcrypt2 = FakeModcryptEncrypt(programInfo.DsiInfo.ModcryptArea2Target);
+            (sectionInfo.ModcryptArea1Offset, sectionInfo.ModcryptArea1Length) = modcrypt1;
+            (sectionInfo.ModcryptArea2Offset, sectionInfo.ModcryptArea2Length) = modcrypt2;
+        }
+
         WriteHeader();
 
         // Fill size to the cartridge size
-        sectionInfo.RomSize = (uint)writer.Stream.Length;
         writer.WriteUntilLength(0xFF, programInfo.CartridgeSize);
 
         return binary;
@@ -156,13 +187,11 @@ public class NitroRom2Binary :
             header.CopyrightLogo = new byte[156];
         }
 
-        sectionInfo.RomSize = (uint)writer.Stream.Length;
-
         GenerateSignatures();
 
         // We don't calculate the header length but we expect it's preset.
         // It's used inside the converter to pad.
-        var binaryHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
+        var binaryHeader = (IBinary)ConvertFormat.With<RomHeader2Binary>(header);
         writer.Stream.Position = 0;
         binaryHeader.Stream.WriteTo(writer.Stream);
     }
@@ -216,7 +245,7 @@ public class NitroRom2Binary :
             byte[] digestHash = hashGenerator.GenerateDigestBlockHmac(writer.Stream, sectionInfo);
             programInfo.DsiInfo.DigestMain.ChangeHash(digestHash);
 
-            // TODO: After modcrypt implementation HMAC for ARM9i and ARM7i.
+            // TODO: After modcrypt implementation HMAC for ARM9i and ARM7i #11
             byte[] arm9Hash = hashGenerator.GenerateArm9NoSecureAreaHmac(writer.Stream, sectionInfo);
             programInfo.DsiInfo.Arm9Mac.ChangeHash(arm9Hash);
         }
@@ -237,6 +266,9 @@ public class NitroRom2Binary :
         GetChildSafe("system/banner")
             .TransformWith<Banner2Binary>()
             .Stream!.WriteTo(writer.Stream);
+
+        writer.Stream.Position = sectionInfo.BannerOffset;
+        sectionInfo.BannerLength = (uint)Binary2Banner.GetSize(writer.Stream);
     }
 
     private void WritePrograms()
@@ -249,11 +281,39 @@ public class NitroRom2Binary :
         WriteOverlays(false);
     }
 
+    private void WriteTwilightPrograms()
+    {
+        // First 0x3000 bytes
+        // Unknown but let's replicate what the dumper gets
+        byte[] unknownTwilightData = new byte[0x1000];
+        writer.Stream.Position = 0x8000;
+        writer.Stream.Read(unknownTwilightData);
+
+        writer.Stream.Seek(0, SeekOrigin.End);
+        writer.Write(unknownTwilightData);
+        writer.Write(unknownTwilightData);
+        writer.Write(unknownTwilightData);
+
+        // ARM9i
+        IBinary arm9i = GetChildFormatSafe<IBinary>("system/arm9i");
+        sectionInfo.Arm9iSize = (uint)arm9i.Stream.Length;
+        sectionInfo.Arm9iOffset = (uint)writer.Stream.Length;
+        arm9i.Stream.WriteTo(writer.Stream);
+        writer.WritePadding(0xFF, TwilightPaddingSize);
+
+        // ARM7i
+        IBinary arm7i = GetChildFormatSafe<IBinary>("system/arm7i");
+        sectionInfo.Arm7iSize = (uint)arm7i.Stream.Length;
+        sectionInfo.Arm7iOffset = (uint)writer.Stream.Length;
+        arm7i.Stream.WriteTo(writer.Stream);
+        writer.WritePadding(0xFF, TwilightPaddingSize);
+    }
+
     private void WriteProgram(bool isArm9)
     {
         string armPath = isArm9 ? "system/arm9" : "system/arm7";
 
-        BinaryFormat binaryArm = GetChildFormatSafe<BinaryFormat>(armPath);
+        IBinary binaryArm = GetChildFormatSafe<IBinary>(armPath);
         uint armLength = (uint)binaryArm.Stream.Length;
         uint armOffset = armLength > 0 ? (uint)writer.Stream.Position : 0;
         binaryArm.Stream.WriteTo(writer.Stream);
@@ -354,7 +414,7 @@ public class NitroRom2Binary :
             writer.Write(info.StaticInitStart);
             writer.Write(info.StaticInitEnd);
             writer.Write(info.OverlayId);
-            uint encodingInfo = info.CompressedSize;
+            uint encodingInfo = info.IsCompressed ? info.CompressedSize : 0;
             encodingInfo |= (uint)((info.IsCompressed ? 1 : 0) << 24);
             encodingInfo |= (uint)((info.IsSigned ? 1 : 0) << 25);
             writer.Write(encodingInfo);
@@ -515,6 +575,54 @@ public class NitroRom2Binary :
                 nodesByOffset.Add(info.PhysicalId, info);
             }
         }
+    }
+
+    private void WriteEmptyDigest()
+    {
+        uint sha1HashLength = 0x14;
+        sectionInfo.DigestBlockSectorCount = 0x20;
+        sectionInfo.DigestSectorSize = 0x400;
+
+        // Digest needs padding to its sector size, so pad ROM content to it.
+        writer.Stream.Seek(0, SeekOrigin.End);
+        writer.WritePadding(0xFF, (int)sectionInfo.DigestSectorSize);
+
+        sectionInfo.DigestNitroOffset = sectionInfo.Arm9Offset;
+        sectionInfo.DigestNitroLength = (uint)(writer.Stream.Length - sectionInfo.DigestNitroOffset);
+
+        // Twilight digest offset will be set later, once we know this size.
+        uint arm9iLength = (uint)GetChildFormatSafe<IBinary>("system/arm9i").Stream.Length.Pad(TwilightPaddingSize);
+        uint arm7iLength = (uint)GetChildFormatSafe<IBinary>("system/arm7i").Stream.Length.Pad(TwilightPaddingSize);
+        sectionInfo.DigestTwilightLength = arm9iLength + arm7iLength;
+
+        uint numSectorHashes = (sectionInfo.DigestNitroLength + sectionInfo.DigestTwilightLength) / sectionInfo.DigestSectorSize;
+        uint sectorHashLength = numSectorHashes * sha1HashLength;
+
+        uint numBlockHashes = numSectorHashes.Pad((int)sectionInfo.DigestBlockSectorCount) / sectionInfo.DigestBlockSectorCount;
+        uint blockHashLength = numBlockHashes * sha1HashLength;
+
+        sectionInfo.DigestSectorHashtableOffset = (uint)writer.Stream.Length;
+        sectionInfo.DigestSectorHashtableLength = sectorHashLength.Pad(PaddingSize);
+        writer.WriteTimes(0xCA, sectorHashLength);
+        writer.WritePadding(0, PaddingSize);
+
+        sectionInfo.DigestBlockHashtableOffset = (uint)writer.Stream.Length;
+        sectionInfo.DigestBlockHashtableLength = blockHashLength;
+        writer.WriteTimes(0xFE, blockHashLength);
+        writer.WritePadding(0xFF, PaddingSize);
+    }
+
+    private (uint, uint) FakeModcryptEncrypt(ModcryptTargetKind target)
+    {
+        return target switch {
+            ModcryptTargetKind.None => (0, 0),
+            ModcryptTargetKind.Arm9 => (sectionInfo.Arm9Offset, sectionInfo.Arm9Size),
+            ModcryptTargetKind.Arm7 => (sectionInfo.Arm7Offset, sectionInfo.Arm7Size),
+            ModcryptTargetKind.Arm9i => (sectionInfo.Arm9iOffset, sectionInfo.Arm9iSize),
+            ModcryptTargetKind.Arm9iSecureArea => (sectionInfo.Arm9iOffset, SecureAreaLength),
+            ModcryptTargetKind.Arm7i => (sectionInfo.Arm7iOffset, sectionInfo.Arm7iSize),
+            _ => throw new NotSupportedException($"Unsupported modcrypt area: {target}"),
+        };
     }
 
     private struct NodeInfo

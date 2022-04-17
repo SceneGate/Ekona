@@ -48,7 +48,7 @@ namespace SceneGate.Ekona.Containers.Rom
         private const int IconHeight = 32;
 
         /// <summary>
-        /// Gets the maxmimum number of animated images.
+        /// Gets the maximum number of animated images.
         /// </summary>
         public static int NumAnimatedImages => 8;
 
