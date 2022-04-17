@@ -70,7 +70,7 @@ public class RomHeader2Binary :
         return binary;
     }
 
-    private static void WriteDsFields(DataWriter writer, RomHeader source)
+    private void WriteDsFields(DataWriter writer, RomHeader source)
     {
         writer.Write(source.ProgramInfo.GameTitle, 12, nullTerminator: false);
         writer.Write(source.ProgramInfo.GameCode, 4, nullTerminator: false);
@@ -83,7 +83,22 @@ public class RomHeader2Binary :
 
         writer.WriteTimes(0, 7); // reserved
         writer.Write((byte)source.ProgramInfo.DsiCryptoFlags);
-        writer.Write(source.ProgramInfo.Region);
+
+        if (source.ProgramInfo.UnitCode == DeviceUnitKind.DS) {
+            byte region = 0;
+            if (source.ProgramInfo.Region.HasFlag(ProgramRegion.China)) {
+                region |= 0x80;
+            }
+
+            if (source.ProgramInfo.Region.HasFlag(ProgramRegion.Korea)) {
+                region |= 0x40;
+            }
+
+            writer.Write(region);
+        } else {
+            writer.Write((byte)source.ProgramInfo.DsiInfo.StartJumpKind);
+        }
+
         writer.Write(source.ProgramInfo.Version);
         writer.Write(source.ProgramInfo.AutoStartFlag);
 
@@ -183,7 +198,7 @@ public class RomHeader2Binary :
         WriteLocalMemoryBankSettings(writer, info.LocalMemoryBanksArm7);
         writer.Write(info.GlobalMbk9Settings | (info.GlobalWramCntSettings << 24));
 
-        writer.Write(info.Region);
+        writer.Write((uint)source.ProgramInfo.Region);
         writer.Write(info.AccessControl);
         writer.Write(info.Arm7ScfgExt7Setting);
         writer.Stream.Position += 4; // ProgramFeatures written with DS fields
@@ -280,15 +295,21 @@ public class RomHeader2Binary :
             throw new FormatException("Expecting 3 local memory bank settings");
         }
 
-        for (int i = 0; i < settings.Length; i++) {
-            var setting = settings[i];
-            if (setting.StartAddressSlot > 255 || setting.ImageSize > 3 || setting.EndAddressSlot > 255) {
+        uint mbk6 = 0;
+        mbk6 |= (uint)(settings[0].StartAddressSlot << 4);
+        mbk6 |= (uint)(settings[0].ImageSize << 12);
+        mbk6 |= (uint)(settings[0].EndAddressSlot << 20);
+        writer.Write(mbk6);
+
+        for (int i = 0; i < 2; i++) {
+            var setting = settings[i + 1];
+            if (setting.StartAddressSlot > 511 || setting.ImageSize > 3 || setting.EndAddressSlot > 1023) {
                 throw new ArgumentException($"Invalid local memory bank setting for {i}");
             }
 
             uint data = (uint)(setting.StartAddressSlot << 3);
-            data |= (uint)(setting.ImageSize << 11);
-            data |= (uint)(setting.EndAddressSlot << 18);
+            data |= (uint)(setting.ImageSize << 12);
+            data |= (uint)(setting.EndAddressSlot << 19);
             writer.Write(data);
         }
     }

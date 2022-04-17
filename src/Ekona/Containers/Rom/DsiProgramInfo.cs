@@ -41,11 +41,20 @@ public class DsiProgramInfo
     /// </summary>
     public LocalMemoryBankSettings[] LocalMemoryBanksArm7 { get; set; }
 
+    /// <summary>
+    /// Gets or sets the global memory bank 9 settings: WRAM slot write protect.
+    /// </summary>
     public int GlobalMbk9Settings { get; set; }
 
+    /// <summary>
+    /// Gets or sets the WRAMCNT register settings.
+    /// </summary>
     public byte GlobalWramCntSettings { get; set; }
 
-    public uint Region { get; set; } // todo: check other region field
+    /// <summary>
+    /// Gets or sets the program start jump kind.
+    /// </summary>
+    public ProgramStartJumpKind StartJumpKind { get; set; }
 
     public uint AccessControl { get; set; }
 

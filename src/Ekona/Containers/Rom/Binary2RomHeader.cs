@@ -97,7 +97,22 @@ namespace SceneGate.Ekona.Containers.Rom
             header.ProgramInfo.CartridgeSize = ProgramInfo.MinimumCartridgeSize * (1 << reader.ReadByte());
             reader.Stream.Position += 7; // reserved
             header.ProgramInfo.DsiCryptoFlags = (DsiCryptoMode)reader.ReadByte();
-            header.ProgramInfo.Region = reader.ReadByte();
+
+            if (header.ProgramInfo.UnitCode == DeviceUnitKind.DS) {
+                byte region = reader.ReadByte();
+                header.ProgramInfo.Region = ProgramRegion.Normal;
+
+                if ((region & 0x80) != 0) {
+                    header.ProgramInfo.Region |= ProgramRegion.China;
+                }
+
+                if ((region & 0x40) != 0) {
+                    header.ProgramInfo.Region |= ProgramRegion.Korea;
+                }
+            } else {
+                header.ProgramInfo.DsiInfo.StartJumpKind = (ProgramStartJumpKind)reader.ReadByte();
+            }
+
             header.ProgramInfo.Version = reader.ReadByte();
             header.ProgramInfo.AutoStartFlag = reader.ReadByte();
 
@@ -202,7 +217,7 @@ namespace SceneGate.Ekona.Containers.Rom
             info.GlobalWramCntSettings = reader.ReadByte();
 
             // Pos: 0x1B0
-            info.Region = reader.ReadUInt32();
+            header.ProgramInfo.Region = (ProgramRegion)reader.ReadUInt32();
             info.AccessControl = reader.ReadUInt32();
             info.Arm7ScfgExt7Setting = reader.ReadUInt32();
             reader.Stream.Position += 4; // ProgramFeatures flags read with DS fields

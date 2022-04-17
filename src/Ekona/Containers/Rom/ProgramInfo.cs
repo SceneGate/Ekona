@@ -69,9 +69,9 @@ namespace SceneGate.Ekona.Containers.Rom
         public DsiCryptoMode DsiCryptoFlags { get; set; }
 
         /// <summary>
-        /// Gets or sets the special game region.
+        /// Gets or sets the supported region.
         /// </summary>
-        public byte Region { get; set; }
+        public ProgramRegion Region { get; set; }
 
         /// <summary>
         /// Gets or sets the version of the program.
