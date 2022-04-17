@@ -20,12 +20,13 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
   - HMAC validation and re-generation when keys are provided.
   - Signature validation when keys are provided.
 - DSi cartridge:
+  - Filesystem: read and write `arm9i` and `arm7i` programs.
   - Header: read and write
   - Animated banner icons
   - HMAC validation and re-generation when keys are provided.
   - Signature validation when keys are provided.
-  - _arm9i, arm7i and digest generation not supported yet._
-  - _Modcrypt encryption and decryption not supported yet._
+  - _Digest hashtable generation not supported yet #12._
+  - _Modcrypt encryption and decryption not supported yet #11._
 
 ## Documentation
 

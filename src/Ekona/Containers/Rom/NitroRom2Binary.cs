@@ -108,7 +108,6 @@ public class NitroRom2Binary :
         // Sort nodes by ID
         PopulateNodeInfo();
 
-        // TODO: Encrypt arm9/arm7/arm9i/arm7i #11
         WritePrograms();
 
         WriteFileSystem();
@@ -145,6 +144,7 @@ public class NitroRom2Binary :
 
             sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
 
+            // TODO: Encrypt arm9/arm7/arm9i/arm7i #11
             var modcrypt1 = FakeModcryptEncrypt(programInfo.DsiInfo.ModcryptArea1Target);
             var modcrypt2 = FakeModcryptEncrypt(programInfo.DsiInfo.ModcryptArea2Target);
             (sectionInfo.ModcryptArea1Offset, sectionInfo.ModcryptArea1Length) = modcrypt1;
