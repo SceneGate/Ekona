@@ -39,6 +39,7 @@ public class NitroRom2Binary :
     IConverter<NodeContainerFormat, BinaryFormat>
 {
     private const int PaddingSize = 0x200;
+    private const long SecureAreaLength = 16 * 1024;
     private readonly SortedList<int, NodeInfo> nodesById = new SortedList<int, NodeInfo>();
     private readonly SortedList<int, NodeInfo> nodesByOffset = new SortedList<int, NodeInfo>();
     private Stream? initializedOutputStream;
@@ -168,34 +169,47 @@ public class NitroRom2Binary :
 
     private void GenerateSignatures()
     {
-        // TODO: Encrypt secure area and generate checksums
         if (keyStore is null) {
             return;
         }
 
-        var generator = new TwilightHMacGenerator(keyStore);
         bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+        var key1Encryption = new NitroKey1Encryption(programInfo.GameCode, keyStore);
+        var hashGenerator = new TwilightHMacGenerator(keyStore);
+        var crcGenerator = new NitroCrcGenerator();
 
-        bool requireOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
-        if (keyStore.HMacKeyWhitelist12?.Length > 0 && requireOverlayHmac) {
-            byte[] newHash = generator.GeneratePhase2Hmac(writer.Stream, sectionInfo);
-            programInfo.OverlaysMac.ChangeHash(newHash);
+        // Get ARM9 encrypted (or encrypt it) since it's used for several CRC / hashes
+        DataStream arm9 = GetChildFormatSafe<IBinary>("system/arm9").Stream;
+        using DataStream encryptedArm9 = key1Encryption.HasEncryptedArm9(arm9)
+            ? new DataStream(arm9)
+            : key1Encryption.EncryptArm9(arm9);
+
+        // Header secure area CRC
+        byte[] secureAreaCrc = crcGenerator.GenerateCrc16(encryptedArm9, 0, SecureAreaLength);
+        programInfo.ChecksumSecureArea.ChangeHash(secureAreaCrc);
+
+        // HMAC for phase 1 and 2 of DS games
+        bool generatePhase12 = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned);
+        if (generatePhase12 && keyStore.HMacKeyWhitelist12 is { Length: > 0 }) {
+            byte[] phase1Hash = hashGenerator.GeneratePhase1Hmac(writer.Stream, encryptedArm9, sectionInfo);
+            programInfo.NitroProgramMac.ChangeHash(phase1Hash);
+
+            byte[] phase2Hash = hashGenerator.GeneratePhase2Hmac(writer.Stream, sectionInfo);
+            programInfo.NitroOverlaysMac.ChangeHash(phase2Hash);
         }
 
+        // HMAC for banner of DS (phase 3) and DSi games
         byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
-        bool requireBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned);
-        if (bannerKey?.Length > 0 && requireBannerHmac) {
-            byte[] newHash2 = generator.GeneratePhase3Hmac(writer.Stream, programInfo, sectionInfo);
-            programInfo.BannerMac.ChangeHash(newHash2);
+        bool generateBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned);
+        if (generateBannerHmac && bannerKey is { Length: > 0 }) {
+            byte[] bannerHash = hashGenerator.GeneratePhase3Hmac(writer.Stream, programInfo, sectionInfo);
+            programInfo.BannerMac.ChangeHash(bannerHash);
         }
 
-        bool requireSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
-        if (keyStore.PublicModulusRetailGames?.Length > 0 && requireSignature) {
-            // While we could add the code to sign the data with a provided private key...
-            // In practice it won't ever happen that we know the actual private key.
-            // We could modify the NAND with our own public/private key but at that point
-            // just replacing the verification sign code is easier with launch, so I won't add that dead code.
-        }
+        // While we could add the code to sign the data with a provided private key...
+        // In practice it won't ever happen that we know the actual private key.
+        // We could modify the NAND with our own public/private key but at that point
+        // just replacing the verification sign code is easier with launch, so I won't add that dead code.
     }
 
     private void WriteBanner()

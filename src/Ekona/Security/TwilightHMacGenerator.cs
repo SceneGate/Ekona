@@ -21,7 +21,6 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using SceneGate.Ekona.Containers.Rom;
-using SceneGate.Ekona.Security;
 using Yarhl.IO;
 
 namespace SceneGate.Ekona.Security;
@@ -40,7 +39,44 @@ public class TwilightHMacGenerator
     /// <param name="keyStore">Store with the keys.</param>
     public TwilightHMacGenerator(DsiKeyStore keyStore)
     {
-        this.keyStore = keyStore;
+        this.keyStore = keyStore ?? throw new ArgumentNullException(nameof(keyStore));
+    }
+
+    /// <summary>
+    /// Generate the DS whitelist phase 1 HMAC (header, encrypted ARM9 and ARM7).
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to generate the hash.</param>
+    /// <param name="encryptedArm9">Encrypted ARM9 to use for the hash.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>HMAC for the whitelist phase 1.</returns>
+    /// <exception cref="InvalidOperationException">The key for the whitelist phase 1 is missing.</exception>
+    public byte[] GeneratePhase1Hmac(Stream romStream, Stream encryptedArm9, RomSectionInfo sectionInfo)
+    {
+        byte[] phase1Key = keyStore.HMacKeyWhitelist12;
+        if (phase1Key is not { Length: > 0 }) {
+            throw new InvalidOperationException($"Missing {nameof(DsiKeyStore.HMacKeyWhitelist12)} key");
+        }
+
+        using HMAC generator = CreateGenerator(phase1Key);
+        var reader = new DataReader(romStream);
+
+        // First hash the DS header.
+        romStream.Position = 0;
+        byte[] headerData = reader.ReadBytes(0x160);
+        _ = generator.TransformBlock(headerData, 0, headerData.Length, null, 0);
+
+        // Then hash the encrypted ARM9.
+        encryptedArm9.Position = 0;
+        byte[] arm9Data = new byte[encryptedArm9.Length];
+        encryptedArm9.Read(arm9Data);
+        _ = generator.TransformBlock(arm9Data, 0, arm9Data.Length, null, 0);
+
+        // Finally hash the ARM7
+        romStream.Position = sectionInfo.Arm7Offset;
+        byte[] arm7Data = reader.ReadBytes((int)sectionInfo.Arm7Size);
+        _ = generator.TransformFinalBlock(arm7Data, 0, arm7Data.Length);
+
+        return generator.Hash;
     }
 
     /// <summary>

@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using SceneGate.Ekona.Security;
 using Yarhl.FileFormat;
@@ -36,6 +35,7 @@ namespace SceneGate.Ekona.Containers.Rom
     /// </summary>
     public class Binary2NitroRom : IConverter<IBinary, NitroRom>, IInitializer<DsiKeyStore>
     {
+        private const int SecureAreaLength = 16 * 1024;
         private static readonly FileAddressOffsetComparer FileAddressComparer = new FileAddressOffsetComparer();
 
         private DsiKeyStore keyStore;
@@ -255,31 +255,47 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ValidateSignatures()
         {
-            // TODO: Encrypt secure area and check checksums
             if (keyStore is null) {
                 return;
             }
 
             ProgramInfo programInfo = header.ProgramInfo;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+            var key1Encryption = new NitroKey1Encryption(programInfo.GameCode, keyStore);
             var hashGenerator = new TwilightHMacGenerator(keyStore);
+            var crcGenerator = new NitroCrcGenerator();
 
-            // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
-            bool checkOverlayHmac = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
-            if (keyStore.HMacKeyWhitelist12?.Length > 0 && checkOverlayHmac) {
-                byte[] actualHash = hashGenerator.GeneratePhase2Hmac(reader.Stream, header.SectionInfo);
-                programInfo.OverlaysMac.Validate(actualHash);
+            // Get ARM9 encrypted (or encrypt it) since it's used for several CRC / hashes
+            DataStream arm9 = rom.System.Children["arm9"].Stream!;
+            using DataStream encryptedArm9 = key1Encryption.HasEncryptedArm9(arm9)
+                ? new DataStream(arm9)
+                : key1Encryption.EncryptArm9(arm9);
+
+            // Header secure area CRC
+            byte[] secureAreaCrc = crcGenerator.GenerateCrc16(encryptedArm9, 0, SecureAreaLength);
+            programInfo.ChecksumSecureArea.Validate(secureAreaCrc);
+
+            // HMAC for phase 1 and 2 of DS games
+            bool checkPhase12 = programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned);
+            if (checkPhase12 && keyStore.HMacKeyWhitelist12 is { Length: > 0 }) {
+                byte[] phase1Hash = hashGenerator.GeneratePhase1Hmac(reader.Stream, encryptedArm9, header.SectionInfo);
+                programInfo.NitroProgramMac.Validate(phase1Hash);
+
+                byte[] phase2Hash = hashGenerator.GeneratePhase2Hmac(reader.Stream, header.SectionInfo);
+                programInfo.NitroOverlaysMac.Validate(phase2Hash);
             }
 
+            // HMAC for banner of DS (phase 3) and DSi games
             byte[] bannerKey = isDsi ? keyStore.HMacKeyDSiGames : keyStore.HMacKeyWhitelist34;
-            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned);
-            if (bannerKey?.Length > 0 && checkBannerHmac) {
+            bool checkBannerHmac = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned);
+            if (checkBannerHmac && bannerKey is { Length: > 0 }) {
                 byte[] actualHash = hashGenerator.GeneratePhase3Hmac(reader.Stream, programInfo, header.SectionInfo);
                 programInfo.BannerMac.Validate(actualHash);
             }
 
-            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned);
-            if (keyStore.PublicModulusRetailGames?.Length > 0 && checkSignature) {
+            // ROM signature of DS and DSi games
+            bool checkSignature = isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned);
+            if (checkSignature && keyStore.PublicModulusRetailGames is { Length: > 0 }) {
                 var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
                 programInfo.Signature.Status = signer.VerifySignature(programInfo.Signature.Hash, reader.Stream);
             }

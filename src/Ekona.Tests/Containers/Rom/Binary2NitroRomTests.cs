@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using SceneGate.Ekona.Security;
@@ -103,20 +104,21 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             ProgramInfo programInfo = rom.Information;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
 
-            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.BannerSigned)) {
+            programInfo.ChecksumSecureArea.Status.Should().Be(HashStatus.Valid);
+
+            if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
                 programInfo.BannerMac.Status.Should().Be(HashStatus.Valid);
             }
 
-            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.ProgramSigned)) {
-                // TODO: Verify header (0x160 bytes) + armX (secure area encrypted) HMAC
-                // programInfo.ProgramMac.Status.Should().Be(HashStatus.Valid)
-                programInfo.OverlaysMac.Status.Should().Be(HashStatus.Valid);
+            if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
+                programInfo.NitroProgramMac.Status.Should().Be(HashStatus.Valid);
+                programInfo.NitroOverlaysMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
             }
 
             if (isDsi) {
-                programInfo.OverlaysMac.IsNull.Should().BeTrue();
-                programInfo.ProgramMac.IsNull.Should().BeTrue();
+                programInfo.NitroProgramMac.IsNull.Should().BeTrue();
+                programInfo.NitroOverlaysMac.IsNull.Should().BeTrue();
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
             }
         }
@@ -161,9 +163,33 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             node.Should().MatchInfo(expected);
 
-            // Keep old hashes
-            newInfo.OverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.OverlaysMac.Hash);
-            newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
+            bool isDsi = originalInfo.UnitCode != DeviceUnitKind.DS;
+
+            newInfo.ChecksumSecureArea.Hash.Should().BeEquivalentTo(originalInfo.ChecksumSecureArea.Hash);
+            newInfo.ChecksumSecureArea.Status.Should().Be(HashStatus.NotValidated);
+
+            if (isDsi || originalInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
+                newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
+                newInfo.BannerMac.Status.Should().Be(HashStatus.NotValidated);
+            }
+
+            if (originalInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
+                newInfo.NitroProgramMac.Hash.Should().BeEquivalentTo(originalInfo.NitroProgramMac.Hash);
+                newInfo.NitroProgramMac.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.NitroOverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.NitroOverlaysMac.Hash);
+                newInfo.NitroOverlaysMac.Status.Should().Be(HashStatus.NotValidated);
+
+                // Not regenerated but should keep it
+                newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
+                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+            }
+
+            if (isDsi) {
+                // Not regenerated but should keep it
+                newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
+                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+            }
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -175,16 +201,40 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
 
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
-            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>().Information;
+            ProgramInfo originalInfo = node.GetFormatAs<NitroRom>()!.Information;
 
             var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
             node.Invoking(n => n.TransformWith<NitroRom2Binary, NitroRom2BinaryParams>(nitroParameters)).Should().NotThrow();
 
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
-            ProgramInfo newInfo = node.GetFormatAs<NitroRom>().Information;
+            ProgramInfo newInfo = node.GetFormatAs<NitroRom>()!.Information;
+            bool isDsi = originalInfo.UnitCode != DeviceUnitKind.DS;
 
-            newInfo.OverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.OverlaysMac.Hash);
-            newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
+            newInfo.ChecksumSecureArea.Hash.Should().BeEquivalentTo(originalInfo.ChecksumSecureArea.Hash);
+            originalInfo.ChecksumSecureArea.Status.Should().Be(HashStatus.Generated);
+
+            if (isDsi || originalInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
+                newInfo.BannerMac.Hash.Should().BeEquivalentTo(originalInfo.BannerMac.Hash);
+                originalInfo.BannerMac.Status.Should().Be(HashStatus.Generated);
+            }
+
+            if (originalInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
+                newInfo.NitroProgramMac.Hash.Should().BeEquivalentTo(originalInfo.NitroProgramMac.Hash);
+                originalInfo.NitroProgramMac.Status.Should().Be(HashStatus.Generated);
+
+                newInfo.NitroOverlaysMac.Hash.Should().BeEquivalentTo(originalInfo.NitroOverlaysMac.Hash);
+                originalInfo.NitroOverlaysMac.Status.Should().Be(HashStatus.Generated);
+
+                // Not regenerated but should keep it
+                newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
+                originalInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+            }
+
+            if (isDsi) {
+                // Not regenerated but should keep it
+                newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
+                originalInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+            }
         }
     }
 }

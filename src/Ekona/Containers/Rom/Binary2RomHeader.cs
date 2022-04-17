@@ -27,12 +27,30 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <summary>
     /// Converter for binary ROM header into an object.
     /// </summary>
-    public class Binary2RomHeader : IConverter<IBinary, RomHeader>
+    public class Binary2RomHeader :
+        IInitializer<DsiKeyStore>,
+        IConverter<IBinary, RomHeader>
     {
+        private DsiKeyStore keyStore;
+
         /// <summary>
         /// Gets the offset in the header containing the header size value.
         /// </summary>
         public static int HeaderSizeOffset => 0x84;
+
+        /// <summary>
+        /// Initialize the converter with the key store to enable additional features.
+        /// </summary>
+        /// <remarks>
+        /// The key store is used to verify a special token and set the value of `DisableSecureArea`.
+        /// Otherwise, it will always be `false`. The required key is `BlowfishDsKey`.
+        /// </remarks>
+        /// <param name="parameters">The converter parameters.</param>
+        /// <exception cref="ArgumentNullException">The argument is null.</exception>
+        public void Initialize(DsiKeyStore parameters)
+        {
+            keyStore = parameters ?? throw new ArgumentNullException(nameof(parameters));
+        }
 
         /// <summary>
         /// Convert a binary format into a ROM header object.
@@ -58,7 +76,15 @@ namespace SceneGate.Ekona.Containers.Rom
             return header;
         }
 
-        private static void ReadDsFields(DataReader reader, RomHeader header)
+        private static void ValidateChecksums(DataStream stream, ProgramInfo info)
+        {
+            // We don't validate the checksum of the secure area as it's outside the header. Same for HMAC.
+            var crcGen = new NitroCrcGenerator();
+            info.ChecksumLogo.Validate(crcGen.GenerateCrc16(stream, 0xC0, 0x9C));
+            info.ChecksumHeader.Validate(crcGen.GenerateCrc16(stream, 0x00, 0x15E));
+        }
+
+        private void ReadDsFields(DataReader reader, RomHeader header)
         {
             // Pos: 0x00
             header.ProgramInfo.GameTitle = reader.ReadString(12).Replace("\0", string.Empty);
@@ -109,7 +135,15 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0x70
             header.ProgramInfo.Arm9Autoload = reader.ReadUInt32();
             header.ProgramInfo.Arm7Autoload = reader.ReadUInt32();
-            header.ProgramInfo.SecureDisable = reader.ReadUInt64();
+
+            if (keyStore is { BlowfishDsKey: { Length: > 0 } }) {
+                var encryption = new NitroKey1Encryption(header.ProgramInfo.GameCode, keyStore);
+                byte[] disableToken = reader.ReadBytes(8);
+                header.ProgramInfo.DisableSecureArea = encryption.HasDisabledSecureArea(disableToken);
+            } else {
+                reader.Stream.Position += 8;
+                header.ProgramInfo.DisableSecureArea = false;
+            }
 
             // Pos: 0x80
             header.SectionInfo.RomSize = reader.ReadUInt32();
@@ -142,8 +176,8 @@ namespace SceneGate.Ekona.Containers.Rom
 
             // Pos: 0x378
             reader.Stream.Position = 0x378;
-            header.ProgramInfo.ProgramMac = reader.ReadHMACSHA1();
-            header.ProgramInfo.OverlaysMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.NitroProgramMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.NitroOverlaysMac = reader.ReadHMACSHA1();
 
             // Pos: 0xF80
             reader.Stream.Position = 0xF80;
@@ -249,14 +283,6 @@ namespace SceneGate.Ekona.Containers.Rom
             info.Arm7iMac = reader.ReadHMACSHA1();
             reader.Stream.Position += 0x28; // HMAC for whitelist DS games
             info.Arm9Mac = reader.ReadHMACSHA1();
-        }
-
-        private static void ValidateChecksums(DataStream stream, ProgramInfo info)
-        {
-            // We don't validate the checksum of the secure area as it's outside the header. Same for HMAC.
-            var crcGen = new NitroCrcGenerator();
-            info.ChecksumLogo.Validate(crcGen.GenerateCrc16(stream, 0xC0, 0x9C));
-            info.ChecksumHeader.Validate(crcGen.GenerateCrc16(stream, 0x00, 0x15E));
         }
 
         private static GlobalMemoryBankSettings[] ReadGlobalMemoryBankSettings(DataReader reader)
