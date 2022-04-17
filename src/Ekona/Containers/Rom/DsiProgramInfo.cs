@@ -60,41 +60,90 @@ public class DsiProgramInfo
 
     public uint Arm7ScfgExt7Setting { get; set; }
 
+    /// <summary>
+    /// Gets or sets the start of the RAM address for the ARM9i program.
+    /// </summary>
     public uint Arm9iRamAddress { get; set; }
 
-    public uint SdDeviceListArm7RamAddress { get; set; }
+    /// <summary>
+    /// Gets or sets the SD/eMMC device list ARM7 RAM address.
+    /// 0x400 bytes initialized by the firmware.
+    /// </summary>
+    public uint StorageDeviceListArm7RamAddress { get; set; }
 
+    /// <summary>
+    /// Gets or sets the start of the RAM address for the ARM7i program.
+    /// </summary>
     public uint Arm7iRamAddress { get; set; }
 
-    public int SdShared200Length { get; set; }
+    /// <summary>
+    /// Gets or sets the length for the file in SD/eMMC "shared2/0000".
+    /// </summary>
+    public int StorageShared20Length { get; set; }
 
-    public int SdShared201Length { get; set; }
+    /// <summary>
+    /// Gets or sets the length for the file in SD/eMMC "shared2/0001".
+    /// </summary>
+    public int StorageShared21Length { get; set; }
 
+    /// <summary>
+    /// Gets or sets the version of the EULA agreement.
+    /// </summary>
     public byte EulaVersion { get; set; }
 
+    /// <summary>
+    /// Gets or sets the use ratings.
+    /// </summary>
     public byte UseRatings { get; set; }
 
-    public int SdShared202Length { get; set; }
+    /// <summary>
+    /// Gets or sets the length for the file in SD/eMMC "shared2/0002".
+    /// </summary>
+    public int StorageShared22Length { get; set; }
 
-    public int SdShared203Length { get; set; }
+    /// <summary>
+    /// Gets or sets the length for the file in SD/eMMC "shared2/0003".
+    /// </summary>
+    public int StorageShared23Length { get; set; }
 
-    public int SdShared204Length { get; set; }
+    /// <summary>
+    /// Gets or sets the length for the file in SD/eMMC "shared2/0004".
+    /// </summary>
+    public int StorageShared24Length { get; set; }
 
-    public int SdShared205Length { get; set; }
+    /// <summary>
+    /// Gets or sets the length for the file in SD/eMMC "shared2/0005".
+    /// </summary>
+    public int StorageShared25Length { get; set; }
 
+    /// <summary>
+    /// Gets or sets the offset in the ARM9i program to the code parameters.
+    /// </summary>
     public uint Arm9iParametersTableOffset { get; set; }
 
+    /// <summary>
+    /// Gets or sets the offset in the ARM7i program to the code parameters.
+    /// </summary>
     public uint Arm7iParametersTableOffset { get; set; }
 
     public int ModcryptArea1Target { get; set; }
 
     public int ModcryptArea2Target { get; set; }
 
+    /// <summary>
+    /// Gets or sets the title ID of the program (similar to 3DS).
+    /// </summary>
     public ulong TitleId { get; set; }
 
-    public uint SdPublicSaveLength { get; set; }
+    /// <summary>
+    /// Gets or sets the length of the "public.sav" file for DSiWare.
+    /// </summary>
+    public uint StoragePublicSaveLength { get; set; }
 
-    public uint SdPrivateSaveLength { get; set; }
+    /// <summary>
+    /// Gets or sets the length of the "private.sav" file for DSiWare.
+    /// </summary>
+    public uint StoragePrivateSaveLength { get; set; }
 
     public byte AgeRatingCero { get; set; }
 

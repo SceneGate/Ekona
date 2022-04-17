@@ -27,15 +27,15 @@ public enum DeviceUnitKind
     /// <summary>
     /// DS only game.
     /// </summary>
-    DS,
+    DS = 0,
 
     /// <summary>
     /// DSi game compatible on DS units too.
     /// </summary>
-    DSiCompatible,
+    DSiEnhanced = 2,
 
     /// <summary>
     /// DSi exclusive game.
     /// </summary>
-    DSi,
+    DSiExclusive = 3,
 }

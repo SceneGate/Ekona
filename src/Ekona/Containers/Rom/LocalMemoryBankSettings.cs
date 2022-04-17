@@ -38,7 +38,7 @@ public class LocalMemoryBankSettings
     /// <remarks>
     /// According to existing research:
     /// MBK6: 0 or 1 = 64 KB /slot0, 2 = 128 KB / slot0-2, 3 = 256 KB / slot0-3
-    /// MBK7-8: 0 = 32 KB / slot0, 1 = 64 KB / slot0-1, 2 = 128 KB / slot0-3, 3 = 256 KB / slot0-7
+    /// MBK7-8: 0 = 32 KB / slot0, 1 = 64 KB / slot0-1, 2 = 128 KB / slot0-3, 3 = 256 KB / slot0-7.
     /// </remarks>
     public int ImageSize { get; set; }
 

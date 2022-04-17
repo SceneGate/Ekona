@@ -84,6 +84,147 @@ namespace SceneGate.Ekona.Containers.Rom
             info.ChecksumHeader.Validate(crcGen.GenerateCrc16(stream, 0x00, 0x15E));
         }
 
+        private static void ReadDsiFields(DataReader reader, RomHeader header)
+        {
+            DsiProgramInfo info = header.ProgramInfo.DsiInfo;
+            RomSectionInfo sections = header.SectionInfo;
+
+            // Pos: 0x180
+            reader.Stream.Position = 0x180;
+            info.GlobalMemoryBanks = ReadGlobalMemoryBankSettings(reader);
+
+            // Pos: 0x194
+            info.LocalMemoryBanksArm9 = ReadLocalMemoryBankSettings(reader);
+
+            // Pos: 0x1A0
+            info.LocalMemoryBanksArm7 = ReadLocalMemoryBankSettings(reader);
+            info.GlobalMbk9Settings = reader.ReadInt24();
+            info.GlobalWramCntSettings = reader.ReadByte();
+
+            // Pos: 0x1B0
+            header.ProgramInfo.Region = (ProgramRegions)reader.ReadUInt32();
+            info.AccessControl = reader.ReadUInt32();
+            info.Arm7ScfgExt7Setting = reader.ReadUInt32();
+            reader.Stream.Position += 4; // ProgramFeatures flags read with DS fields
+
+            // Pos: 0x1C0
+            sections.Arm9iOffset = reader.ReadUInt32();
+            reader.Stream.Position += 4; // reserved
+            info.Arm9iRamAddress = reader.ReadUInt32();
+            sections.Arm9iSize = reader.ReadUInt32();
+
+            // Pos: 0x1D0
+            sections.Arm7iOffset = reader.ReadUInt32();
+            info.StorageDeviceListArm7RamAddress = reader.ReadUInt32();
+            info.Arm7iRamAddress = reader.ReadUInt32();
+            sections.Arm7iSize = reader.ReadUInt32();
+
+            // Pos: 0x1E0
+            sections.DigestNitroOffset = reader.ReadUInt32();
+            sections.DigestNitroLength = reader.ReadUInt32();
+            sections.DigestTwilightOffset = reader.ReadUInt32();
+            sections.DigestTwilightLength = reader.ReadUInt32();
+
+            // Pos: 0x1F0
+            sections.DigestSectorHashtableOffset = reader.ReadUInt32();
+            sections.DigestSectorHashtableLength = reader.ReadUInt32();
+            sections.DigestBlockHashtableOffset = reader.ReadUInt32();
+            sections.DigestBlockHashtableLength = reader.ReadUInt32();
+
+            // Pos: 0x200
+            sections.DigestSectorSize = reader.ReadUInt32();
+            sections.DigestBlockSectorCount = reader.ReadUInt32();
+            sections.BannerLength = reader.ReadUInt32();
+            info.StorageShared20Length = reader.ReadByte();
+            info.StorageShared21Length = reader.ReadByte();
+            info.EulaVersion = reader.ReadByte();
+            info.UseRatings = reader.ReadByte();
+
+            // Pos: 0x210
+            sections.DsiRomLength = reader.ReadUInt32();
+            info.StorageShared22Length = reader.ReadByte();
+            info.StorageShared23Length = reader.ReadByte();
+            info.StorageShared24Length = reader.ReadByte();
+            info.StorageShared25Length = reader.ReadByte();
+            info.Arm9iParametersTableOffset = reader.ReadUInt32();
+            info.Arm7iParametersTableOffset = reader.ReadUInt32();
+
+            // Pos: 0x220
+            sections.ModcryptArea1Offset = reader.ReadUInt32();
+            sections.ModcryptArea1Length = reader.ReadUInt32();
+            sections.ModcryptArea2Offset = reader.ReadUInt32();
+            sections.ModcryptArea2Length = reader.ReadUInt32();
+
+            // Pos: 0x230
+            info.TitleId = reader.ReadUInt64();
+            info.StoragePublicSaveLength = reader.ReadUInt32();
+            info.StoragePrivateSaveLength = reader.ReadUInt32();
+
+            // Pos: 0x2F0
+            reader.Stream.Position = 0x2F0;
+            info.AgeRatingCero = reader.ReadByte();
+            info.AgeRatingEsrb = reader.ReadByte();
+            reader.Stream.Position++; // reserved
+            info.AgeRatingUsk = reader.ReadByte();
+            info.AgeRatingPegiEurope = reader.ReadByte();
+            reader.Stream.Position++; // reserved
+            info.AgeRatingPegiPortugal = reader.ReadByte();
+            info.AgeRatingPegiUk = reader.ReadByte();
+            info.AgeRatingAgcb = reader.ReadByte();
+            info.AgeRatingGrb = reader.ReadByte();
+            reader.Stream.Position += 6; // reserved
+
+            // Pos: 0x300
+            info.Arm9SecureMac = reader.ReadHMACSHA1();
+            info.Arm7Mac = reader.ReadHMACSHA1();
+            info.DigestMain = reader.ReadHMACSHA1();
+            reader.Stream.Position += 0x14; // Banner HMAC already read with DS fields
+            info.Arm9iMac = reader.ReadHMACSHA1();
+            info.Arm7iMac = reader.ReadHMACSHA1();
+            reader.Stream.Position += 0x28; // HMAC for whitelist DS games
+            info.Arm9Mac = reader.ReadHMACSHA1();
+        }
+
+        private static GlobalMemoryBankSettings[] ReadGlobalMemoryBankSettings(DataReader reader)
+        {
+            var settings = new GlobalMemoryBankSettings[5 * 4];
+            for (int i = 0; i < settings.Length; i++) {
+                byte data = reader.ReadByte();
+                settings[i] = new GlobalMemoryBankSettings {
+                    Processor = (MemoryBankProcessor)(data & 0x3),
+                    OffsetSlot = (byte)((data >> 2) & 0x7),
+                    Enabled = (data >> 7) == 1,
+                };
+            }
+
+            return settings;
+        }
+
+        private static LocalMemoryBankSettings[] ReadLocalMemoryBankSettings(DataReader reader)
+        {
+            var settings = new LocalMemoryBankSettings[3];
+
+            // MBK6 - WRAM A
+            uint mbk6 = reader.ReadUInt32();
+            settings[0] = new LocalMemoryBankSettings {
+                StartAddressSlot = (int)((mbk6 >> 4) & 0xFF),
+                ImageSize = (int)((mbk6 >> 12) & 0x3),
+                EndAddressSlot = (int)((mbk6 >> 20) & 0x1FF),
+            };
+
+            // MBK 7 and 8 - WRAM B and C
+            for (int i = 0; i < 2; i++) {
+                uint data = reader.ReadUInt32();
+                settings[i + 1] = new LocalMemoryBankSettings {
+                    StartAddressSlot = (int)((data >> 3) & 0x1FF),
+                    ImageSize = (int)((data >> 12) & 0x3),
+                    EndAddressSlot = (int)((data >> 19) & 0x3FF),
+                };
+            }
+
+            return settings;
+        }
+
         private void ReadDsFields(DataReader reader, RomHeader header)
         {
             // Pos: 0x00
@@ -100,14 +241,14 @@ namespace SceneGate.Ekona.Containers.Rom
 
             if (header.ProgramInfo.UnitCode == DeviceUnitKind.DS) {
                 byte region = reader.ReadByte();
-                header.ProgramInfo.Region = ProgramRegion.Normal;
+                header.ProgramInfo.Region = ProgramRegions.NitroBase;
 
                 if ((region & 0x80) != 0) {
-                    header.ProgramInfo.Region |= ProgramRegion.China;
+                    header.ProgramInfo.Region |= ProgramRegions.China;
                 }
 
                 if ((region & 0x40) != 0) {
-                    header.ProgramInfo.Region |= ProgramRegion.Korea;
+                    header.ProgramInfo.Region |= ProgramRegions.Korea;
                 }
             } else {
                 header.ProgramInfo.DsiInfo.StartJumpKind = (ProgramStartJumpKind)reader.ReadByte();
@@ -197,147 +338,6 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0xF80
             reader.Stream.Position = 0xF80;
             header.ProgramInfo.Signature = reader.ReadSignatureSHA1RSA();
-        }
-
-        private static void ReadDsiFields(DataReader reader, RomHeader header)
-        {
-            DsiProgramInfo info = header.ProgramInfo.DsiInfo;
-            RomSectionInfo sections = header.SectionInfo;
-
-            // Pos: 0x180
-            reader.Stream.Position = 0x180;
-            info.GlobalMemoryBanks = ReadGlobalMemoryBankSettings(reader);
-
-            // Pos: 0x194
-            info.LocalMemoryBanksArm9 = ReadLocalMemoryBankSettings(reader);
-
-            // Pos: 0x1A0
-            info.LocalMemoryBanksArm7 = ReadLocalMemoryBankSettings(reader);
-            info.GlobalMbk9Settings = reader.ReadInt24();
-            info.GlobalWramCntSettings = reader.ReadByte();
-
-            // Pos: 0x1B0
-            header.ProgramInfo.Region = (ProgramRegion)reader.ReadUInt32();
-            info.AccessControl = reader.ReadUInt32();
-            info.Arm7ScfgExt7Setting = reader.ReadUInt32();
-            reader.Stream.Position += 4; // ProgramFeatures flags read with DS fields
-
-            // Pos: 0x1C0
-            sections.Arm9iOffset = reader.ReadUInt32();
-            reader.Stream.Position += 4; // reserved
-            info.Arm9iRamAddress = reader.ReadUInt32();
-            sections.Arm9iSize = reader.ReadUInt32();
-
-            // Pos: 0x1D0
-            sections.Arm7iOffset = reader.ReadUInt32();
-            info.SdDeviceListArm7RamAddress = reader.ReadUInt32();
-            info.Arm7iRamAddress = reader.ReadUInt32();
-            sections.Arm7iSize = reader.ReadUInt32();
-
-            // Pos: 0x1E0
-            sections.DigestNitroOffset = reader.ReadUInt32();
-            sections.DigestNitroLength = reader.ReadUInt32();
-            sections.DigestTwilightOffset = reader.ReadUInt32();
-            sections.DigestTwilightLength = reader.ReadUInt32();
-
-            // Pos: 0x1F0
-            sections.DigestSectorHashtableOffset = reader.ReadUInt32();
-            sections.DigestSectorHashtableLength = reader.ReadUInt32();
-            sections.DigestBlockHashtableOffset = reader.ReadUInt32();
-            sections.DigestBlockHashtableLength = reader.ReadUInt32();
-
-            // Pos: 0x200
-            sections.DigestSectorSize = reader.ReadUInt32();
-            sections.DigestBlockSectorCount = reader.ReadUInt32();
-            sections.BannerLength = reader.ReadUInt32();
-            info.SdShared200Length = reader.ReadByte();
-            info.SdShared201Length = reader.ReadByte();
-            info.EulaVersion = reader.ReadByte();
-            info.UseRatings = reader.ReadByte();
-
-            // Pos: 0x210
-            sections.DsiRomLength = reader.ReadUInt32();
-            info.SdShared202Length = reader.ReadByte();
-            info.SdShared203Length = reader.ReadByte();
-            info.SdShared204Length = reader.ReadByte();
-            info.SdShared205Length = reader.ReadByte();
-            info.Arm9iParametersTableOffset = reader.ReadUInt32();
-            info.Arm7iParametersTableOffset = reader.ReadUInt32();
-
-            // Pos: 0x220
-            sections.ModcryptArea1Offset = reader.ReadUInt32();
-            sections.ModcryptArea1Length = reader.ReadUInt32();
-            sections.ModcryptArea2Offset = reader.ReadUInt32();
-            sections.ModcryptArea2Length = reader.ReadUInt32();
-
-            // Pos: 0x230
-            info.TitleId = reader.ReadUInt64();
-            info.SdPublicSaveLength = reader.ReadUInt32();
-            info.SdPrivateSaveLength = reader.ReadUInt32();
-
-            // Pos: 0x2F0
-            reader.Stream.Position = 0x2F0;
-            info.AgeRatingCero = reader.ReadByte();
-            info.AgeRatingEsrb = reader.ReadByte();
-            reader.Stream.Position++; // reserved
-            info.AgeRatingUsk = reader.ReadByte();
-            info.AgeRatingPegiEurope = reader.ReadByte();
-            reader.Stream.Position++; // reserved
-            info.AgeRatingPegiPortugal = reader.ReadByte();
-            info.AgeRatingPegiUk = reader.ReadByte();
-            info.AgeRatingAgcb = reader.ReadByte();
-            info.AgeRatingGrb = reader.ReadByte();
-            reader.Stream.Position += 6; // reserved
-
-            // Pos: 0x300
-            info.Arm9SecureMac = reader.ReadHMACSHA1();
-            info.Arm7Mac = reader.ReadHMACSHA1();
-            info.DigestMain = reader.ReadHMACSHA1();
-            reader.Stream.Position += 0x14; // Banner HMAC already read with DS fields
-            info.Arm9iMac = reader.ReadHMACSHA1();
-            info.Arm7iMac = reader.ReadHMACSHA1();
-            reader.Stream.Position += 0x28; // HMAC for whitelist DS games
-            info.Arm9Mac = reader.ReadHMACSHA1();
-        }
-
-        private static GlobalMemoryBankSettings[] ReadGlobalMemoryBankSettings(DataReader reader)
-        {
-            var settings = new GlobalMemoryBankSettings[5 * 4];
-            for (int i = 0; i < settings.Length; i++) {
-                byte data = reader.ReadByte();
-                settings[i] = new GlobalMemoryBankSettings {
-                    Processor = (MemoryBankProcessor)(data & 0x3),
-                    OffsetSlot = (byte)((data >> 2) & 0x7),
-                    Enabled = (data >> 7) == 1,
-                };
-            }
-
-            return settings;
-        }
-
-        private static LocalMemoryBankSettings[] ReadLocalMemoryBankSettings(DataReader reader)
-        {
-            var settings = new LocalMemoryBankSettings[3];
-
-            // MBK6 - WRAM A
-            uint mbk6 = reader.ReadUInt32();
-            settings[0] = new LocalMemoryBankSettings {
-                StartAddressSlot = (int)((mbk6 >> 4) & 0xFF),
-                ImageSize = (int)((mbk6 >> 12) & 0x3),
-                EndAddressSlot = (int)((mbk6 >> 20) & 0x1FF),
-            };
-
-            // MBK 7 and 8 - WRAM B and C
-            for (int i = 0; i < 2; i++) {
-                uint data = reader.ReadUInt32();
-                settings[i + 1] = new LocalMemoryBankSettings {
-                    StartAddressSlot = (int)((data >> 3) & 0x1FF),
-                    ImageSize = (int)((data >> 12) & 0x3),
-                    EndAddressSlot = (int)((data >> 19) & 0x3FF),
-                };
-            }
-
-            return settings;
         }
     }
 }

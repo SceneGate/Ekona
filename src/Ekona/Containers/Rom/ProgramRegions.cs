@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SceneGate.Ekona.Containers.Rom;
 
@@ -25,12 +26,14 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// Supported regions for the program.
 /// </summary>
 [Flags]
-public enum ProgramRegion : uint
+[SuppressMessage("", "S4070", Justification = "RegionFree is a combination of every possible bit")]
+public enum ProgramRegions : uint
 {
     /// <summary>
-    /// Typical Nintendo supported regions (DS only).
+    /// Typical Nintendo supported regions for DS.
     /// </summary>
-    Normal = 0,
+    [SuppressMessage("", "S2346", Justification = "In this context makes more sense than None.")]
+    NitroBase = 0,
 
     /// <summary>
     /// Japan region (DSi only).

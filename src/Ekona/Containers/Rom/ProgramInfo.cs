@@ -71,7 +71,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <summary>
         /// Gets or sets the supported region.
         /// </summary>
-        public ProgramRegion Region { get; set; }
+        public ProgramRegions Region { get; set; }
 
         /// <summary>
         /// Gets or sets the version of the program.
