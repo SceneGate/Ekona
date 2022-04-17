@@ -45,7 +45,7 @@ internal static class IOExtensions
     /// </summary>
     /// <param name="reader">The data reader with the stream to read the HMAC.</param>
     /// <returns>The information about the HMAC verification.</returns>
-    public static HashInfo ReadHMACSHA1(this DataReader reader)
+    public static HashInfo ReadHmacSha1(this DataReader reader)
     {
         byte[] hmac = reader.ReadBytes(0x14);
         return new HashInfo("HMAC-SHA1", hmac);
@@ -56,7 +56,7 @@ internal static class IOExtensions
     /// </summary>
     /// <param name="reader">The data reader with the stream to read the signature.</param>
     /// <returns>The information about the signature.</returns>
-    public static HashInfo ReadSignatureSHA1RSA(this DataReader reader)
+    public static HashInfo ReadSignatureSha1Rsa(this DataReader reader)
     {
         byte[] signature = reader.ReadBytes(128);
         return new HashInfo("RawRSA-SHA1", signature);

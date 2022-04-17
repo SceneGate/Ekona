@@ -103,8 +103,8 @@ namespace SceneGate.Ekona.Containers.Rom
 
             // Pos: 0x1B0
             header.ProgramInfo.Region = (ProgramRegions)reader.ReadUInt32();
-            info.AccessControl = reader.ReadUInt32();
-            info.Arm7ScfgExt7Setting = reader.ReadUInt32();
+            info.AccessControl = (TwilightAccessControl)reader.ReadUInt32();
+            info.ScfgExtendedArm7 = (ScfgExtendedFeaturesArm7)reader.ReadUInt32();
             reader.Stream.Position += 4; // ProgramFeatures flags read with DS fields
 
             // Pos: 0x1C0
@@ -152,8 +152,10 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0x220
             sections.ModcryptArea1Offset = reader.ReadUInt32();
             sections.ModcryptArea1Length = reader.ReadUInt32();
+            info.ModcryptArea1Target = GetModcryptTarget(sections.ModcryptArea1Offset, sections);
             sections.ModcryptArea2Offset = reader.ReadUInt32();
             sections.ModcryptArea2Length = reader.ReadUInt32();
+            info.ModcryptArea2Target = GetModcryptTarget(sections.ModcryptArea2Offset, sections);
 
             // Pos: 0x230
             info.TitleId = reader.ReadUInt64();
@@ -162,27 +164,27 @@ namespace SceneGate.Ekona.Containers.Rom
 
             // Pos: 0x2F0
             reader.Stream.Position = 0x2F0;
-            info.AgeRatingCero = reader.ReadByte();
-            info.AgeRatingEsrb = reader.ReadByte();
+            info.AgeRatingCero = DeserializeAgeRating(reader.ReadByte());
+            info.AgeRatingEsrb = DeserializeAgeRating(reader.ReadByte());
             reader.Stream.Position++; // reserved
-            info.AgeRatingUsk = reader.ReadByte();
-            info.AgeRatingPegiEurope = reader.ReadByte();
+            info.AgeRatingUsk = DeserializeAgeRating(reader.ReadByte());
+            info.AgeRatingPegiEurope = DeserializeAgeRating(reader.ReadByte());
             reader.Stream.Position++; // reserved
-            info.AgeRatingPegiPortugal = reader.ReadByte();
-            info.AgeRatingPegiUk = reader.ReadByte();
-            info.AgeRatingAgcb = reader.ReadByte();
-            info.AgeRatingGrb = reader.ReadByte();
+            info.AgeRatingPegiPortugal = DeserializeAgeRating(reader.ReadByte());
+            info.AgeRatingPegiUk = DeserializeAgeRating(reader.ReadByte());
+            info.AgeRatingAgcb = DeserializeAgeRating(reader.ReadByte());
+            info.AgeRatingGrb = DeserializeAgeRating(reader.ReadByte());
             reader.Stream.Position += 6; // reserved
 
             // Pos: 0x300
-            info.Arm9SecureMac = reader.ReadHMACSHA1();
-            info.Arm7Mac = reader.ReadHMACSHA1();
-            info.DigestMain = reader.ReadHMACSHA1();
+            info.Arm9SecureMac = reader.ReadHmacSha1();
+            info.Arm7Mac = reader.ReadHmacSha1();
+            info.DigestMain = reader.ReadHmacSha1();
             reader.Stream.Position += 0x14; // Banner HMAC already read with DS fields
-            info.Arm9iMac = reader.ReadHMACSHA1();
-            info.Arm7iMac = reader.ReadHMACSHA1();
+            info.Arm9iMac = reader.ReadHmacSha1();
+            info.Arm7iMac = reader.ReadHmacSha1();
             reader.Stream.Position += 0x28; // HMAC for whitelist DS games
-            info.Arm9Mac = reader.ReadHMACSHA1();
+            info.Arm9Mac = reader.ReadHmacSha1();
         }
 
         private static GlobalMemoryBankSettings[] ReadGlobalMemoryBankSettings(DataReader reader)
@@ -225,7 +227,30 @@ namespace SceneGate.Ekona.Containers.Rom
             return settings;
         }
 
-        private void ReadDsFields(DataReader reader, RomHeader header)
+        private static ModcryptTargetKind GetModcryptTarget(uint offset, RomSectionInfo info)
+        {
+            if (offset == 0)
+                return ModcryptTargetKind.None;
+            if (offset == info.Arm9Offset)
+                return ModcryptTargetKind.Arm9;
+            if (offset == info.Arm7Offset)
+                return ModcryptTargetKind.Arm7;
+            if (offset == info.Arm9iOffset)
+                return ModcryptTargetKind.Arm9i;
+            if (offset == info.Arm7iOffset)
+                return ModcryptTargetKind.Arm7i;
+
+            return ModcryptTargetKind.Unknown;
+        }
+
+        private static AgeRating DeserializeAgeRating(byte value) =>
+            new AgeRating {
+                Enabled = (value >> 7) == 1,
+                Prohibited = (value >> 6) == 1,
+                Age = value & 0x1F,
+            };
+
+    private void ReadDsFields(DataReader reader, RomHeader header)
         {
             // Pos: 0x00
             header.ProgramInfo.GameTitle = reader.ReadString(12).Replace("\0", string.Empty);
@@ -328,16 +353,16 @@ namespace SceneGate.Ekona.Containers.Rom
 
             // Pos: 0x33C
             reader.Stream.Position = 0x33C;
-            header.ProgramInfo.BannerMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.BannerMac = reader.ReadHmacSha1();
 
             // Pos: 0x378
             reader.Stream.Position = 0x378;
-            header.ProgramInfo.NitroProgramMac = reader.ReadHMACSHA1();
-            header.ProgramInfo.NitroOverlaysMac = reader.ReadHMACSHA1();
+            header.ProgramInfo.NitroProgramMac = reader.ReadHmacSha1();
+            header.ProgramInfo.NitroOverlaysMac = reader.ReadHmacSha1();
 
             // Pos: 0xF80
             reader.Stream.Position = 0xF80;
-            header.ProgramInfo.Signature = reader.ReadSignatureSHA1RSA();
+            header.ProgramInfo.Signature = reader.ReadSignatureSha1Rsa();
         }
     }
 }

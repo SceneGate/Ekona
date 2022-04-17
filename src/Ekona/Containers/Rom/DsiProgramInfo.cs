@@ -56,9 +56,15 @@ public class DsiProgramInfo
     /// </summary>
     public ProgramStartJumpKind StartJumpKind { get; set; }
 
-    public uint AccessControl { get; set; }
+    /// <summary>
+    /// Gets or sets the access control for DSi features.
+    /// </summary>
+    public TwilightAccessControl AccessControl { get; set; }
 
-    public uint Arm7ScfgExt7Setting { get; set; }
+    /// <summary>
+    /// Gets or sets some extended features of DSi ARM7 control register (SCFG).
+    /// </summary>
+    public ScfgExtendedFeaturesArm7 ScfgExtendedArm7 { get; set; }
 
     /// <summary>
     /// Gets or sets the start of the RAM address for the ARM9i program.
@@ -126,9 +132,15 @@ public class DsiProgramInfo
     /// </summary>
     public uint Arm7iParametersTableOffset { get; set; }
 
-    public int ModcryptArea1Target { get; set; }
+    /// <summary>
+    /// Gets or sets the first target area to have encryption modcrypt.
+    /// </summary>
+    public ModcryptTargetKind ModcryptArea1Target { get; set; }
 
-    public int ModcryptArea2Target { get; set; }
+    /// <summary>
+    /// Gets or sets the second target area to have encryption modcrypt.
+    /// </summary>
+    public ModcryptTargetKind ModcryptArea2Target { get; set; }
 
     /// <summary>
     /// Gets or sets the title ID of the program (similar to 3DS).
@@ -145,21 +157,45 @@ public class DsiProgramInfo
     /// </summary>
     public uint StoragePrivateSaveLength { get; set; }
 
-    public byte AgeRatingCero { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating CERO (Japan).
+    /// </summary>
+    public AgeRating AgeRatingCero { get; set; }
 
-    public byte AgeRatingEsrb { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating ESRB (US / Canada).
+    /// </summary>
+    public AgeRating AgeRatingEsrb { get; set; }
 
-    public byte AgeRatingUsk { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating USK (Germany).
+    /// </summary>
+    public AgeRating AgeRatingUsk { get; set; }
 
-    public byte AgeRatingPegiEurope { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating PEGI (Pan-Europe).
+    /// </summary>
+    public AgeRating AgeRatingPegiEurope { get; set; }
 
-    public byte AgeRatingPegiPortugal { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating PEGI for Portugal.
+    /// </summary>
+    public AgeRating AgeRatingPegiPortugal { get; set; }
 
-    public byte AgeRatingPegiUk { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating PEGI and BBFC (UK).
+    /// </summary>
+    public AgeRating AgeRatingPegiUk { get; set; }
 
-    public byte AgeRatingAgcb { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating AGCB (Australia).
+    /// </summary>
+    public AgeRating AgeRatingAgcb { get; set; }
 
-    public byte AgeRatingGrb { get; set; }
+    /// <summary>
+    /// Gets or sets the age rating GRB (South Korea).
+    /// </summary>
+    public AgeRating AgeRatingGrb { get; set; }
 
     public HashInfo Arm9SecureMac { get; set; }
 

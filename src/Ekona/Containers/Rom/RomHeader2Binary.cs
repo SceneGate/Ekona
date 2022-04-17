@@ -82,8 +82,8 @@ public class RomHeader2Binary :
         writer.Write(info.GlobalMbk9Settings | (info.GlobalWramCntSettings << 24));
 
         writer.Write((uint)source.ProgramInfo.Region);
-        writer.Write(info.AccessControl);
-        writer.Write(info.Arm7ScfgExt7Setting);
+        writer.Write((uint)info.AccessControl);
+        writer.Write((uint)info.ScfgExtendedArm7);
         writer.Stream.Position += 4; // ProgramFeatures written with DS fields
 
         writer.Write(sections.Arm9iOffset);
@@ -129,16 +129,16 @@ public class RomHeader2Binary :
         writer.Write(info.StoragePrivateSaveLength);
 
         writer.Stream.Position = 0x2F0;
-        writer.Write(info.AgeRatingCero);
-        writer.Write(info.AgeRatingEsrb);
+        writer.Write(SerializeAgeRating(info.AgeRatingCero));
+        writer.Write(SerializeAgeRating(info.AgeRatingEsrb));
         writer.Write((byte)0);
-        writer.Write(info.AgeRatingUsk);
-        writer.Write(info.AgeRatingPegiEurope);
+        writer.Write(SerializeAgeRating(info.AgeRatingUsk));
+        writer.Write(SerializeAgeRating(info.AgeRatingPegiEurope));
         writer.Write((byte)0);
-        writer.Write(info.AgeRatingPegiPortugal);
-        writer.Write(info.AgeRatingPegiUk);
-        writer.Write(info.AgeRatingAgcb);
-        writer.Write(info.AgeRatingGrb);
+        writer.Write(SerializeAgeRating(info.AgeRatingPegiPortugal));
+        writer.Write(SerializeAgeRating(info.AgeRatingPegiUk));
+        writer.Write(SerializeAgeRating(info.AgeRatingAgcb));
+        writer.Write(SerializeAgeRating(info.AgeRatingGrb));
 
         writer.Stream.Position = 0x300;
         writer.Write(info.Arm9SecureMac.Hash);
@@ -195,6 +195,14 @@ public class RomHeader2Binary :
             data |= (uint)(setting.EndAddressSlot << 19);
             writer.Write(data);
         }
+    }
+
+    private static byte SerializeAgeRating(AgeRating rating)
+    {
+        byte value = (byte)(rating.Age & 0x1F);
+        value |= (byte)((rating.Prohibited ? 1 : 0) << 6);
+        value |= (byte)((rating.Enabled ? 1 : 0) << 7);
+        return value;
     }
 
     private void WriteDsFields(DataWriter writer, RomHeader source)
