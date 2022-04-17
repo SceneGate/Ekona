@@ -73,7 +73,6 @@ namespace SceneGate.Ekona.Containers.Rom
             ReadBanner();
             ReadFat();
             ReadPrograms();
-            // TODO: Decrypt programs with modcrypt #11
             ReadProgramCodeParameters();
             ReadFileSystem();
             ValidateSignatures();
@@ -134,6 +133,7 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ReadPrograms()
         {
+            // TODO: Decrypt programs with modcrypt #11
             var arm9 = new BinaryFormat(reader.Stream, header.SectionInfo.Arm9Offset, header.SectionInfo.Arm9Size);
             rom.System.Children["arm9"].ChangeFormat(arm9);
             ReadOverlayTable(
