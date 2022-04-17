@@ -31,6 +31,7 @@ namespace SceneGate.Ekona.Containers.Rom
         IInitializer<DsiKeyStore>,
         IConverter<IBinary, RomHeader>
     {
+        private const int SecureAreaLength = 16 * 1024;
         private DsiKeyStore keyStore;
 
         /// <summary>
@@ -152,10 +153,17 @@ namespace SceneGate.Ekona.Containers.Rom
             // Pos: 0x220
             sections.ModcryptArea1Offset = reader.ReadUInt32();
             sections.ModcryptArea1Length = reader.ReadUInt32();
-            info.ModcryptArea1Target = GetModcryptTarget(sections.ModcryptArea1Offset, sections);
+            info.ModcryptArea1Target = GetModcryptTarget(
+                sections.ModcryptArea1Offset,
+                sections.ModcryptArea1Length,
+                sections);
+
             sections.ModcryptArea2Offset = reader.ReadUInt32();
             sections.ModcryptArea2Length = reader.ReadUInt32();
-            info.ModcryptArea2Target = GetModcryptTarget(sections.ModcryptArea2Offset, sections);
+            info.ModcryptArea2Target = GetModcryptTarget(
+                sections.ModcryptArea2Offset,
+                sections.ModcryptArea2Length,
+                sections);
 
             // Pos: 0x230
             info.TitleId = reader.ReadUInt64();
@@ -227,7 +235,7 @@ namespace SceneGate.Ekona.Containers.Rom
             return settings;
         }
 
-        private static ModcryptTargetKind GetModcryptTarget(uint offset, RomSectionInfo info)
+        private static ModcryptTargetKind GetModcryptTarget(uint offset, uint length, RomSectionInfo info)
         {
             if (offset == 0)
                 return ModcryptTargetKind.None;
@@ -235,6 +243,8 @@ namespace SceneGate.Ekona.Containers.Rom
                 return ModcryptTargetKind.Arm9;
             if (offset == info.Arm7Offset)
                 return ModcryptTargetKind.Arm7;
+            if (offset == info.Arm9iOffset && length == SecureAreaLength)
+                return ModcryptTargetKind.Arm9iSecureArea;
             if (offset == info.Arm9iOffset)
                 return ModcryptTargetKind.Arm9i;
             if (offset == info.Arm7iOffset)

@@ -45,6 +45,11 @@ public enum ModcryptTargetKind
     Arm9i,
 
     /// <summary>
+    /// ARM9i (DSi) secure area program only.
+    /// </summary>
+    Arm9iSecureArea,
+
+    /// <summary>
     /// ARM7i (DSi) program.
     /// </summary>
     Arm7i,
