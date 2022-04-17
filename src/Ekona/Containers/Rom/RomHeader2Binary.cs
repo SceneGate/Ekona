@@ -152,9 +152,9 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         RomSectionInfo sections = source.SectionInfo;
 
         writer.Stream.Position = 0x180;
-        writer.Write(info.GlobalMbkSettings);
-        writer.Write(info.LocalMbkArm9Settings);
-        writer.Write(info.LocalMbkArm7Settings);
+        WriteGlobalMemoryBankSettings(writer, info.GlobalMemoryBanks);
+        WriteLocalMemoryBankSettings(writer, info.LocalMemoryBanksArm9);
+        WriteLocalMemoryBankSettings(writer, info.LocalMemoryBanksArm7);
         writer.Write(info.GlobalMbk9Settings | (info.GlobalWramCntSettings << 24));
 
         writer.Write(info.Region);
@@ -225,5 +225,45 @@ public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
         writer.Write(info.Arm7iMac.Hash);
         writer.Stream.Position += 0x28; // DS whitelist macs
         writer.Write(info.Arm9Mac.Hash);
+    }
+
+    private static void WriteGlobalMemoryBankSettings(DataWriter writer, GlobalMemoryBankSettings[] settings)
+    {
+        if (settings is not { Length: 5 * 4 }) {
+            throw new FormatException("Expecting 20 global memory bank settings");
+        }
+
+        for (int i = 0; i < settings.Length; i++) {
+            var setting = settings[i];
+            int maxProcessor = (i == 0) ? 1 : 3;
+            int maxSlot = (i == 0) ? 3 : 7;
+            if ((int)setting.Processor > maxProcessor || setting.OffsetSlot > maxSlot) {
+                throw new ArgumentException($"Invalid global memory bank setting for {i}");
+            }
+
+            int data = (int)setting.Processor;
+            data |= setting.OffsetSlot << 2;
+            data |= (setting.Enabled ? 1 : 0) << 7;
+            writer.Write((byte)data);
+        }
+    }
+
+    private static void WriteLocalMemoryBankSettings(DataWriter writer, LocalMemoryBankSettings[] settings)
+    {
+        if (settings is not { Length: 3 }) {
+            throw new FormatException("Expecting 3 local memory bank settings");
+        }
+
+        for (int i = 0; i < settings.Length; i++) {
+            var setting = settings[i];
+            if (setting.StartAddressSlot > 255 || setting.ImageSize > 3 || setting.EndAddressSlot > 255) {
+                throw new ArgumentException($"Invalid local memory bank setting for {i}");
+            }
+
+            uint data = (uint)(setting.StartAddressSlot << 3);
+            data |= (uint)(setting.ImageSize << 11);
+            data |= (uint)(setting.EndAddressSlot << 18);
+            writer.Write(data);
+        }
     }
 }

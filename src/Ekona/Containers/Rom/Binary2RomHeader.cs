@@ -157,13 +157,13 @@ namespace SceneGate.Ekona.Containers.Rom
 
             // Pos: 0x180
             reader.Stream.Position = 0x180;
-            info.GlobalMbkSettings = reader.ReadBytes(5 * 4);
+            info.GlobalMemoryBanks = ReadGlobalMemoryBankSettings(reader);
 
             // Pos: 0x194
-            info.LocalMbkArm9Settings = reader.ReadBytes(3 * 4);
+            info.LocalMemoryBanksArm9 = ReadLocalMemoryBankSettings(reader);
 
             // Pos: 0x1A0
-            info.LocalMbkArm7Settings = reader.ReadBytes(3 * 4);
+            info.LocalMemoryBanksArm7 = ReadLocalMemoryBankSettings(reader);
             info.GlobalMbk9Settings = reader.ReadInt24();
             info.GlobalWramCntSettings = reader.ReadByte();
 
@@ -257,6 +257,46 @@ namespace SceneGate.Ekona.Containers.Rom
             var crcGen = new NitroCrcGenerator();
             info.ChecksumLogo.Validate(crcGen.GenerateCrc16(stream, 0xC0, 0x9C));
             info.ChecksumHeader.Validate(crcGen.GenerateCrc16(stream, 0x00, 0x15E));
+        }
+
+        private static GlobalMemoryBankSettings[] ReadGlobalMemoryBankSettings(DataReader reader)
+        {
+            var settings = new GlobalMemoryBankSettings[5 * 4];
+            for (int i = 0; i < settings.Length; i++) {
+                byte data = reader.ReadByte();
+                settings[i] = new GlobalMemoryBankSettings {
+                    Processor = (MemoryBankProcessor)(data & 0x3),
+                    OffsetSlot = (byte)((data >> 2) & 0x7),
+                    Enabled = (data >> 7) == 1,
+                };
+            }
+
+            return settings;
+        }
+
+        private static LocalMemoryBankSettings[] ReadLocalMemoryBankSettings(DataReader reader)
+        {
+            var settings = new LocalMemoryBankSettings[3];
+
+            // MBK6 - WRAM A
+            uint mbk6 = reader.ReadUInt32();
+            settings[0] = new LocalMemoryBankSettings {
+                StartAddressSlot = (int)((mbk6 >> 4) & 0xFF),
+                ImageSize = (int)((mbk6 >> 12) & 0x3),
+                EndAddressSlot = (int)((mbk6 >> 20) & 0x1FF),
+            };
+
+            // MBK 7 and 8 - WRAM B and C
+            for (int i = 0; i < 2; i++) {
+                uint data = reader.ReadUInt32();
+                settings[i + 1] = new LocalMemoryBankSettings {
+                    StartAddressSlot = (int)((data >> 3) & 0x1FF),
+                    ImageSize = (int)((data >> 12) & 0x3),
+                    EndAddressSlot = (int)((data >> 19) & 0x3FF),
+                };
+            }
+
+            return settings;
         }
     }
 }

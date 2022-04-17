@@ -1,4 +1,4 @@
-// Copyright(c) 2021 SceneGate
+// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,11 +26,20 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// </summary>
 public class DsiProgramInfo
 {
-    public byte[] GlobalMbkSettings { get; set; }
+    /// <summary>
+    /// Gets or sets the global memory banks settings (MBK 1 - 5) for the DSi extended memory.
+    /// </summary>
+    public GlobalMemoryBankSettings[] GlobalMemoryBanks { get; set; }
 
-    public byte[] LocalMbkArm9Settings { get; set; }
+    /// <summary>
+    /// Gets or sets the local memory banks settings for ARM9 (MBK 6 - 8) for the DSi extended memory.
+    /// </summary>
+    public LocalMemoryBankSettings[] LocalMemoryBanksArm9 { get; set; }
 
-    public byte[] LocalMbkArm7Settings { get; set; }
+    /// <summary>
+    /// Gets or sets the local memory banks settings for ARM7 (MBK 6 - 8) for the DSi extended memory.
+    /// </summary>
+    public LocalMemoryBankSettings[] LocalMemoryBanksArm7 { get; set; }
 
     public int GlobalMbk9Settings { get; set; }
 
