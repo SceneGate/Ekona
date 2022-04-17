@@ -1,15 +1,15 @@
-// Copyright(c) 2022 SceneGate
-//
+// Copyright (c) 2022 SceneGate
+
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,25 +17,50 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
-/// Device unit compatible for the ROM.
+/// Define the control register (SCFG) extended features for DSi ARM7.
 /// </summary>
-public enum DeviceUnitKind
+[Flags]
+[SuppressMessage("", "S4070", Justification = "False positive")]
+public enum ScfgExtendedFeaturesArm7
 {
     /// <summary>
-    /// DS only game.
+    /// No setting set.
     /// </summary>
-    DS = 0,
+    None = 0,
 
     /// <summary>
-    /// DSi game compatible on DS units too.
+    /// Use the revised ARM7 DMA circuit instead of the nitro (DS) one.
     /// </summary>
-    DSiEnhanced = 2,
+    RevisedArm7DmaCircuit = 1 << 0,
 
     /// <summary>
-    /// DSi exclusive game.
+    /// Use the revised sound DMA instead of the nitro (DS) one.
     /// </summary>
-    DSiExclusive = 3,
+    RevisedSoundDma = 1 << 1,
+
+    /// <summary>
+    /// Use the revised sound instead of the nitro (DS) one.
+    /// </summary>
+    RevisedSound = 1 << 2,
+
+    /// <summary>
+    /// Use the extended sound DMA instead of the nitro (DS) one.
+    /// </summary>
+    ExtendedSoundDma = 1 << 10,
+
+    /// <summary>
+    /// Allow access to the SD/eMMC registers.
+    /// </summary>
+    AccessStorageRegisters = 1 << 18,
+
+    /// <summary>
+    /// Allow access to the SCFG/MBK registers.
+    /// </summary>
+    AccessScfgMbkRegisters = 1 << 31,
 }

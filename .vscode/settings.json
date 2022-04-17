@@ -14,8 +14,14 @@
     },
     "prettier.proseWrap": "always",
     "cSpell.words": [
+        "Agcb",
         "cref",
         "Ekona",
-        "HMAC"
+        "ESRB",
+        "HMAC",
+        "NAND",
+        "Pegi",
+        "SCFG",
+        "WRAM"
     ],
 }

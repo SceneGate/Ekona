@@ -69,9 +69,9 @@ namespace SceneGate.Ekona.Containers.Rom
         public DsiCryptoMode DsiCryptoFlags { get; set; }
 
         /// <summary>
-        /// Gets or sets the special game region.
+        /// Gets or sets the supported region.
         /// </summary>
-        public byte Region { get; set; }
+        public ProgramRegions Region { get; set; }
 
         /// <summary>
         /// Gets or sets the version of the program.
@@ -230,6 +230,11 @@ namespace SceneGate.Ekona.Containers.Rom
         /// Only for DSi games and DS games released after the DSi. Otherwise null.
         /// </remarks>
         public HashInfo Signature { get; set; }
+
+        /// <summary>
+        /// Gets or sets the information exclusive to DSi programs.
+        /// </summary>
+        public DsiProgramInfo DsiInfo { get; set; } = new DsiProgramInfo();
 
         /// <summary>
         /// Gets or sets the program code (arm9) parameters.

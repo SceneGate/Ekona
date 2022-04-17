@@ -102,6 +102,15 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 programInfo.Signature.Should().NotBeNull();
                 programInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }
+
+            if (isDsi) {
+                programInfo.DsiInfo.Arm9SecureMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm7Mac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.NotValidated);
+            }
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -116,11 +125,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             var originalStream = new DataStream(node.Stream!, 0, header.SectionInfo.HeaderSize);
             generatedStream.Stream.Length.Should().Be(originalStream.Length);
-
-            // TODO: Enable after adding the DSi flags
-            if (header.ProgramInfo.UnitCode == DeviceUnitKind.DS) {
-                generatedStream.Stream.Compare(originalStream).Should().BeTrue();
-            }
+            generatedStream.Stream.Compare(originalStream).Should().BeTrue();
         }
 
         [TestCaseSource(nameof(GetFiles))]

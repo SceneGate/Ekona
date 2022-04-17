@@ -120,6 +120,15 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 programInfo.NitroProgramMac.IsNull.Should().BeTrue();
                 programInfo.NitroOverlaysMac.IsNull.Should().BeTrue();
                 programInfo.Signature.Status.Should().Be(HashStatus.Valid);
+
+                programInfo.DsiInfo.Arm9SecureMac.Status.Should().Be(HashStatus.Valid);
+                programInfo.DsiInfo.Arm7Mac.Status.Should().Be(HashStatus.Valid);
+                programInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.Valid);
+
+                // TODO: After modcrypt implementation.
+                // programInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Valid)
+                // programInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Valid)
+                programInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Valid);
             }
         }
 
@@ -135,7 +144,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
 
-            // TODO: After implementing DSi fields
+            // TODO: After implementing DSi disgest and armXi
             if (rom.Information.UnitCode == DeviceUnitKind.DS) {
                 generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
             }
@@ -182,13 +191,31 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
                 // Not regenerated but should keep it
                 newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
-                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }
 
             if (isDsi) {
                 // Not regenerated but should keep it
                 newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
-                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+                newInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.Arm9SecureMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9SecureMac.Hash);
+                newInfo.DsiInfo.Arm9SecureMac.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.Arm7Mac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm7Mac.Hash);
+                newInfo.DsiInfo.Arm7Mac.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.DigestMain.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.DigestMain.Hash);
+                newInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.Arm9iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9iMac.Hash);
+                newInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.Arm7iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm7iMac.Hash);
+                newInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.Arm9Mac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9Mac.Hash);
+                newInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.NotValidated);
             }
         }
 
@@ -227,13 +254,30 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
                 // Not regenerated but should keep it
                 newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
-                originalInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+                originalInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }
 
             if (isDsi) {
                 // Not regenerated but should keep it
                 newInfo.Signature.Hash.Should().BeEquivalentTo(originalInfo.Signature.Hash);
-                originalInfo.Signature.Status.Should().Be(HashStatus.NotValidated); // not generated
+                originalInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.Arm9SecureMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9SecureMac.Hash);
+                originalInfo.DsiInfo.Arm9SecureMac.Status.Should().Be(HashStatus.Generated);
+
+                newInfo.DsiInfo.Arm7Mac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm7Mac.Hash);
+                originalInfo.DsiInfo.Arm7Mac.Status.Should().Be(HashStatus.Generated);
+
+                newInfo.DsiInfo.DigestMain.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.DigestMain.Hash);
+                originalInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.Generated);
+
+                // TODO: After modcrypt implementation.
+                // newInfo.DsiInfo.Arm9iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9iMac.Hash)
+                // originalInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Generated)
+                // newInfo.DsiInfo.Arm7iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm7iMac.Hash)
+                // originalInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Generated)
+                newInfo.DsiInfo.Arm9Mac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9Mac.Hash);
+                originalInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Generated);
             }
         }
     }

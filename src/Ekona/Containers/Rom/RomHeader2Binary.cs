@@ -61,6 +61,152 @@ public class RomHeader2Binary :
         var binary = new BinaryFormat();
         var writer = new DataWriter(binary.Stream);
 
+        WriteDsFields(writer, source);
+
+        if (source.ProgramInfo.UnitCode != DeviceUnitKind.DS) {
+            WriteDsiFields(writer, source);
+        }
+
+        return binary;
+    }
+
+    private static void WriteDsiFields(DataWriter writer, RomHeader source)
+    {
+        DsiProgramInfo info = source.ProgramInfo.DsiInfo;
+        RomSectionInfo sections = source.SectionInfo;
+
+        writer.Stream.Position = 0x180;
+        WriteGlobalMemoryBankSettings(writer, info.GlobalMemoryBanks);
+        WriteLocalMemoryBankSettings(writer, info.LocalMemoryBanksArm9);
+        WriteLocalMemoryBankSettings(writer, info.LocalMemoryBanksArm7);
+        writer.Write(info.GlobalMbk9Settings | (info.GlobalWramCntSettings << 24));
+
+        writer.Write((uint)source.ProgramInfo.Region);
+        writer.Write((uint)info.AccessControl);
+        writer.Write((uint)info.ScfgExtendedArm7);
+        writer.Stream.Position += 4; // ProgramFeatures written with DS fields
+
+        writer.Write(sections.Arm9iOffset);
+        writer.Write(0);
+        writer.Write(info.Arm9iRamAddress);
+        writer.Write(sections.Arm9iSize);
+        writer.Write(sections.Arm7iOffset);
+        writer.Write(info.StorageDeviceListArm7RamAddress);
+        writer.Write(info.Arm7iRamAddress);
+        writer.Write(sections.Arm7iSize);
+
+        writer.Write(sections.DigestNitroOffset);
+        writer.Write(sections.DigestNitroLength);
+        writer.Write(sections.DigestTwilightOffset);
+        writer.Write(sections.DigestTwilightLength);
+        writer.Write(sections.DigestSectorHashtableOffset);
+        writer.Write(sections.DigestSectorHashtableLength);
+        writer.Write(sections.DigestBlockHashtableOffset);
+        writer.Write(sections.DigestBlockHashtableLength);
+        writer.Write(sections.DigestSectorSize);
+        writer.Write(sections.DigestBlockSectorCount);
+
+        writer.Write(sections.BannerLength);
+        writer.Write((byte)info.StorageShared20Length);
+        writer.Write((byte)info.StorageShared21Length);
+        writer.Write(info.EulaVersion);
+        writer.Write(info.UseRatings);
+        writer.Write(sections.DsiRomLength);
+        writer.Write((byte)info.StorageShared22Length);
+        writer.Write((byte)info.StorageShared23Length);
+        writer.Write((byte)info.StorageShared24Length);
+        writer.Write((byte)info.StorageShared25Length);
+        writer.Write(info.Arm9iParametersTableOffset);
+        writer.Write(info.Arm7iParametersTableOffset);
+
+        writer.Write(sections.ModcryptArea1Offset);
+        writer.Write(sections.ModcryptArea1Length);
+        writer.Write(sections.ModcryptArea2Offset);
+        writer.Write(sections.ModcryptArea2Length);
+
+        writer.Write(info.TitleId);
+        writer.Write(info.StoragePublicSaveLength);
+        writer.Write(info.StoragePrivateSaveLength);
+
+        writer.Stream.Position = 0x2F0;
+        writer.Write(SerializeAgeRating(info.AgeRatingCero));
+        writer.Write(SerializeAgeRating(info.AgeRatingEsrb));
+        writer.Write((byte)0);
+        writer.Write(SerializeAgeRating(info.AgeRatingUsk));
+        writer.Write(SerializeAgeRating(info.AgeRatingPegiEurope));
+        writer.Write((byte)0);
+        writer.Write(SerializeAgeRating(info.AgeRatingPegiPortugal));
+        writer.Write(SerializeAgeRating(info.AgeRatingPegiUk));
+        writer.Write(SerializeAgeRating(info.AgeRatingAgcb));
+        writer.Write(SerializeAgeRating(info.AgeRatingGrb));
+
+        writer.Stream.Position = 0x300;
+        writer.Write(info.Arm9SecureMac.Hash);
+        writer.Write(info.Arm7Mac.Hash);
+        writer.Write(info.DigestMain.Hash);
+        writer.Stream.Position += 0x14; // Banner HMAC read with DS fields
+        writer.Write(info.Arm9iMac.Hash);
+        writer.Write(info.Arm7iMac.Hash);
+        writer.Stream.Position += 0x28; // DS whitelist macs
+        writer.Write(info.Arm9Mac.Hash);
+    }
+
+    private static void WriteGlobalMemoryBankSettings(DataWriter writer, GlobalMemoryBankSettings[] settings)
+    {
+        if (settings is not { Length: 5 * 4 }) {
+            throw new FormatException("Expecting 20 global memory bank settings");
+        }
+
+        for (int i = 0; i < settings.Length; i++) {
+            var setting = settings[i];
+            int maxProcessor = (i == 0) ? 1 : 3;
+            int maxSlot = (i == 0) ? 3 : 7;
+            if ((int)setting.Processor > maxProcessor || setting.OffsetSlot > maxSlot) {
+                throw new ArgumentException($"Invalid global memory bank setting for {i}");
+            }
+
+            int data = (int)setting.Processor;
+            data |= setting.OffsetSlot << 2;
+            data |= (setting.Enabled ? 1 : 0) << 7;
+            writer.Write((byte)data);
+        }
+    }
+
+    private static void WriteLocalMemoryBankSettings(DataWriter writer, LocalMemoryBankSettings[] settings)
+    {
+        if (settings is not { Length: 3 }) {
+            throw new FormatException("Expecting 3 local memory bank settings");
+        }
+
+        uint mbk6 = 0;
+        mbk6 |= (uint)(settings[0].StartAddressSlot << 4);
+        mbk6 |= (uint)(settings[0].ImageSize << 12);
+        mbk6 |= (uint)(settings[0].EndAddressSlot << 20);
+        writer.Write(mbk6);
+
+        for (int i = 0; i < 2; i++) {
+            var setting = settings[i + 1];
+            if (setting.StartAddressSlot > 511 || setting.ImageSize > 3 || setting.EndAddressSlot > 1023) {
+                throw new ArgumentException($"Invalid local memory bank setting for {i}");
+            }
+
+            uint data = (uint)(setting.StartAddressSlot << 3);
+            data |= (uint)(setting.ImageSize << 12);
+            data |= (uint)(setting.EndAddressSlot << 19);
+            writer.Write(data);
+        }
+    }
+
+    private static byte SerializeAgeRating(AgeRating rating)
+    {
+        byte value = (byte)(rating.Age & 0x1F);
+        value |= (byte)((rating.Prohibited ? 1 : 0) << 6);
+        value |= (byte)((rating.Enabled ? 1 : 0) << 7);
+        return value;
+    }
+
+    private void WriteDsFields(DataWriter writer, RomHeader source)
+    {
         writer.Write(source.ProgramInfo.GameTitle, 12, nullTerminator: false);
         writer.Write(source.ProgramInfo.GameCode, 4, nullTerminator: false);
         writer.Write(source.ProgramInfo.MakerCode, 2, nullTerminator: false);
@@ -72,7 +218,22 @@ public class RomHeader2Binary :
 
         writer.WriteTimes(0, 7); // reserved
         writer.Write((byte)source.ProgramInfo.DsiCryptoFlags);
-        writer.Write(source.ProgramInfo.Region);
+
+        if (source.ProgramInfo.UnitCode == DeviceUnitKind.DS) {
+            byte region = 0;
+            if (source.ProgramInfo.Region.HasFlag(ProgramRegions.China)) {
+                region |= 0x80;
+            }
+
+            if (source.ProgramInfo.Region.HasFlag(ProgramRegions.Korea)) {
+                region |= 0x40;
+            }
+
+            writer.Write(region);
+        } else {
+            writer.Write((byte)source.ProgramInfo.DsiInfo.StartJumpKind);
+        }
+
         writer.Write(source.ProgramInfo.Version);
         writer.Write(source.ProgramInfo.AutoStartFlag);
 
@@ -159,7 +320,5 @@ public class RomHeader2Binary :
         }
 
         writer.WriteUntilLength(0, source.SectionInfo.HeaderSize);
-
-        return binary;
     }
 }

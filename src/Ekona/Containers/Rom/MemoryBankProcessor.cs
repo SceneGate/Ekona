@@ -20,22 +20,27 @@
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
-/// Device unit compatible for the ROM.
+/// Gets or sets the processor assigned to a memory bank.
 /// </summary>
-public enum DeviceUnitKind
+public enum MemoryBankProcessor
 {
     /// <summary>
-    /// DS only game.
+    /// ARM9 processor.
     /// </summary>
-    DS = 0,
+    Arm9 = 0,
 
     /// <summary>
-    /// DSi game compatible on DS units too.
+    /// ARM7 processor.
     /// </summary>
-    DSiEnhanced = 2,
+    Arm7 = 1,
 
     /// <summary>
-    /// DSi exclusive game.
+    /// DSP for value 2 (code?).
     /// </summary>
-    DSiExclusive = 3,
+    Dsp2 = 2,
+
+    /// <summary>
+    /// DSP for value 3 (data?).
+    /// </summary>
+    Dsp3 = 3,
 }

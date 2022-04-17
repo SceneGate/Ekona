@@ -1,15 +1,15 @@
-// Copyright(c) 2022 SceneGate
-//
+// Copyright (c) 2022 SceneGate
+
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,22 +20,22 @@
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
-/// Device unit compatible for the ROM.
+/// Age rating for a region.
 /// </summary>
-public enum DeviceUnitKind
+public class AgeRating
 {
     /// <summary>
-    /// DS only game.
+    /// Gets or sets a value indicating whether this rating applies or not.
     /// </summary>
-    DS = 0,
+    public bool Enabled { get; set; }
 
     /// <summary>
-    /// DSi game compatible on DS units too.
+    /// Gets or sets a value indicating whether the program is prohibited in the region.
     /// </summary>
-    DSiEnhanced = 2,
+    public bool Prohibited { get; set; }
 
     /// <summary>
-    /// DSi exclusive game.
+    /// Gets or sets the minimal age for the program. The value meaning may vary per region.
     /// </summary>
-    DSiExclusive = 3,
+    public int Age { get; set; }
 }

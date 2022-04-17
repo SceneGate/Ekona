@@ -20,22 +20,31 @@
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
-/// Device unit compatible for the ROM.
+/// DSi extended memory global memory bank settings (MBK 1 to 5).
 /// </summary>
-public enum DeviceUnitKind
+public class GlobalMemoryBankSettings
 {
     /// <summary>
-    /// DS only game.
+    /// Gets or sets the processor reserved for this memory.
     /// </summary>
-    DS = 0,
+    /// <remarks>
+    /// For MBK1 only ARM9 or ARM7.
+    /// For MBK2-3: also DSP for code.
+    /// For MBK4-5: also DSP for data.
+    /// </remarks>
+    public MemoryBankProcessor Processor { get; set; }
 
     /// <summary>
-    /// DSi game compatible on DS units too.
+    /// Gets or sets the offset slot in blocks.
     /// </summary>
-    DSiEnhanced = 2,
+    /// <remarks>
+    /// For MBK1: 64 KB units.
+    /// For MBK2-5: 32 KB units.
+    /// </remarks>
+    public byte OffsetSlot { get; set; }
 
     /// <summary>
-    /// DSi exclusive game.
+    /// Gets or sets a value indicating whether this memory bank is enabled.
     /// </summary>
-    DSiExclusive = 3,
+    public bool Enabled { get; set; }
 }

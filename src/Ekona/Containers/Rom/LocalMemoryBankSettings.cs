@@ -20,22 +20,33 @@
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
-/// Device unit compatible for the ROM.
+/// DSi extended memory local (to a processor) memory bank settings (MBK 6 to 8).
 /// </summary>
-public enum DeviceUnitKind
+public class LocalMemoryBankSettings
 {
     /// <summary>
-    /// DS only game.
+    /// Gets or sets the start address slot.
     /// </summary>
-    DS = 0,
+    /// <remarks>
+    /// Final address is: 0x03000000 + value * (0x010000 for MBK6 or 0x8000 for 7-8).
+    /// </remarks>
+    public int StartAddressSlot { get; set; }
 
     /// <summary>
-    /// DSi game compatible on DS units too.
+    /// Gets or sets the image size kind.
     /// </summary>
-    DSiEnhanced = 2,
+    /// <remarks>
+    /// According to existing research:
+    /// MBK6: 0 or 1 = 64 KB /slot0, 2 = 128 KB / slot0-2, 3 = 256 KB / slot0-3
+    /// MBK7-8: 0 = 32 KB / slot0, 1 = 64 KB / slot0-1, 2 = 128 KB / slot0-3, 3 = 256 KB / slot0-7.
+    /// </remarks>
+    public int ImageSize { get; set; }
 
     /// <summary>
-    /// DSi exclusive game.
+    /// Gets or sets the end address slot.
     /// </summary>
-    DSiExclusive = 3,
+    /// <remarks>
+    /// Final address is: 0x03000000 + value * (0x010000 for MBK6 or 0x8000 for 7-8) - 1.
+    /// </remarks>
+    public int EndAddressSlot { get; set; }
 }

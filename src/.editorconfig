@@ -168,6 +168,7 @@ dotnet_diagnostic.CA1303.severity = none # We don't translate exception and log 
 dotnet_diagnostic.SA1009.severity = none # False positive due to nullables
 dotnet_diagnostic.SA1011.severity = none # False positive due to nullables
 dotnet_diagnostic.SA1101.severity = none # Do not force to prefix local calls with 'this'
+dotnet_diagnostic.SA1137.severity = none # False positive due to inline methods
 dotnet_diagnostic.SA1500.severity = none # Allow inline braces
 dotnet_diagnostic.SA1503.severity = suggestion # Braces can be omitted (guards can)
 dotnet_diagnostic.SA1633.severity = none # No XML-format header in source files

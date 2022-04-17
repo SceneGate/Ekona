@@ -1,15 +1,15 @@
-// Copyright(c) 2022 SceneGate
-//
+// Copyright (c) 2022 SceneGate
+
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,25 +17,56 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace SceneGate.Ekona.Containers.Rom;
 
 /// <summary>
-/// Device unit compatible for the ROM.
+/// Supported regions for the program.
 /// </summary>
-public enum DeviceUnitKind
+[Flags]
+[SuppressMessage("", "S4070", Justification = "RegionFree is a combination of every possible bit")]
+public enum ProgramRegions : uint
 {
     /// <summary>
-    /// DS only game.
+    /// Typical Nintendo supported regions for DS.
     /// </summary>
-    DS = 0,
+    [SuppressMessage("", "S2346", Justification = "In this context makes more sense than None.")]
+    NitroBase = 0,
 
     /// <summary>
-    /// DSi game compatible on DS units too.
+    /// Japan region (DSi only).
     /// </summary>
-    DSiEnhanced = 2,
+    Japan = 1 << 0,
 
     /// <summary>
-    /// DSi exclusive game.
+    /// USA region (DSi only).
     /// </summary>
-    DSiExclusive = 3,
+    Usa = 1 << 1,
+
+    /// <summary>
+    /// Europe region (DSi only).
+    /// </summary>
+    Europe = 1 << 2,
+
+    /// <summary>
+    /// Australia region (DSi only).
+    /// </summary>
+    Australia = 1 << 3,
+
+    /// <summary>
+    /// China region.
+    /// </summary>
+    China = 1 << 4,
+
+    /// <summary>
+    /// Korea region.
+    /// </summary>
+    Korea = 1 << 5,
+
+    /// <summary>
+    /// Region free, support on all possible regions.
+    /// </summary>
+    RegionFree = 0xFFFFFFFF,
 }

@@ -299,6 +299,21 @@ namespace SceneGate.Ekona.Containers.Rom
                 var signer = new TwilightSigner(keyStore.PublicModulusRetailGames);
                 programInfo.Signature.Status = signer.VerifySignature(programInfo.Signature.Hash, reader.Stream);
             }
+
+            if (isDsi && keyStore.HMacKeyDSiGames is { Length: > 0 }) {
+                byte[] arm9EncryptedHash = hashGenerator.GenerateEncryptedArm9Hmac(encryptedArm9);
+                programInfo.DsiInfo.Arm9SecureMac.Validate(arm9EncryptedHash);
+
+                byte[] arm7Hash = hashGenerator.GenerateArm7Hmac(reader.Stream, header.SectionInfo);
+                programInfo.DsiInfo.Arm7Mac.Validate(arm7Hash);
+
+                byte[] digestHash = hashGenerator.GenerateDigestBlockHmac(reader.Stream, header.SectionInfo);
+                programInfo.DsiInfo.DigestMain.Validate(digestHash);
+
+                // TODO: After modcrypt implementation HMAC for ARM9i and ARM7i.
+                byte[] arm9Hash = hashGenerator.GenerateArm9NoSecureAreaHmac(reader.Stream, header.SectionInfo);
+                programInfo.DsiInfo.Arm9Mac.Validate(arm9Hash);
+            }
         }
 
         private struct FileAddress

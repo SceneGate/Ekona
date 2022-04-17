@@ -30,6 +30,7 @@ namespace SceneGate.Ekona.Security;
 /// </summary>
 public class TwilightHMacGenerator
 {
+    private const int SecureAreaLength = 16 * 1024;
     private const int PaddingSize = 512;
     private readonly DsiKeyStore keyStore;
 
@@ -151,12 +152,57 @@ public class TwilightHMacGenerator
         return Generate(bannerKey, romStream, sectionInfo.BannerOffset, bannerSize);
     }
 
+    /// <summary>
+    /// Generate the HMAC of the ARM9 with encrypted secure area.
+    /// </summary>
+    /// <param name="encryptedArm9">ARM9 stream with encrypted secure area.</param>
+    /// <returns>HMAC of the ARM9 with encrypted secure area.</returns>
+    public byte[] GenerateEncryptedArm9Hmac(Stream encryptedArm9) =>
+        Generate(keyStore.HMacKeyDSiGames, encryptedArm9);
+
+    /// <summary>
+    /// Generate the HMAC of the ARM7.
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to generate the hash.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>HMAC of the ARM7.</returns>
+    public byte[] GenerateArm7Hmac(Stream romStream, RomSectionInfo sectionInfo) =>
+        Generate(keyStore.HMacKeyDSiGames, romStream, sectionInfo.Arm7Offset, sectionInfo.Arm7Size);
+
+    /// <summary>
+    /// Generate the HMAC of the DSi program digest block.
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to generate the hash.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>HMAC of the digest block.</returns>
+    public byte[] GenerateDigestBlockHmac(Stream romStream, RomSectionInfo sectionInfo) =>
+        Generate(
+            keyStore.HMacKeyDSiGames,
+            romStream,
+            sectionInfo.DigestBlockHashtableOffset,
+            sectionInfo.DigestBlockHashtableLength);
+
+    /// <summary>
+    /// Generate the HMAC of the ARM9 without secure area.
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to generate the hash.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>HMAC of the ARM9 with no secure area.</returns>
+    public byte[] GenerateArm9NoSecureAreaHmac(Stream romStream, RomSectionInfo sectionInfo) =>
+        Generate(
+            keyStore.HMacKeyDSiGames,
+            romStream,
+            sectionInfo.Arm9Offset + SecureAreaLength,
+            sectionInfo.Arm9Size - SecureAreaLength);
+
     private static HMAC CreateGenerator(byte[] key)
     {
         var hmac = HMAC.Create("HMACSHA1");
         hmac.Key = key;
         return hmac;
     }
+
+    private static byte[] Generate(byte[] key, Stream stream) => Generate(key, stream, 0, stream.Length);
 
     private static byte[] Generate(byte[] key, Stream stream, long offset, long length)
     {
