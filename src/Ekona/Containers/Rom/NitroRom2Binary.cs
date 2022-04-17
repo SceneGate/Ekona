@@ -206,6 +206,21 @@ public class NitroRom2Binary :
             programInfo.BannerMac.ChangeHash(bannerHash);
         }
 
+        if (isDsi && keyStore.HMacKeyDSiGames is { Length: > 0 }) {
+            byte[] arm9EncryptedHash = hashGenerator.GenerateEncryptedArm9Hmac(encryptedArm9);
+            programInfo.DsiInfo.Arm9SecureMac.ChangeHash(arm9EncryptedHash);
+
+            byte[] arm7Hash = hashGenerator.GenerateArm7Hmac(writer.Stream, sectionInfo);
+            programInfo.DsiInfo.Arm7Mac.ChangeHash(arm7Hash);
+
+            byte[] digestHash = hashGenerator.GenerateDigestBlockHmac(writer.Stream, sectionInfo);
+            programInfo.DsiInfo.DigestMain.ChangeHash(digestHash);
+
+            // TODO: After modcrypt implementation HMAC for ARM9i and ARM7i.
+            byte[] arm9Hash = hashGenerator.GenerateArm9NoSecureAreaHmac(writer.Stream, sectionInfo);
+            programInfo.DsiInfo.Arm9Mac.ChangeHash(arm9Hash);
+        }
+
         // While we could add the code to sign the data with a provided private key...
         // In practice it won't ever happen that we know the actual private key.
         // We could modify the NAND with our own public/private key but at that point

@@ -102,6 +102,15 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 programInfo.Signature.Should().NotBeNull();
                 programInfo.Signature.Status.Should().Be(HashStatus.NotValidated);
             }
+
+            if (isDsi) {
+                programInfo.DsiInfo.Arm9SecureMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm7Mac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.NotValidated);
+                programInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.NotValidated);
+            }
         }
 
         [TestCaseSource(nameof(GetFiles))]

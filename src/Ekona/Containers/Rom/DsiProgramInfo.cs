@@ -197,15 +197,33 @@ public class DsiProgramInfo
     /// </summary>
     public AgeRating AgeRatingGrb { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SHA1-HMAC of the ARM9 with encrypted secure area.
+    /// </summary>
     public HashInfo Arm9SecureMac { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SHA1-HMAC of the ARM7.
+    /// </summary>
     public HashInfo Arm7Mac { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SHA1-HMAC of digest block data.
+    /// </summary>
     public HashInfo DigestMain { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SHA1-HMAC of the ARM9i program decrypted.
+    /// </summary>
     public HashInfo Arm9iMac { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SHA1-HMAC of the ARM7i program decrypted.
+    /// </summary>
     public HashInfo Arm7iMac { get; set; }
 
+    /// <summary>
+    /// Gets or sets the SHA1-HMAC of the ARM9 program without secure area.
+    /// </summary>
     public HashInfo Arm9Mac { get; set; }
 }
