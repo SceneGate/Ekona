@@ -93,11 +93,9 @@ public class NitroRom2Binary :
         // - ARM7i
         root = source.Root;
 
-        var binary = new BinaryFormat(initializedOutputStream ?? new DataStream());
-
-        // Create a wrapper so the length starts from 0. We shouldn't dispose it.
-        var writeStream = new DataStream(binary.Stream);
-        writer = new DataWriter(writeStream);
+        Stream outputStream = initializedOutputStream ?? new DataStream();
+        outputStream.SetLength(0);
+        writer = new DataWriter(outputStream);
 
         programInfo = GetChildFormatSafe<ProgramInfo>("system/info");
         sectionInfo = new RomSectionInfo {
@@ -158,7 +156,7 @@ public class NitroRom2Binary :
         // Fill size to the cartridge size
         writer.WriteUntilLength(0xFF, programInfo.CartridgeSize);
 
-        return binary;
+        return new BinaryFormat(outputStream);
     }
 
     private Node GetChildSafe(string path) =>

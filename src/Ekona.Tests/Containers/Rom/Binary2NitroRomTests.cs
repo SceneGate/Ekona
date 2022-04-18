@@ -246,11 +246,13 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var returnStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(converterParams, rom);
 
             returnStream.Stream.Should().BeSameAs(ownStream);
+            ownStream.Length.Should().Be(createdStream.Stream.Length);
             ownStream.Compare(createdStream.Stream).Should().BeTrue();
 
             // Second pass
             ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(converterParams, rom);
             ownStream.Disposed.Should().BeFalse();
+            ownStream.Length.Should().Be(createdStream.Stream.Length);
             ownStream.Compare(createdStream.Stream).Should().BeTrue();
         }
 
