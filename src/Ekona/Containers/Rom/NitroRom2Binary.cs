@@ -75,8 +75,6 @@ public class NitroRom2Binary :
         if (source is null)
             throw new ArgumentNullException(nameof(source));
 
-        root = source.Root;
-
         // Binary order is:
         // - Header
         // - Unknown
@@ -93,9 +91,11 @@ public class NitroRom2Binary :
         // - Unknown, probably padding but due to cartridge protocol 3x 0x8000..0x9000
         // - ARM9i
         // - ARM7i
-        var binary = new BinaryFormat(initializedOutputStream ?? new DataStream());
-        binary.Stream.Position = 0;
-        writer = new DataWriter(binary.Stream);
+        root = source.Root;
+
+        Stream outputStream = initializedOutputStream ?? new DataStream();
+        outputStream.SetLength(0);
+        writer = new DataWriter(outputStream);
 
         programInfo = GetChildFormatSafe<ProgramInfo>("system/info");
         sectionInfo = new RomSectionInfo {
@@ -156,7 +156,7 @@ public class NitroRom2Binary :
         // Fill size to the cartridge size
         writer.WriteUntilLength(0xFF, programInfo.CartridgeSize);
 
-        return binary;
+        return new BinaryFormat(outputStream);
     }
 
     private Node GetChildSafe(string path) =>
@@ -182,6 +182,7 @@ public class NitroRom2Binary :
         Node? logoNode = root.Children["system"]?.Children["copyright_logo"];
         if (logoNode is not null) {
             DataStream binaryLogo = logoNode.Stream ?? throw new FormatException("Invalid format for copyright_logo");
+            binaryLogo.Position = 0;
             header.CopyrightLogo = new DataReader(binaryLogo).ReadBytes((int)binaryLogo.Length);
         } else {
             header.CopyrightLogo = new byte[156];
@@ -263,9 +264,9 @@ public class NitroRom2Binary :
         }
 
         writer.Stream.Position = sectionInfo.BannerOffset;
-        GetChildSafe("system/banner")
-            .TransformWith<Banner2Binary>()
-            .Stream!.WriteTo(writer.Stream);
+        var bannerContainer = GetChildFormatSafe<NodeContainerFormat>("system/banner");
+        using var bannerStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(bannerContainer);
+        bannerStream.Stream!.WriteTo(writer.Stream);
 
         writer.Stream.Position = sectionInfo.BannerOffset;
         sectionInfo.BannerLength = (uint)Binary2Banner.GetSize(writer.Stream);
