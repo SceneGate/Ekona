@@ -59,6 +59,12 @@ To just build and test quickly, run:
 dotnet cake --target=BuildTest
 ```
 
+To run the performance test with memory and CPU traces:
+
+```sh
+dotnet run --project src/Ekona.PerformanceTests/ -c Release -- -f "*<TestName>*" -m -p EP --maxWidth 60
+```
+
 ## References
 
 - [GBATek](https://problemkaputt.de/gbatek.htm)
