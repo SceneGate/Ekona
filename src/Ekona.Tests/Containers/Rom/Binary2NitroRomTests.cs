@@ -219,6 +219,43 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         }
 
         [TestCaseSource(nameof(GetFiles))]
+        public void WriteSeveralTimesGeneratesSameResult(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+            NitroRom rom = node.TransformWith<Binary2NitroRom>().GetFormatAs<NitroRom>();
+
+            using var output1 = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
+            using var output2 = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
+            output1.Stream.Compare(output2.Stream).Should().BeTrue();
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void WriteSpecificStreamGeneratesSameResult(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+            NitroRom rom = node.TransformWith<Binary2NitroRom>().GetFormatAs<NitroRom>();
+
+            using var createdStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
+
+            using var ownStream = new DataStream();
+            var converterParams = new NitroRom2BinaryParams { OutputStream = ownStream };
+            var returnStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(converterParams, rom);
+
+            returnStream.Stream.Should().BeSameAs(ownStream);
+            ownStream.Compare(createdStream.Stream).Should().BeTrue();
+
+            // Second pass
+            ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(converterParams, rom);
+            ownStream.Disposed.Should().BeFalse();
+            ownStream.Compare(createdStream.Stream).Should().BeTrue();
+        }
+
+
+        [TestCaseSource(nameof(GetFiles))]
         public void ReadWriteThreeWaysRomWithKeyGeneratesSameHashes(string infoPath, string romPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);
