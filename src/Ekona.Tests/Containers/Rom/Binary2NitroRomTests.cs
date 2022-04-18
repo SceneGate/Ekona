@@ -256,7 +256,6 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             ownStream.Compare(createdStream.Stream).Should().BeTrue();
         }
 
-
         [TestCaseSource(nameof(GetFiles))]
         public void ReadWriteThreeWaysRomWithKeyGeneratesSameHashes(string infoPath, string romPath)
         {
