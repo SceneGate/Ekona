@@ -23,10 +23,10 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
   - Filesystem: read and write `arm9i` and `arm7i` programs.
   - Header: read and write
   - Animated banner icons
+  - Modcrypt encryption and decryption
   - HMAC validation and re-generation when keys are provided.
   - Signature validation when keys are provided.
   - _Digest hashtable generation not supported yet #12._
-  - _Modcrypt encryption and decryption not supported yet #11._
 
 ## Documentation
 

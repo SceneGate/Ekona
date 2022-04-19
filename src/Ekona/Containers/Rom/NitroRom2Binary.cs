@@ -144,9 +144,8 @@ public class NitroRom2Binary :
 
             sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
 
-            // TODO: Encrypt arm9/arm7/arm9i/arm7i #11
-            var modcrypt1 = FakeModcryptEncrypt(programInfo.DsiInfo.ModcryptArea1Target);
-            var modcrypt2 = FakeModcryptEncrypt(programInfo.DsiInfo.ModcryptArea2Target);
+            var modcrypt1 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea1Target, 1);
+            var modcrypt2 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea2Target, 2);
             (sectionInfo.ModcryptArea1Offset, sectionInfo.ModcryptArea1Length) = modcrypt1;
             (sectionInfo.ModcryptArea2Offset, sectionInfo.ModcryptArea2Length) = modcrypt2;
         }
@@ -237,16 +236,21 @@ public class NitroRom2Binary :
         }
 
         if (isDsi && keyStore.HMacKeyDSiGames is { Length: > 0 }) {
-            byte[] arm9EncryptedHash = hashGenerator.GenerateEncryptedArm9Hmac(encryptedArm9);
+            byte[] arm9EncryptedHash = hashGenerator.GenerateHmac(encryptedArm9);
             programInfo.DsiInfo.Arm9SecureMac.ChangeHash(arm9EncryptedHash);
 
-            byte[] arm7Hash = hashGenerator.GenerateArm7Hmac(writer.Stream, sectionInfo);
+            byte[] arm7Hash = hashGenerator.GenerateHmac(GetChildFormatSafe<IBinary>("system/arm7").Stream);
             programInfo.DsiInfo.Arm7Mac.ChangeHash(arm7Hash);
 
             byte[] digestHash = hashGenerator.GenerateDigestBlockHmac(writer.Stream, sectionInfo);
             programInfo.DsiInfo.DigestMain.ChangeHash(digestHash);
 
-            // TODO: After modcrypt implementation HMAC for ARM9i and ARM7i #11
+            byte[] arm9iHash = hashGenerator.GenerateHmac(GetChildFormatSafe<IBinary>("system/arm9i").Stream);
+            programInfo.DsiInfo.Arm9iMac.ChangeHash(arm9iHash);
+
+            byte[] arm7iHash = hashGenerator.GenerateHmac(GetChildFormatSafe<IBinary>("system/arm7i").Stream);
+            programInfo.DsiInfo.Arm7iMac.ChangeHash(arm7iHash);
+
             byte[] arm9Hash = hashGenerator.GenerateArm9NoSecureAreaHmac(writer.Stream, sectionInfo);
             programInfo.DsiInfo.Arm9Mac.ChangeHash(arm9Hash);
         }
@@ -613,17 +617,26 @@ public class NitroRom2Binary :
         writer.WritePadding(0xFF, PaddingSize);
     }
 
-    private (uint, uint) FakeModcryptEncrypt(ModcryptTargetKind target)
+    private (uint, uint) EncryptModcrypt(ModcryptTargetKind target, int area)
     {
-        return target switch {
-            ModcryptTargetKind.None => (0, 0),
+        (uint offset, uint length) = target switch {
+            ModcryptTargetKind.None => (0u, 0u),
             ModcryptTargetKind.Arm9 => (sectionInfo.Arm9Offset, sectionInfo.Arm9Size),
             ModcryptTargetKind.Arm7 => (sectionInfo.Arm7Offset, sectionInfo.Arm7Size),
             ModcryptTargetKind.Arm9i => (sectionInfo.Arm9iOffset, sectionInfo.Arm9iSize),
-            ModcryptTargetKind.Arm9iSecureArea => (sectionInfo.Arm9iOffset, SecureAreaLength),
+            ModcryptTargetKind.Arm9iSecureArea => (sectionInfo.Arm9iOffset, (uint)SecureAreaLength),
             ModcryptTargetKind.Arm7i => (sectionInfo.Arm7iOffset, sectionInfo.Arm7iSize),
             _ => throw new NotSupportedException($"Unsupported modcrypt area: {target}"),
         };
+
+        using var input = new DataStream(writer.Stream, offset, length);
+        var modcrypt = Modcrypt.Create(programInfo, area);
+        using var output = modcrypt.Transform(input);
+
+        input.Position = 0;
+        output.WriteTo(input);
+
+        return (offset, length);
     }
 
     private struct NodeInfo
