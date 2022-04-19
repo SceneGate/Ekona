@@ -226,4 +226,9 @@ public class DsiProgramInfo
     /// Gets or sets the SHA1-HMAC of the ARM9 program without secure area.
     /// </summary>
     public HashInfo Arm9Mac { get; set; }
+
+    /// <summary>
+    /// Gets or sets the status of the digest hashes.
+    /// </summary>
+    public HashStatus DigestHashesStatus { get; set; }
 }

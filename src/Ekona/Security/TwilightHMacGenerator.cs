@@ -19,6 +19,7 @@
 // SOFTWARE.
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using SceneGate.Ekona.Containers.Rom;
 using Yarhl.IO;
@@ -108,7 +109,7 @@ public class TwilightHMacGenerator
         byte[] overlaysFat = reader.ReadBytes(numOverlays * 8);
         _ = generator.TransformBlock(overlaysFat, 0, overlaysFat.Length, null, 0);
 
-        // Finally hash each overlay in an fun, unncessary and complex way.
+        // Finally hash each overlay in an fun, unnecessary and complex way.
         // Hash each overlay including its hash, without exceeding a maximum size per file.
         // The maximum file size to hash is changing depending how many bytes are hashed already.
         int blocksRead = 0;
@@ -194,6 +195,107 @@ public class TwilightHMacGenerator
             romStream,
             sectionInfo.Arm9Offset + SecureAreaLength,
             sectionInfo.Arm9Size - SecureAreaLength);
+
+    /// <summary>
+    /// Verify if the digest block hashes (to the sector hashes) are valid.
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to validate.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>The status if the digest block area is valid or not.</returns>
+    /// <exception cref="EndOfStreamException">The block area is incomplete.</exception>
+    public HashStatus VerifyDigestBlock(Stream romStream, RomSectionInfo sectionInfo)
+    {
+        const int HashLength = 0x14;
+        byte[] expectedHash = new byte[HashLength];
+        using HMAC generator = CreateGenerator(keyStore.HMacKeyDSiGames);
+
+        uint blockLength = sectionInfo.DigestBlockSectorCount * HashLength;
+        byte[] buffer = new byte[blockLength];
+
+        bool result = true;
+        int numBlockHashes = (int)sectionInfo.DigestBlockHashtableLength / HashLength;
+        for (int i = 0; i < numBlockHashes && result; i++) {
+            // Get next hash from digest block area
+            romStream.Position = sectionInfo.DigestBlockHashtableOffset + (i * HashLength);
+            int read = romStream.Read(expectedHash);
+            if (read != HashLength) {
+                throw new EndOfStreamException("End of stream reading existing hash");
+            }
+
+            // Generate next HMAC hash from digest section area
+            romStream.Position = sectionInfo.DigestSectorHashtableOffset + (i * blockLength);
+            romStream.Read(buffer);
+            byte[] actualHash = generator.ComputeHash(buffer);
+
+            result = expectedHash.SequenceEqual(actualHash);
+        }
+
+        return result ? HashStatus.Valid : HashStatus.Invalid;
+    }
+
+    /// <summary>
+    /// Verify if the digest section content hashes (to the ROM data) are valid.
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to validate.</param>
+    /// <param name="encryptedArm9">ARM9 stream with encrypted secure area.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>The status if the digest section is valid or not.</returns>
+    /// <exception cref="EndOfStreamException">The section area is incomplete.</exception>
+    public HashStatus VerifyDigestSectionContent(Stream romStream, Stream encryptedArm9, RomSectionInfo sectionInfo)
+    {
+        const int HashLength = 0x14;
+        byte[] expectedHash = new byte[HashLength];
+        using HMAC sha1 = CreateGenerator(keyStore.HMacKeyDSiGames);
+
+        uint nitroBlockIdx = 0;
+        uint twilightBlockIdx = 0;
+        uint nitroMaxBlocks = sectionInfo.DigestNitroLength / sectionInfo.DigestSectorSize;
+        uint twilightMaxBlocks = sectionInfo.DigestTwilightLength / sectionInfo.DigestSectorSize;
+
+        byte[] buffer = new byte[sectionInfo.DigestSectorSize];
+
+        bool result = true;
+        int numBlockHashes = (int)sectionInfo.DigestSectorHashtableLength / HashLength;
+        for (int i = 0; i < numBlockHashes && result; i++) {
+            // Get next hash from digest sector area
+            romStream.Position = sectionInfo.DigestSectorHashtableOffset + (i * HashLength);
+            int read = romStream.Read(expectedHash);
+            if (read != HashLength) {
+                throw new EndOfStreamException("End of stream reading existing hash");
+            }
+
+            // Generate next hash from the ROM content
+            long hashOffset;
+            if (nitroBlockIdx < nitroMaxBlocks) {
+                hashOffset = sectionInfo.DigestNitroOffset + (nitroBlockIdx * sectionInfo.DigestSectorSize);
+                nitroBlockIdx++;
+            } else if (twilightBlockIdx < twilightMaxBlocks) {
+                hashOffset = sectionInfo.DigestTwilightOffset + (twilightBlockIdx * sectionInfo.DigestSectorSize);
+                twilightBlockIdx++;
+
+                // TODO: Use decrypted twilight binaries (encrypt ARM9i secure area too?)
+                break;
+            } else if (expectedHash.All(x => x == 0)) {
+                // Because the length includes padding, we don't know if we reach to the end of hashes.
+                break;
+            } else {
+                throw new EndOfStreamException("Missing ROM content for hashes");
+            }
+
+            if (hashOffset >= sectionInfo.Arm9Offset && hashOffset < sectionInfo.Arm9Offset + SecureAreaLength) {
+                encryptedArm9.Position = hashOffset - sectionInfo.Arm9Offset;
+                encryptedArm9.Read(buffer);
+            } else {
+                romStream.Position = hashOffset;
+                romStream.Read(buffer);
+            }
+
+            byte[] actualHash = sha1.ComputeHash(buffer);
+            result = expectedHash.SequenceEqual(actualHash);
+        }
+
+        return result ? HashStatus.Valid : HashStatus.Invalid;
+    }
 
     private static HMAC CreateGenerator(byte[] key)
     {
