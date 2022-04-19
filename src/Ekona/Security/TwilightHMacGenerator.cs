@@ -153,10 +153,10 @@ public class TwilightHMacGenerator
     }
 
     /// <summary>
-    /// Generate the HMAC of the stream
+    /// Generate the HMAC of the stream.
     /// </summary>
     /// <param name="stream">Stream to generate MAC.</param>
-    /// <returns>HMAC of the stream</returns>
+    /// <returns>HMAC of the stream.</returns>
     public byte[] GenerateHmac(Stream stream) => Generate(keyStore.HMacKeyDSiGames, stream);
 
     /// <summary>

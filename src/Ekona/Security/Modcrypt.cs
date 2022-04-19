@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -86,6 +87,7 @@ public class Modcrypt
     /// </summary>
     /// <param name="input">The input data.</param>
     /// <returns>The decrypted or encrypted data.</returns>
+    [SuppressMessage("", "S3329", Justification = "Implement must match device.")]
     public DataStream Transform(Stream input)
     {
         var output = new DataStream();
@@ -111,6 +113,7 @@ public class Modcrypt
         return output;
     }
 
+    [SuppressMessage("", "S1117", Justification = "Static methods can't access instance fields")]
     private static Modcrypt CreateDebug(ProgramInfo programInfo, int area)
     {
         byte[] iv = (area == 1)
@@ -127,6 +130,7 @@ public class Modcrypt
         return new Modcrypt(iv, key);
     }
 
+    [SuppressMessage("", "S1117", Justification = "Static methods can't access instance fields")]
     private static Modcrypt CreateRetail(ProgramInfo programInfo, int area)
     {
         byte[] iv = (area == 1)
