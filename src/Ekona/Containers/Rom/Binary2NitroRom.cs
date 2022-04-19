@@ -133,15 +133,24 @@ namespace SceneGate.Ekona.Containers.Rom
 
         private void ReadPrograms()
         {
-            // TODO: Decrypt programs with modcrypt #11
-            var arm9 = new BinaryFormat(reader.Stream, header.SectionInfo.Arm9Offset, header.SectionInfo.Arm9Size);
+            var arm9Stream = GetOrModcrypt(
+                reader.Stream,
+                header.SectionInfo.Arm9Offset,
+                header.SectionInfo.Arm9Size,
+                ModcryptTargetKind.Arm9);
+            var arm9 = new BinaryFormat(arm9Stream);
             rom.System.Children["arm9"].ChangeFormat(arm9);
             ReadOverlayTable(
                 header.ProgramInfo.Overlays9Info,
                 header.SectionInfo.Overlay9TableOffset,
                 header.SectionInfo.Overlay9TableSize);
 
-            var arm7 = new BinaryFormat(reader.Stream, header.SectionInfo.Arm7Offset, header.SectionInfo.Arm7Size);
+            var arm7Stream = GetOrModcrypt(
+                reader.Stream,
+                header.SectionInfo.Arm7Offset,
+                header.SectionInfo.Arm7Size,
+                ModcryptTargetKind.Arm7);
+            var arm7 = new BinaryFormat(arm7Stream);
             rom.System.Children["arm7"].ChangeFormat(arm7);
             ReadOverlayTable(
                 header.ProgramInfo.Overlays7Info,
@@ -149,12 +158,55 @@ namespace SceneGate.Ekona.Containers.Rom
                 header.SectionInfo.Overlay7TableSize);
 
             if (header.ProgramInfo.UnitCode != DeviceUnitKind.DS) {
-                var arm9i = new BinaryFormat(reader.Stream, header.SectionInfo.Arm9iOffset, header.SectionInfo.Arm9iSize);
+                var arm9iStream = GetOrModcrypt(
+                    reader.Stream,
+                    header.SectionInfo.Arm9iOffset,
+                    header.SectionInfo.Arm9iSize,
+                    ModcryptTargetKind.Arm9i,
+                    ModcryptTargetKind.Arm9iSecureArea);
+                var arm9i = new BinaryFormat(arm9iStream);
                 rom.System.Add(new Node("arm9i", arm9i));
 
-                var arm7i = new BinaryFormat(reader.Stream, header.SectionInfo.Arm7iOffset, header.SectionInfo.Arm7iSize);
+                var arm7iStream = GetOrModcrypt(
+                    reader.Stream,
+                    header.SectionInfo.Arm7iOffset,
+                    header.SectionInfo.Arm7iSize,
+                    ModcryptTargetKind.Arm7i);
+                var arm7i = new BinaryFormat(arm7iStream);
                 rom.System.Add(new Node("arm7i", arm7i));
             }
+        }
+
+        private DataStream GetOrModcrypt(Stream source, long offset, long length, params ModcryptTargetKind[] kinds)
+        {
+            if (header.ProgramInfo.UnitCode == DeviceUnitKind.DS) {
+                return new DataStream(source, offset, length);
+            }
+
+            int area;
+            uint modcryptLength;
+            if (kinds.Any(k => header.ProgramInfo.DsiInfo.ModcryptArea1Target == k)) {
+                area = 1;
+                modcryptLength = header.SectionInfo.ModcryptArea1Length;
+            } else if (kinds.Any(k => header.ProgramInfo.DsiInfo.ModcryptArea2Target == k)) {
+                area = 2;
+                modcryptLength = header.SectionInfo.ModcryptArea2Length;
+            } else {
+                return new DataStream(source, offset, length);
+            }
+
+            var modcrypt = Modcrypt.Create(header.ProgramInfo, area);
+            using var input = new DataStream(source, offset, modcryptLength);
+            var output = modcrypt.Transform(input);
+
+            // For instance if only the secure area of ARM9i is modcrypted. Copy the rest of ARM9i program.
+            if (length > modcryptLength) {
+                long remaining = length - modcryptLength;
+                using var remainingInput = new DataStream(source, offset + modcryptLength, remaining);
+                remainingInput.WriteTo(output);
+            }
+
+            return output;
         }
 
         private void ReadProgramCodeParameters()
@@ -310,16 +362,21 @@ namespace SceneGate.Ekona.Containers.Rom
             }
 
             if (isDsi && keyStore.HMacKeyDSiGames is { Length: > 0 }) {
-                byte[] arm9EncryptedHash = hashGenerator.GenerateEncryptedArm9Hmac(encryptedArm9);
+                byte[] arm9EncryptedHash = hashGenerator.GenerateHmac(encryptedArm9);
                 programInfo.DsiInfo.Arm9SecureMac.Validate(arm9EncryptedHash);
 
-                byte[] arm7Hash = hashGenerator.GenerateArm7Hmac(reader.Stream, header.SectionInfo);
+                byte[] arm7Hash = hashGenerator.GenerateHmac(rom.System.Children["arm7"].Stream);
                 programInfo.DsiInfo.Arm7Mac.Validate(arm7Hash);
 
                 byte[] digestHash = hashGenerator.GenerateDigestBlockHmac(reader.Stream, header.SectionInfo);
                 programInfo.DsiInfo.DigestMain.Validate(digestHash);
 
-                // TODO: After modcrypt implementation HMAC for ARM9i and ARM7i.
+                byte[] arm9iHash = hashGenerator.GenerateHmac(rom.System.Children["arm9i"].Stream);
+                programInfo.DsiInfo.Arm9iMac.Validate(arm9iHash);
+
+                byte[] arm7iHash = hashGenerator.GenerateHmac(rom.System.Children["arm7i"].Stream);
+                programInfo.DsiInfo.Arm7iMac.Validate(arm7iHash);
+
                 byte[] arm9Hash = hashGenerator.GenerateArm9NoSecureAreaHmac(reader.Stream, header.SectionInfo);
                 programInfo.DsiInfo.Arm9Mac.Validate(arm9Hash);
             }
