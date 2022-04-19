@@ -154,21 +154,11 @@ public class TwilightHMacGenerator
     }
 
     /// <summary>
-    /// Generate the HMAC of the ARM9 with encrypted secure area.
+    /// Generate the HMAC of the stream.
     /// </summary>
-    /// <param name="encryptedArm9">ARM9 stream with encrypted secure area.</param>
-    /// <returns>HMAC of the ARM9 with encrypted secure area.</returns>
-    public byte[] GenerateEncryptedArm9Hmac(Stream encryptedArm9) =>
-        Generate(keyStore.HMacKeyDSiGames, encryptedArm9);
-
-    /// <summary>
-    /// Generate the HMAC of the ARM7.
-    /// </summary>
-    /// <param name="romStream">ROM stream with the content to generate the hash.</param>
-    /// <param name="sectionInfo">Information of different ROM sections.</param>
-    /// <returns>HMAC of the ARM7.</returns>
-    public byte[] GenerateArm7Hmac(Stream romStream, RomSectionInfo sectionInfo) =>
-        Generate(keyStore.HMacKeyDSiGames, romStream, sectionInfo.Arm7Offset, sectionInfo.Arm7Size);
+    /// <param name="stream">Stream to generate MAC.</param>
+    /// <returns>HMAC of the stream.</returns>
+    public byte[] GenerateHmac(Stream stream) => Generate(keyStore.HMacKeyDSiGames, stream);
 
     /// <summary>
     /// Generate the HMAC of the DSi program digest block.

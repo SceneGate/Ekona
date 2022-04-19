@@ -124,10 +124,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 programInfo.DsiInfo.Arm9SecureMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.DsiInfo.Arm7Mac.Status.Should().Be(HashStatus.Valid);
                 programInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.Valid);
-
-                // TODO: After modcrypt implementation.
-                // programInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Valid)
-                // programInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Valid)
+                programInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Valid);
+                programInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Valid);
 
                 programInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Valid);
@@ -146,7 +144,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
 
-            // TODO: After generating DSi disgest (requires modcrypt #11)
+            // TODO: After implementing DSi disgest
             if (rom.Information.UnitCode == DeviceUnitKind.DS) {
                 generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
             }
@@ -313,14 +311,16 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 newInfo.DsiInfo.DigestMain.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.DigestMain.Hash);
                 originalInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.Generated);
 
-                // TODO: After modcrypt implementation.
-                // newInfo.DsiInfo.Arm9iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9iMac.Hash)
-                // originalInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Generated)
-                // newInfo.DsiInfo.Arm7iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm7iMac.Hash)
-                // originalInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Generated)
-                // originalInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Generated);
+                newInfo.DsiInfo.Arm9iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9iMac.Hash);
+                originalInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Generated);
+
+                newInfo.DsiInfo.Arm7iMac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm7iMac.Hash);
+                originalInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Generated);
+
                 newInfo.DsiInfo.Arm9Mac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9Mac.Hash);
                 originalInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Generated);
+
+                originalInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Generated);
             }
         }
     }
