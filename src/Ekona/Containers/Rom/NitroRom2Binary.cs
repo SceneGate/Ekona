@@ -189,11 +189,18 @@ public class NitroRom2Binary :
             header.CopyrightLogo = new byte[156];
         }
 
+        // We need to write a first time the header because we need some of the data
+        // for the signatures.
+        using var initialHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
+        writer.Stream.Position = 0;
+        initialHeader.Stream.WriteTo(writer.Stream);
+
         GenerateSignatures();
 
+        // Re-write with the good signatures.
         // We don't calculate the header length but we expect it's preset.
         // It's used inside the converter to pad.
-        var binaryHeader = (IBinary)ConvertFormat.With<RomHeader2Binary>(header);
+        using var binaryHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
         writer.Stream.Position = 0;
         binaryHeader.Stream.WriteTo(writer.Stream);
     }
