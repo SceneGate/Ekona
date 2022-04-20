@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using SceneGate.Ekona.Containers.Rom;
+using Yarhl.FileSystem;
 using Yarhl.IO;
 
 namespace SceneGate.Ekona.Security;
@@ -228,11 +229,24 @@ public class TwilightHMacGenerator
     /// </summary>
     /// <param name="romStream">ROM stream with the content to validate.</param>
     /// <param name="encryptedArm9">ARM9 stream with encrypted secure area.</param>
+    /// <param name="systemNode">Container node with modcrypt decrypted system programs.</param>
     /// <param name="sectionInfo">Information of different ROM sections.</param>
     /// <returns>The status if the digest section is valid or not.</returns>
     /// <exception cref="EndOfStreamException">The section area is incomplete.</exception>
-    public HashStatus VerifyDigestSectionContent(Stream romStream, Stream encryptedArm9, RomSectionInfo sectionInfo)
+    public HashStatus VerifyDigestSectionContent(Stream romStream, Stream encryptedArm9, Node systemNode, RomSectionInfo sectionInfo)
     {
+        bool PositionBetween(long position, uint offset, uint length) =>
+            position >= offset && position < offset + length;
+
+        void ReadWithPadding(Stream stream, long position, byte[] buffer)
+        {
+            stream.Position = position;
+            int read = stream.Read(buffer);
+            if (read != buffer.Length) {
+                Array.Fill<byte>(buffer, 0xFF, read, buffer.Length - read);
+            }
+        }
+
         const int HashLength = 0x14;
         byte[] expectedHash = new byte[HashLength];
         using HMAC sha1 = CreateGenerator(keyStore.HMacKeyDSiGames);
@@ -262,9 +276,6 @@ public class TwilightHMacGenerator
             } else if (twilightBlockIdx < twilightMaxBlocks) {
                 hashOffset = sectionInfo.DigestTwilightOffset + (twilightBlockIdx * sectionInfo.DigestSectorSize);
                 twilightBlockIdx++;
-
-                // TODO: Use decrypted twilight binaries (encrypt ARM9i secure area too?)
-                break;
             } else if (expectedHash.All(x => x == 0)) {
                 // Because the length includes padding, we don't know if we reach to the end of hashes.
                 break;
@@ -272,9 +283,16 @@ public class TwilightHMacGenerator
                 throw new EndOfStreamException("Missing ROM content for hashes");
             }
 
-            if (hashOffset >= sectionInfo.Arm9Offset && hashOffset < sectionInfo.Arm9Offset + SecureAreaLength) {
-                encryptedArm9.Position = hashOffset - sectionInfo.Arm9Offset;
-                encryptedArm9.Read(buffer);
+            // We use the nodes from the system folder as the file may have modcrypt and we need them decrypted.
+            if (PositionBetween(hashOffset, sectionInfo.Arm9Offset, sectionInfo.Arm9Size)) {
+                // Digest hash encrypted secure area, so we use the argument stream
+                ReadWithPadding(encryptedArm9, hashOffset - sectionInfo.Arm9Offset, buffer);
+            } else if (PositionBetween(hashOffset, sectionInfo.Arm7Offset, sectionInfo.Arm7Size)) {
+                ReadWithPadding(systemNode.Children["arm7"].Stream, hashOffset - sectionInfo.Arm7Offset, buffer);
+            } else if (PositionBetween(hashOffset, sectionInfo.Arm9iOffset, sectionInfo.Arm9iSize)) {
+                ReadWithPadding(systemNode.Children["arm9i"].Stream, hashOffset - sectionInfo.Arm9iOffset, buffer);
+            } else if (PositionBetween(hashOffset, sectionInfo.Arm7iOffset, sectionInfo.Arm7iSize)) {
+                ReadWithPadding(systemNode.Children["arm7i"].Stream, hashOffset - sectionInfo.Arm7iOffset, buffer);
             } else {
                 romStream.Position = hashOffset;
                 romStream.Read(buffer);

@@ -382,7 +382,11 @@ namespace SceneGate.Ekona.Containers.Rom
 
                 HashStatus digestBlockStatus = hashGenerator.VerifyDigestBlock(reader.Stream, header.SectionInfo);
                 if (digestBlockStatus == HashStatus.Valid) {
-                    digestBlockStatus = hashGenerator.VerifyDigestSectionContent(reader.Stream, encryptedArm9, header.SectionInfo);
+                    digestBlockStatus = hashGenerator.VerifyDigestSectionContent(
+                        reader.Stream,
+                        encryptedArm9,
+                        rom.System,
+                        header.SectionInfo);
                 }
 
                 programInfo.DsiInfo.DigestHashesStatus = digestBlockStatus;
