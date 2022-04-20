@@ -129,7 +129,6 @@ public class NitroRom2Binary :
         WriteBanner();
 
         if (programInfo.UnitCode != DeviceUnitKind.DS) {
-            // TODO: Generate actual digest #12
             WriteEmptyDigest();
         }
 
@@ -142,12 +141,15 @@ public class NitroRom2Binary :
             WriteTwilightPrograms();
             sectionInfo.DigestTwilightOffset = sectionInfo.Arm9iOffset;
 
-            sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
+            // Needs to happen before the modcrypt encryption.
+            WriteActualDigest();
 
             var modcrypt1 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea1Target, 1);
             var modcrypt2 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea2Target, 2);
             (sectionInfo.ModcryptArea1Offset, sectionInfo.ModcryptArea1Length) = modcrypt1;
             (sectionInfo.ModcryptArea2Offset, sectionInfo.ModcryptArea2Length) = modcrypt2;
+
+            sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
         }
 
         WriteHeader();
@@ -615,6 +617,25 @@ public class NitroRom2Binary :
         sectionInfo.DigestBlockHashtableLength = blockHashLength;
         writer.WriteTimes(0xFE, blockHashLength);
         writer.WritePadding(0xFF, PaddingSize);
+    }
+
+    private void WriteActualDigest()
+    {
+        if (keyStore?.HMacKeyDSiGames is not { Length: > 0}) {
+            return;
+        }
+
+        var key1Encryption = new NitroKey1Encryption(programInfo.GameCode, keyStore);
+        var hashGenerator = new TwilightHMacGenerator(keyStore);
+
+        DataStream arm9 = GetChildFormatSafe<IBinary>("system/arm9").Stream;
+        using DataStream encryptedArm9 = key1Encryption.HasEncryptedArm9(arm9)
+            ? new DataStream(arm9)
+            : key1Encryption.EncryptArm9(arm9);
+
+        hashGenerator.WriteDigestSectionContent(writer.Stream, encryptedArm9, root.Children["system"], sectionInfo);
+        hashGenerator.WriteDigestBlock(writer.Stream, sectionInfo);
+        programInfo.DsiInfo.DigestHashesStatus = HashStatus.Generated;
     }
 
     private (uint, uint) EncryptModcrypt(ModcryptTargetKind target, int area)
