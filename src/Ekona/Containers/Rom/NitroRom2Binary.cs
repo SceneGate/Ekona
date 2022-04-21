@@ -628,7 +628,7 @@ public class NitroRom2Binary :
 
     private void WriteActualDigest()
     {
-        if (keyStore?.HMacKeyDSiGames is not { Length: > 0}) {
+        if (keyStore?.HMacKeyDSiGames is not { Length: > 0 }) {
             return;
         }
 
