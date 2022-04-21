@@ -129,7 +129,6 @@ public class NitroRom2Binary :
         WriteBanner();
 
         if (programInfo.UnitCode != DeviceUnitKind.DS) {
-            // TODO: Generate actual digest #12
             WriteEmptyDigest();
         }
 
@@ -142,12 +141,15 @@ public class NitroRom2Binary :
             WriteTwilightPrograms();
             sectionInfo.DigestTwilightOffset = sectionInfo.Arm9iOffset;
 
-            sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
+            // Needs to happen before the modcrypt encryption.
+            WriteActualDigest();
 
             var modcrypt1 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea1Target, 1);
             var modcrypt2 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea2Target, 2);
             (sectionInfo.ModcryptArea1Offset, sectionInfo.ModcryptArea1Length) = modcrypt1;
             (sectionInfo.ModcryptArea2Offset, sectionInfo.ModcryptArea2Length) = modcrypt2;
+
+            sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
         }
 
         WriteHeader();
@@ -187,11 +189,18 @@ public class NitroRom2Binary :
             header.CopyrightLogo = new byte[156];
         }
 
+        // We need to write a first time the header because we need some of the data
+        // for the signatures.
+        using var initialHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
+        writer.Stream.Position = 0;
+        initialHeader.Stream.WriteTo(writer.Stream);
+
         GenerateSignatures();
 
+        // Re-write with the good signatures.
         // We don't calculate the header length but we expect it's preset.
         // It's used inside the converter to pad.
-        var binaryHeader = (IBinary)ConvertFormat.With<RomHeader2Binary>(header);
+        using var binaryHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
         writer.Stream.Position = 0;
         binaryHeader.Stream.WriteTo(writer.Stream);
     }
@@ -615,6 +624,25 @@ public class NitroRom2Binary :
         sectionInfo.DigestBlockHashtableLength = blockHashLength;
         writer.WriteTimes(0xFE, blockHashLength);
         writer.WritePadding(0xFF, PaddingSize);
+    }
+
+    private void WriteActualDigest()
+    {
+        if (keyStore?.HMacKeyDSiGames is not { Length: > 0 }) {
+            return;
+        }
+
+        var key1Encryption = new NitroKey1Encryption(programInfo.GameCode, keyStore);
+        var hashGenerator = new TwilightHMacGenerator(keyStore);
+
+        DataStream arm9 = GetChildFormatSafe<IBinary>("system/arm9").Stream;
+        using DataStream encryptedArm9 = key1Encryption.HasEncryptedArm9(arm9)
+            ? new DataStream(arm9)
+            : key1Encryption.EncryptArm9(arm9);
+
+        hashGenerator.WriteDigestSectionContent(writer.Stream, encryptedArm9, root.Children["system"], sectionInfo);
+        hashGenerator.WriteDigestBlock(writer.Stream, sectionInfo);
+        programInfo.DsiInfo.DigestHashesStatus = HashStatus.Generated;
     }
 
     private (uint, uint) EncryptModcrypt(ModcryptTargetKind target, int area)

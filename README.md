@@ -24,9 +24,8 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
   - Header: read and write
   - Animated banner icons
   - Modcrypt encryption and decryption
-  - HMAC validation and re-generation when keys are provided.
+  - HMAC validation and re-generation (including digest) when keys are provided.
   - Signature validation when keys are provided.
-  - _Digest hashtable generation not supported yet #12._
 
 ## Documentation
 

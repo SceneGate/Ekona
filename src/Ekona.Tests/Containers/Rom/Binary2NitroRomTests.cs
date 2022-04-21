@@ -86,6 +86,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 expectedInfo,
                 opts => opts
                     .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HashInfo))
+                    .Excluding((FluentAssertions.Equivalency.IMemberInfo info) => info.Type == typeof(HashStatus))
                     .Excluding(p => p.Overlays9Info)
                     .Excluding(p => p.Overlays7Info));
         }
@@ -126,6 +127,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 programInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Valid);
                 programInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Valid);
+
+                programInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Valid);
             }
         }
 
@@ -133,18 +136,17 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         public void TwoWaysIdenticalRomStream(string infoPath, string romPath)
         {
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+            DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
 
             var rom = (NitroRom)ConvertFormat.With<Binary2NitroRom>(node.Format!);
-            var generatedStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
+
+            var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
+            var generatedStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(nitroParameters, rom);
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
-
-            // TODO: After implementing DSi disgest
-            if (rom.Information.UnitCode == DeviceUnitKind.DS) {
-                generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
-            }
+            generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -213,6 +215,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
                 newInfo.DsiInfo.Arm9Mac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9Mac.Hash);
                 newInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.NotValidated);
+
+                newInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.NotValidated);
             }
         }
 
@@ -314,6 +318,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
                 newInfo.DsiInfo.Arm9Mac.Hash.Should().BeEquivalentTo(originalInfo.DsiInfo.Arm9Mac.Hash);
                 originalInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Generated);
+
+                originalInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Generated);
             }
         }
     }

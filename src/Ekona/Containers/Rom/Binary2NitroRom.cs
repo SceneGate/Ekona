@@ -379,9 +379,18 @@ namespace SceneGate.Ekona.Containers.Rom
 
                 byte[] arm9Hash = hashGenerator.GenerateArm9NoSecureAreaHmac(reader.Stream, header.SectionInfo);
                 programInfo.DsiInfo.Arm9Mac.Validate(arm9Hash);
-            }
 
-            // TODO: Verify digest hashes #12
+                HashStatus digestBlockStatus = hashGenerator.VerifyDigestBlock(reader.Stream, header.SectionInfo);
+                if (digestBlockStatus == HashStatus.Valid) {
+                    digestBlockStatus = hashGenerator.VerifyDigestSectionContent(
+                        reader.Stream,
+                        encryptedArm9,
+                        rom.System,
+                        header.SectionInfo);
+                }
+
+                programInfo.DsiInfo.DigestHashesStatus = digestBlockStatus;
+            }
         }
 
         private struct FileAddress

@@ -18,9 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using SceneGate.Ekona.Containers.Rom;
+using Yarhl.FileSystem;
 using Yarhl.IO;
 
 namespace SceneGate.Ekona.Security;
@@ -184,6 +187,201 @@ public class TwilightHMacGenerator
             romStream,
             sectionInfo.Arm9Offset + SecureAreaLength,
             sectionInfo.Arm9Size - SecureAreaLength);
+
+    /// <summary>
+    /// Verify if the digest block hashes (to the sector hashes) are valid.
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to validate.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>The status if the digest block area is valid or not.</returns>
+    /// <exception cref="EndOfStreamException">The block area is incomplete.</exception>
+    public HashStatus VerifyDigestBlock(Stream romStream, RomSectionInfo sectionInfo)
+    {
+        const int HashLength = 0x14;
+        int hashIdx = 0;
+        byte[] expectedHash = new byte[HashLength];
+
+        bool result = true;
+        var hashes = GenerateDigestBlockHashes(romStream, sectionInfo);
+        foreach (byte[] actualHash in hashes) {
+            // Get next hash from digest block area
+            romStream.Position = sectionInfo.DigestBlockHashtableOffset + (hashIdx++ * HashLength);
+            int read = romStream.Read(expectedHash);
+            if (read != HashLength) {
+                throw new EndOfStreamException("End of stream reading existing hash");
+            }
+
+            result = expectedHash.SequenceEqual(actualHash);
+            if (!result) {
+                break;
+            }
+        }
+
+        return result ? HashStatus.Valid : HashStatus.Invalid;
+    }
+
+    /// <summary>
+    /// Write the digest block (hashes of digest section).
+    /// </summary>
+    /// <param name="romStream">ROM to generate hashes and write result.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    public void WriteDigestBlock(Stream romStream, RomSectionInfo sectionInfo)
+    {
+        const int HashLength = 0x14;
+
+        int hashIdx = 0;
+        var hashes = GenerateDigestBlockHashes(romStream, sectionInfo);
+        foreach (byte[] actualHash in hashes) {
+            romStream.Position = sectionInfo.DigestBlockHashtableOffset + (hashIdx++ * HashLength);
+            romStream.Write(actualHash);
+        }
+    }
+
+    /// <summary>
+    /// Generate the digest block hashes (to the sector hashes) .
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to validate.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>Collection of digest block hashes.</returns>
+    /// <exception cref="EndOfStreamException">The block area is incomplete.</exception>
+    public IEnumerable<byte[]> GenerateDigestBlockHashes(Stream romStream, RomSectionInfo sectionInfo)
+    {
+        const int HashLength = 0x14;
+        using HMAC generator = CreateGenerator(keyStore.HMacKeyDSiGames);
+
+        uint blockLength = sectionInfo.DigestBlockSectorCount * HashLength;
+        byte[] buffer = new byte[blockLength];
+
+        bool result = true;
+        int numBlockHashes = (int)sectionInfo.DigestBlockHashtableLength / HashLength;
+        for (int i = 0; i < numBlockHashes && result; i++) {
+            romStream.Position = sectionInfo.DigestSectorHashtableOffset + (i * blockLength);
+            romStream.Read(buffer);
+            yield return generator.ComputeHash(buffer);
+        }
+    }
+
+    /// <summary>
+    /// Verify if the digest section content hashes (to the ROM data) are valid.
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to validate.</param>
+    /// <param name="encryptedArm9">ARM9 stream with encrypted secure area.</param>
+    /// <param name="systemNode">Container node with modcrypt decrypted system programs.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>The status if the digest section is valid or not.</returns>
+    /// <exception cref="EndOfStreamException">The section area or ROM is incomplete.</exception>
+    public HashStatus VerifyDigestSectionContent(Stream romStream, Stream encryptedArm9, Node systemNode, RomSectionInfo sectionInfo)
+    {
+        const int HashLength = 0x14;
+        int hashIdx = 0;
+        byte[] expectedHash = new byte[HashLength];
+
+        bool result = true;
+        var hashes = GenerateDigestSectionHashes(romStream, encryptedArm9, systemNode, sectionInfo);
+        foreach (byte[] actualHash in hashes) {
+            // Get next hash from digest sector area
+            romStream.Position = sectionInfo.DigestSectorHashtableOffset + (hashIdx++ * HashLength);
+            _ = romStream.Read(expectedHash);
+
+            result = expectedHash.SequenceEqual(actualHash);
+            if (!result) {
+                break;
+            }
+        }
+
+        return result ? HashStatus.Valid : HashStatus.Invalid;
+    }
+
+    /// <summary>
+    /// Write the digest section content hashes (to the ROM data).
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to validate and to write.</param>
+    /// <param name="encryptedArm9">ARM9 stream with encrypted secure area.</param>
+    /// <param name="systemNode">Container node with modcrypt decrypted system programs.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <exception cref="EndOfStreamException">The section area or ROM is incomplete.</exception>
+    public void WriteDigestSectionContent(Stream romStream, Stream encryptedArm9, Node systemNode, RomSectionInfo sectionInfo)
+    {
+        const int HashLength = 0x14;
+        int hashIdx = 0;
+
+        var hashes = GenerateDigestSectionHashes(romStream, encryptedArm9, systemNode, sectionInfo);
+        foreach (byte[] actualHash in hashes) {
+            romStream.Position = sectionInfo.DigestSectorHashtableOffset + (hashIdx++ * HashLength);
+            romStream.Write(actualHash);
+        }
+    }
+
+    /// <summary>
+    /// Generate the hashes of the digest section (with the ROM data).
+    /// </summary>
+    /// <param name="romStream">ROM stream with the content to validate.</param>
+    /// <param name="encryptedArm9">ARM9 stream with encrypted secure area.</param>
+    /// <param name="systemNode">Container node with modcrypt decrypted system programs.</param>
+    /// <param name="sectionInfo">Information of different ROM sections.</param>
+    /// <returns>Collection of hashes for the digest section.</returns>
+    /// <exception cref="EndOfStreamException">The section area or ROM is incomplete.</exception>
+    public IEnumerable<byte[]> GenerateDigestSectionHashes(Stream romStream, Stream encryptedArm9, Node systemNode, RomSectionInfo sectionInfo)
+    {
+        bool PositionBetween(long position, uint offset, uint length) =>
+            position >= offset && position < offset + length;
+
+        void ReadWithPadding(Stream stream, long position, byte[] buffer)
+        {
+            stream.Position = position;
+            int read = stream.Read(buffer);
+            if (read != buffer.Length) {
+                Array.Fill<byte>(buffer, 0xFF, read, buffer.Length - read);
+            }
+        }
+
+        const int HashLength = 0x14;
+        byte[] expectedHash = new byte[HashLength];
+        using HMAC sha1 = CreateGenerator(keyStore.HMacKeyDSiGames);
+
+        uint nitroBlockIdx = 0;
+        uint twilightBlockIdx = 0;
+        uint nitroMaxBlocks = sectionInfo.DigestNitroLength / sectionInfo.DigestSectorSize;
+        uint twilightMaxBlocks = sectionInfo.DigestTwilightLength / sectionInfo.DigestSectorSize;
+
+        byte[] buffer = new byte[sectionInfo.DigestSectorSize];
+
+        int numBlockHashes = (int)sectionInfo.DigestSectorHashtableLength / HashLength;
+        for (int i = 0; i < numBlockHashes; i++) {
+            // Generate next hash from the ROM content
+            long hashOffset;
+            if (nitroBlockIdx < nitroMaxBlocks) {
+                hashOffset = sectionInfo.DigestNitroOffset + (nitroBlockIdx * sectionInfo.DigestSectorSize);
+                nitroBlockIdx++;
+            } else if (twilightBlockIdx < twilightMaxBlocks) {
+                hashOffset = sectionInfo.DigestTwilightOffset + (twilightBlockIdx * sectionInfo.DigestSectorSize);
+                twilightBlockIdx++;
+            } else if (expectedHash.All(x => x == 0)) {
+                // Because the length includes padding, we don't know if we reach to the end of hashes.
+                yield break;
+            } else {
+                throw new EndOfStreamException("Missing ROM content for hashes");
+            }
+
+            // We use the nodes from the system folder as the file may have modcrypt and we need them decrypted.
+            if (PositionBetween(hashOffset, sectionInfo.Arm9Offset, sectionInfo.Arm9Size)) {
+                // Digest hash encrypted secure area, so we use the argument stream
+                ReadWithPadding(encryptedArm9, hashOffset - sectionInfo.Arm9Offset, buffer);
+            } else if (PositionBetween(hashOffset, sectionInfo.Arm7Offset, sectionInfo.Arm7Size)) {
+                ReadWithPadding(systemNode.Children["arm7"].Stream, hashOffset - sectionInfo.Arm7Offset, buffer);
+            } else if (PositionBetween(hashOffset, sectionInfo.Arm9iOffset, sectionInfo.Arm9iSize)) {
+                ReadWithPadding(systemNode.Children["arm9i"].Stream, hashOffset - sectionInfo.Arm9iOffset, buffer);
+            } else if (PositionBetween(hashOffset, sectionInfo.Arm7iOffset, sectionInfo.Arm7iSize)) {
+                ReadWithPadding(systemNode.Children["arm7i"].Stream, hashOffset - sectionInfo.Arm7iOffset, buffer);
+            } else {
+                romStream.Position = hashOffset;
+                romStream.Read(buffer);
+            }
+
+            byte[] actualHash = sha1.ComputeHash(buffer);
+            yield return actualHash;
+        }
+    }
 
     private static HMAC CreateGenerator(byte[] key)
     {
