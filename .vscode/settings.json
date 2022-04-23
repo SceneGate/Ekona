@@ -30,6 +30,7 @@
         "SCFG",
         "Texim",
         "Unswizzle",
+        "ushort",
         "WRAM"
     ],
 }
