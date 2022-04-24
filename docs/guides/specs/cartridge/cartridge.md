@@ -1,0 +1,76 @@
+# Cartridge format
+
+The binary cartridge format (also known as `SRL`) is the way to pack the
+information and files for a DS and DSi program. This is the format that physical
+cartridge carts have, but also the format used by digital content like DSiWare
+and utility programs from the DSi firmware.
+
+> [!NOTE]  
+> These documents refer to DS/DSi programs. This also includes games.
+
+## Cartridge memory map
+
+The raw binary format of the cartridge is based on four different regions. It
+maps the different commands we need to send to the cartridge chip to retrieve
+the data:
+
+| Offset    | Length | Description                                         |
+| --------- | ------ | --------------------------------------------------- |
+| 0x00      | 0x1000 | Header                                              |
+| 0x1000    | 0x3000 | Unknown, not readable                               |
+| 0x4000    | 0x8000 | Secure area, first 2 KB with _KEY1_ encryption      |
+| 0x8000    | ...    | Data area                                           |
+| 0xAA00000 | 0x3000 | Unknown, not readable                               |
+| 0xAA03000 | 0x4000 | ARM9i secure area, usually with modcrypt encryption |
+| 0xAA07000 | ...    | DSi data area                                       |
+
+## DS / DSi program sections
+
+Practically speaking, official DS / DSi program maps these memory map areas to
+the following sections:
+
+- [Header](header.md)
+- Unknown, not readable, usually `0x00`
+- ARM9 processor program (actual program code):
+  - Program code: starts at `0x4000` so first 2 KB are _KEY1_ encrypted.
+  - Program extended parameters (DS programs only)
+  - Overlay table info
+  - Overlay files
+- ARM7 processor program (SDK helper code):
+  - Program code
+  - Overlay table info
+  - Overlay files (always empty)
+- File name table
+- File access table
+- Banner
+- Files data
+- Additionally, for DSi programs:
+  - Digest HMACs
+  - Unknown, not readable
+  - ARM9i program
+  - ARM7i program
+
+### Padding
+
+Every section, including each file data is padded to blocks of 512 bytes with
+the byte `0xFF`.
+
+On DS programs, the last file is not padded.
+
+A DS program region (nitro) ends after the _digest HMACs_. The additional DSi
+program region (twilight) starts with the _unknown region_. Between these two
+regions there is a special padding to fill the last block of 1 MB with the byte
+`0xFF`.
+
+### Unknown regions
+
+The header contains `0x3000` unknown bytes. These bytes cannot be read as the
+cartridge protocol does not support getting data from this address. On digital
+programs like firmware utilities (like the launcher), this area seems to have
+random bytes.
+
+This is similar to what happen at the DSi program region. It starts with
+`0x3000` unknown bytes. These bytes cannot be dumped because the cartridge
+protocol silently redirect any read command from these region to `0x8000`. These
+means that if we try to dump these `0x3000` bytes, we will get from the physical
+cart three times `0x1000` bytes of data from `0x8000` (arm9 after secure area).

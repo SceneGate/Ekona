@@ -29,6 +29,7 @@
         "Pegi",
         "SCFG",
         "Texim",
+        "ulong",
         "Unswizzle",
         "ushort",
         "WRAM"
