@@ -33,7 +33,7 @@
       ],
       "resource": [
         { "files": [ "images/**" ] },
-        // { "files": [ "Yarhl.Examples/**.csx" ], "src": "../src" }
+        { "files": [ "Ekona.Examples/**.cs" ], "src": "../src" }
       ],
       "dest": "_site",
       "globalMetadataFiles": [ "global_metadata.json" ],

@@ -1,6 +1,9 @@
 - name: Home
   href: index.md
 
+- name: Getting started
+  href: guides/getting-started/introduction.md
+
 - name: Guides
   href: guides/
 

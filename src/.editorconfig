@@ -182,7 +182,7 @@ dotnet_diagnostic.S1135.severity = suggestion # It's almost inevitable to have T
 dotnet_diagnostic.S1172.severity = silent # Buggy
 
 # Special rules for test projects
-[*Tests/**]
+[{*Tests/**,*Examples/**}]
 dotnet_diagnostic.CS1591.severity = none # Disable documentation
 dotnet_diagnostic.CA1001.severity = none # No need to implement IDisposable in test classes with cleanup.
 dotnet_diagnostic.CA1034.severity = none # Public types in test classes for testing implementations
