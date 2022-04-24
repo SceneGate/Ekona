@@ -50,7 +50,7 @@ Every DS and DSi program has the following header fields consisting in the first
 | 0x80   | uint      | Program size (without cartridge final padding)         |
 | 0x84   | uint      | Header size                                            |
 | 0x88   | byte[56]  | Reserved                                               |
-| 0xC0   | byte[156] | Copyright logo                                         |
+| 0xC0   | byte[156] | [Copyright logo](#copyright-logo)                      |
 | 0x15C  | ushort    | CRC-16 for copyright logo                              |
 | 0x15E  | ushort    | CRC-16 for first 0x15E header bytes                    |
 | 0x160  | uint      | Debugging data offset                                  |
@@ -158,6 +158,23 @@ header.
 | 0xF80  | byte[128] | RSA signature of the first 0xE00 bytes of the header    |
 
 ## Detailed types
+
+### Copyright logo
+
+The copyright logo must be present in every game. The BIOS will verify only the
+checksum value (it doesn't do the checksum). The firmware will verify the data.
+This is the same logo as for GBA cartridges.
+
+The logo contains the _Nintendo_ image that can be see in the _Health and
+Safety_ boot screen. It will show only if a cartridge is present (otherwise it
+can't read the data).
+
+The image is compressed with Huffman and then encrypted with simple additions.
+The header for the Huffman compression (with the codewords tree) is in the BIOS.
+An implementation to decrypt and encrypt the logo can be found
+[here](https://gist.github.com/pleonex/6265017). A blog post in Spanish
+describing the assembly code is also available
+[here](http://pleonet.blogspot.com/2013/08/logo-de-nintendo-en-gba-y-nds.html)
 
 ### Extended program features
 
