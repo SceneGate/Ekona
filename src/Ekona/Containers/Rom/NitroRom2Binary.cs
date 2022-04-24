@@ -361,7 +361,7 @@ public class NitroRom2Binary :
             writer.Stream.Position = sectionInfo.Arm9Offset + sectionInfo.Arm9Size;
             writer.Write(NitroRom.NitroCode);
             writer.Write(programParams.ProgramParameterOffset);
-            writer.Write(programParams.ExtraHashesOffset);
+            writer.Write(programParams.NitroOverlayHMacOffset);
             paramsOffset = programParams.ProgramParameterOffset;
         }
 

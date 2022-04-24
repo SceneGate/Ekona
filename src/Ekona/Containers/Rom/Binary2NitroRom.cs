@@ -217,7 +217,7 @@ namespace SceneGate.Ekona.Containers.Rom
             reader.Stream.Position = header.SectionInfo.Arm9Offset + header.SectionInfo.Arm9Size;
             if (reader.ReadUInt32() == NitroRom.NitroCode) {
                 programParams.ProgramParameterOffset = reader.ReadUInt32();
-                programParams.ExtraHashesOffset = reader.ReadUInt32(); // TODO: investigate hashes
+                programParams.NitroOverlayHMacOffset = reader.ReadUInt32();
                 paramsOffset = programParams.ProgramParameterOffset;
             }
 

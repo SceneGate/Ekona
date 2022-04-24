@@ -29,7 +29,7 @@ public class DsiKeyStore
     /// </summary>
     /// <remarks>
     /// The key can be found in the DS ARM7 BIOS from 0x30 to 0x1077.
-    /// It starts with `99 D5 20 5F`.
+    /// It starts with `99 D5 20 5F` and has 0x40 bytes.
     /// </remarks>
     public byte[] BlowfishDsKey { get; set; }
 
@@ -39,7 +39,7 @@ public class DsiKeyStore
     /// <remarks>
     /// The key can be found in the DSi launcher application ARM9.
     /// For instance, at position 0270EC90h of the RAM.
-    /// It starts with `61 BD DD 72`.
+    /// It starts with `61 BD DD 72` and has 0x40 bytes.
     /// </remarks>
     public byte[] HMacKeyWhitelist12 { get; set; }
 
@@ -49,16 +49,18 @@ public class DsiKeyStore
     /// <remarks>
     /// The key can be found in the DSi launcher application ARM9.
     /// For instance, at position 0270ECD0h of the RAM.
-    /// It starts with `85 29 48 F3`.
+    /// It starts with `85 29 48 F3` and has 0x40 bytes.
     /// </remarks>
     public byte[] HMacKeyWhitelist34 { get; set; }
 
     /// <summary>
-    /// Gets or sets the HMAC key used in DSi games (like banner HMAC).
+    /// Gets or sets the HMAC key used in DSi games (like banner HMAC) but also
+    /// in some DS games to verify the (compressed) overlays in download play load mode.
     /// </summary>
     /// <remarks>
-    /// The key can be found inside the ARM9 of most DSi games and in the launcher.
-    /// It starts with `21 06 C0 DE`.
+    /// The key can be found inside the ARM9 of most DS and DSi games and in the launcher.
+    /// It has 0x40 bytes and starts with `21 06 C0 DE BA 98`.
+    /// It seems to start with the "nitrocode" token and it would be the second one in the ARM9.
     /// </remarks>
     public byte[] HMacKeyDSiGames { get; set; }
 
@@ -67,7 +69,7 @@ public class DsiKeyStore
     /// </summary>
     /// <remarks>
     /// The data can be found in the ARM9 BIOS of the DSi at position 0x8974.
-    /// It starts with `95 6F 79 0D`.
+    /// It starts with `95 6F 79 0D` and has 0x80 bytes.
     /// </remarks>
     public byte[] PublicModulusRetailGames { get; set; }
 }
