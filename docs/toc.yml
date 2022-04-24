@@ -2,13 +2,13 @@
   href: index.md
 
 - name: Getting started
-  href: guides/getting-started/introduction.md
+  href: dev/introduction.md
 
-- name: Guides
-  href: guides/
-
-- name: API
+- name: Dev docs
   href: dev/
+
+- name: Format specifications
+  href: specs/
 
 - name: GitHub
   href: https://github.com/SceneGate/Ekona

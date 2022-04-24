@@ -21,7 +21,7 @@ _unpack_ the ROM by using the converter
 [`Binar2NitroRom`](xref:SceneGate.Ekona.Containers.Rom.Binary2NitroRom). It will
 create a tree of _nodes_ that we can use to access to the files.
 
-[!code-csharp[OpenGame](../../../src/Ekona.Examples/QuickStart.cs?name=OpenGame)]
+[!code-csharp[OpenGame](../../src/Ekona.Examples/QuickStart.cs?name=OpenGame)]
 
 > [!NOTE]  
 > The converter will not write any file to the disk. It will create a tree of
@@ -30,13 +30,13 @@ create a tree of _nodes_ that we can use to access to the files.
 
 Now we can quickly modify our file even by code!
 
-[!code-csharp[ModifyFile](../../../src/Ekona.Examples/QuickStart.cs?name=ModifyFile)]
+[!code-csharp[ModifyFile](../../src/Ekona.Examples/QuickStart.cs?name=ModifyFile)]
 
 Finally, to generate a new game (ROM) file we just need one more line of code to
 use the [`NitroRom2Binary`](xref:SceneGate.Ekona.Containers.Rom.NitroRom2Binary)
 converter.
 
-[!code-csharp[WriteGame](../../../src/Ekona.Examples/QuickStart.cs?name=WriteGame)]
+[!code-csharp[WriteGame](../../src/Ekona.Examples/QuickStart.cs?name=WriteGame)]
 
 > [!TIP]  
 > Check-out the [TODO]() section to learn about the optional parameters of these
@@ -47,14 +47,14 @@ converter.
 Once we have opened a game, we can access to all the information from its header
 easily via the `system/info` node.
 
-[!code-csharp[HeaderInfo](../../../src/Ekona.Examples/QuickStart.cs?name=HeaderInfo)]
+[!code-csharp[HeaderInfo](../../src/Ekona.Examples/QuickStart.cs?name=HeaderInfo)]
 
 In a similar way, you can access to the information from the banner like the
 game title in different languages:
 
-[!code-csharp[BannerTitle](../../../src/Ekona.Examples/QuickStart.cs?name=BannerTitle)]
+[!code-csharp[BannerTitle](../../src/Ekona.Examples/QuickStart.cs?name=BannerTitle)]
 
 You can also export the game icon. If it's a DSi game, it may even have an
 animated icon that you can export as GIF!
 
-[!code-csharp[ExportIcon](../../../src/Ekona.Examples/QuickStart.cs?name=ExportIcon)]
+[!code-csharp[ExportIcon](../../src/Ekona.Examples/QuickStart.cs?name=ExportIcon)]

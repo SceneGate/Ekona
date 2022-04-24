@@ -20,9 +20,9 @@ the data:
 | 0x1000    | 0x3000 | Unknown, not readable                               |
 | 0x4000    | 0x8000 | Secure area, first 2 KB with _KEY1_ encryption      |
 | 0x8000    | ...    | Data area                                           |
-| 0xAA00000 | 0x3000 | Unknown, not readable                               |
-| 0xAA03000 | 0x4000 | ARM9i secure area, usually with modcrypt encryption |
-| 0xAA07000 | ...    | DSi data area                                       |
+| 0xZZ00000 | 0x3000 | Unknown, not readable                               |
+| 0xZZ03000 | 0x4000 | ARM9i secure area, usually with modcrypt encryption |
+| 0xZZ07000 | ...    | DSi data area                                       |
 
 ## DS / DSi program sections
 

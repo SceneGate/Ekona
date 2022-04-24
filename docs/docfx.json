@@ -17,15 +17,9 @@
     ],
     "build": {
       "content": [
-        {
-          "files": [ "api/**.yml", "dev/**" ]
-        },
-        {
-          "files": [ "toc.yml", "index.md" ]
-        },
-        {
-          "files": [ "guides/**" ]
-        },
+        { "files": [ "api/**.yml", "dev/**" ] },
+        { "files": [ "specs/**" ] },
+        { "files": [ "toc.yml", "index.md" ] },
         {
           "files": [ "README.md", "CONTRIBUTING.md" ],
           "src": "../"
