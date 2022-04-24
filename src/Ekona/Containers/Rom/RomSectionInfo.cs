@@ -100,6 +100,16 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint HeaderSize { get; set; }
 
         /// <summary>
+        /// Gets or sets the DS region end.
+        /// </summary>
+        public ushort NitroRegionEnd { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DSi region start.
+        /// </summary>
+        public ushort TwilightRegionStart { get; set; }
+
+        /// <summary>
         /// Gets or sets the offset for the ARM-9 program for DSi devices.
         /// </summary>
         public uint Arm9iOffset { get; set; }

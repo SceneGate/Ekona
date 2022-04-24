@@ -182,16 +182,6 @@ namespace SceneGate.Ekona.Containers.Rom
         public uint Arm7ParametersTableOffset { get; set; }
 
         /// <summary>
-        /// Gets or sets the DS region end.
-        /// </summary>
-        public ushort NitroRegionEnd { get; set; }
-
-        /// <summary>
-        /// Gets or sets the DSi region start.
-        /// </summary>
-        public ushort TwilightRegionStart { get; set; }
-
-        /// <summary>
         /// Gets or sets flags related to ROM features.
         /// </summary>
         /// <remarks>

@@ -274,8 +274,8 @@ public class RomHeader2Binary :
         writer.Write(source.SectionInfo.HeaderSize);
         writer.Write(source.ProgramInfo.Arm9ParametersTableOffset);
         writer.Write(source.ProgramInfo.Arm7ParametersTableOffset);
-        writer.Write(source.ProgramInfo.NitroRegionEnd);
-        writer.Write(source.ProgramInfo.TwilightRegionStart);
+        writer.Write(source.SectionInfo.NitroRegionEnd);
+        writer.Write(source.SectionInfo.TwilightRegionStart);
 
         writer.WriteTimes(0, 0x2C);
         writer.Write(source.CopyrightLogo);

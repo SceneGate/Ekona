@@ -137,6 +137,8 @@ public class NitroRom2Binary :
         if (programInfo.UnitCode != DeviceUnitKind.DS) {
             // Padding to start twilight section
             writer.WritePadding(0xFF, 0x100000);
+            sectionInfo.NitroRegionEnd = (ushort)(writer.Stream.Length / (512 * 1024));
+            sectionInfo.TwilightRegionStart = (ushort)(writer.Stream.Length / (512 * 1024));
 
             WriteTwilightPrograms();
             sectionInfo.DigestTwilightOffset = sectionInfo.Arm9iOffset;
