@@ -86,6 +86,10 @@ the file ID defined in the second field of the
 After every file and directory names of the current directory entry, the byte
 `0x00` must be present.
 
+The text encoding for the name is Shift-JIS. As it's a Japanese encoding, names
+may contain Japanese characters and cannot contain any European (Latin-1) or
+other non-English language characters.
+
 ## Files ID and order
 
 The files ID are assigned in order following a _depth-first_ recursion of the

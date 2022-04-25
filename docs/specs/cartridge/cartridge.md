@@ -42,7 +42,7 @@ the following sections:
   - Overlay files (always empty)
 - [File name table](filesystem.md#file-name-table)
 - [File access table](filesystem.md#file-access-table)
-- Banner
+- [Banner](banner.md)
 - Files data
 - Additionally, for DSi programs:
   - Digest HMACs
