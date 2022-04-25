@@ -566,7 +566,7 @@ public class NitroRom2Binary :
             };
 
             if (!node.IsContainer && node.Stream is null) {
-                throw new FormatException("Child is not binary");
+                throw new FormatException($"Child is not binary '{node.Path}'");
             }
 
             bool hasId = node.Tags.ContainsKey("scenegate.ekona.id");

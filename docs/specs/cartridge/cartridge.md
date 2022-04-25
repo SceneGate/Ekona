@@ -40,8 +40,8 @@ the following sections:
   - Program code
   - Overlay table info
   - Overlay files (always empty)
-- File name table
-- File access table
+- [File name table](filesystem.md#file-name-table)
+- [File access table](filesystem.md#file-access-table)
 - Banner
 - Files data
 - Additionally, for DSi programs:

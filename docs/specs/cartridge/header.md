@@ -4,6 +4,9 @@ A binary cartridge format starts with the program header. It contains
 information about the program as well as the address and size of the rest of the
 sections of the cartridge format.
 
+Formally it takes the first 0x4000 bytes of the cartridge file, but practically
+it is only 0x1000.
+
 ## Specification
 
 ### Base header

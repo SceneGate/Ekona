@@ -194,3 +194,8 @@ dotnet_diagnostic.SA0001.severity = none # Disable documentation
 dotnet_diagnostic.SA1600.severity = none # Disable documentation
 dotnet_diagnostic.S2699.severity = none # Assert may be in helper methods
 dotnet_diagnostic.S3966.severity = none # Dispose twice to test implementation
+
+# Special rules for example projects
+[*Examples/**]
+dotnet_diagnostic.SA1123.severity = none # We can have regions inside methods
+dotnet_diagnostic.SA1515.severity = none # Allow comment lines after region

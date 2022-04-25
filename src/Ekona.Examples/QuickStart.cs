@@ -36,23 +36,26 @@ public class QuickStart
         // Create node from file with binary format.
         Node game = NodeFactory.FromFile(gameFilePath, FileOpenMode.Read);
 
-        // Convert the binary format into nodes.
+        // Use the `Binary2NitroRom` converter to convert the binary format
+        // into node containers (virtual file system tree).
         game.TransformWith<Binary2NitroRom>();
 
-        // Export one file
-        Node itemsText = game.Children["data"].Children["Item.dat"];
-        itemsText.Stream.WriteTo("dump/items.dat");
+        // And it's done!
+        // Now we can access to every game file. For instance, we can export one file
+        Node gameFile = game.Children["data"].Children["Items.dat"];
+        gameFile.Stream.WriteTo("dump/items.dat");
         #endregion
 
         #region ModifyFile
         // Read the file by converting from binary format into PO (translation format)
-        var itemsPo = itemsText.TransformWith<BinaryItems2Po>().GetFormatAs<Po>();
+        Node itemsFile = Navigator.SearchNode(game, "data/Items.dat");
+        Po items = itemsFile.TransformWith<BinaryItems2Po>().GetFormatAs<Po>();
 
         // Let's modify the first entry
-        itemsPo.Entries[0].Translated = "Hello world!";
+        items.Entries[0].Translated = "Hello world!";
 
         // Convert back from PO format into binary (write into a new memory stream)
-        itemsText.TransformWith<Po2BinaryItems>();
+        itemsFile.TransformWith<Po2BinaryItems>();
         #endregion
 
         #region WriteGame
