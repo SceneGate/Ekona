@@ -30,25 +30,25 @@ Practically speaking, official DS / DSi program maps these memory map areas to
 the following sections:
 
 - [Header](header.md)
-- Unknown, not readable, usually `0x00`
-- ARM9 processor program (actual program code):
+- [Unknown, not readable](#unknown-regions), usually `0x00`
+- [ARM9 processor program](program.md) (actual program code):
   - Program code: starts at `0x4000` so first 2 KB are _KEY1_ encrypted.
-  - Program extended parameters (DS programs only)
-  - Overlay table info
-  - Overlay files
-- ARM7 processor program (SDK helper code):
+  - [Program extended parameters](program.md#program-parameters) (DS only)
+  - [Overlay table info](program.md#overlay-information-table)
+  - [Overlay files](program.md#overlays)
+- [ARM7 processor program](program.md) (system code):
   - Program code
-  - Overlay table info
-  - Overlay files (always empty)
+  - [Overlay table info](program.md#overlay-information-table)
+  - [Overlay files](program.md#overlays) (usually empty)
 - [File name table](filesystem.md#file-name-table)
 - [File access table](filesystem.md#file-access-table)
 - [Banner](banner.md)
 - Files data
 - Additionally, for DSi programs:
   - Digest HMACs
-  - Unknown, not readable
-  - ARM9i program
-  - ARM7i program
+  - [Unknown, not readable](#unknown-regions)
+  - [ARM9i program](program.md)
+  - [ARM7i program](program.md)
 
 ### Padding
 
