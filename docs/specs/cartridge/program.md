@@ -90,4 +90,68 @@ patch code.
 
 ## Program parameters
 
-TODO.
+The ARM9 program contains a table inside the file that defines additional
+parameters about the format like the location of _ITCM_ code or the
+[_BSS_](https://en.wikipedia.org/wiki/.bss) area. These parameters are used at
+runtime to initialize the program before calling the actual program entry-point.
+
+The location of this table is defined in the extended header for DSi games. In
+the case of DS games, there are 12 bytes after the ARM9 program file (also known
+as _arm9 tail_) that defines additional pointers. These bytes are not included
+as part of the length of the ARM9 program file. The format of these bytes is:
+
+| Offset | Format | Description                                           |
+| ------ | ------ | ----------------------------------------------------- |
+| 0x00   | uint   | Constant: `0x2106C0DE` (_nitrocode_ marker)           |
+| 0x04   | uint   | Offset to table parameters (see below)                |
+| 0x08   | uint   | Offset to [HMAC-SHA1 table for overlays](security.md) |
+
+If the _nitrocode_ marker is present, then this structure exists. This constant
+or marker is used across the _arm9_ program code to identify structures of data
+after the compilation phase.
+
+> [!TIP]  
+> The constant number is a play of hexadecimal numbers to create the word:
+> _nitro code_. _Nitro_ was the project name of the DS device. The meaning of
+> the bytes is:
+>
+> - `2`: _ni_ japanese number
+> - `10`: _to_ japanese number
+> - `6`: _ro_ japanese number
+> - `C0DE`: _code_ with hexadecimal numbers
+
+The format of the program parameter table is:
+
+| Offset | Format   | Description                                           |
+| ------ | -------- | ----------------------------------------------------- |
+| 0x00   | uint     | First ITCM block info                                 |
+| 0x04   | uint     | Last ITCM block info                                  |
+| 0x08   | uint     | ITCM data offset                                      |
+| 0x0C   | uint     | BSS data offset                                       |
+| 0x10   | uint     | BSS data end offset                                   |
+| 0x14   | uint     | Compressed program size                               |
+| 0x18   | uint     | SDK version with format: major.minor.build            |
+| 0x1C   | uint     | _nitrocode_ marker                                    |
+| 0x20   | uint     | _nitrocode_ marker in big endian                      |
+| 0x24   | string[] | Frameworks used with format `[<company>:<framework>]` |
+
+An _ITCM block info_ consists of two 32-bits integer values: target RAM address
+and block size. The data should be copied consecutive starting from _ITCM data
+offset_ field value.
+
+> [!NOTE]  
+> Programs regenerating a cartridge file should take into account the
+> _compressed program size_ field value and update it if the _program file_
+> changes and it's compressed value is different.
+
+## Program entrypoint
+
+The entrypoint code for the _ARM9_ program is defined by the SDK. It runs a set
+of initialization steps before calling the actual program _main_ function.
+
+These initializations includes:
+
+- Set the program stack address
+- Moves program code and data to TCM areas (cache areas that run faster)
+- Clean the _BSS_ area
+- Decompress the rest of the program file (reverse LZSS compression or BLZ)
