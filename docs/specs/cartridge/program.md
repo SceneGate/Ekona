@@ -88,6 +88,13 @@ The BIOS nor the firmware do not verify the CRC-16. They only verify the first
 8-bytes with the token. For this reason, this area is usually used for hooks and
 patch code.
 
+### Disable secure area
+
+The secure area can be disabled by setting a special constant value in the
+cartridge header at 0x78. The constant is encrypted with
+[KEY1](security.md#blowfish-key1) encryption. It's decrypted value is
+`NmMdOnly`.
+
 ## Program parameters
 
 The ARM9 program contains a table inside the file that defines additional

@@ -24,6 +24,10 @@ the data:
 | 0xZZ03000 | 0x4000 | ARM9i secure area, usually with modcrypt encryption |
 | 0xZZ07000 | ...    | DSi data area                                       |
 
+> [!NOTE]  
+> For details in _KEY1_ and modcrypt encryptions see section
+> [security](security.md).
+
 ## DS / DSi program sections
 
 Practically speaking, official DS / DSi program maps these memory map areas to
@@ -45,7 +49,7 @@ the following sections:
 - [Banner](banner.md)
 - Files data
 - Additionally, for DSi programs:
-  - Digest HMACs
+  - [Digest HMACs](security.md)
   - [Unknown, not readable](#unknown-regions)
   - [ARM9i program](program.md)
   - [ARM7i program](program.md)

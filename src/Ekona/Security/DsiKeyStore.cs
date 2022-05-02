@@ -29,7 +29,7 @@ public class DsiKeyStore
     /// </summary>
     /// <remarks>
     /// The key can be found in the DS ARM7 BIOS from 0x30 to 0x1077.
-    /// It starts with `99 D5 20 5F` and has 0x40 bytes.
+    /// It starts with `99 D5 20 5F` and has 0x1048 bytes.
     /// </remarks>
     public byte[] BlowfishDsKey { get; set; }
 
