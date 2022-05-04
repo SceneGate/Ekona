@@ -27,7 +27,7 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// </summary>
 [Flags]
 [SuppressMessage("", "S4070", Justification = "False positive")]
-public enum ScfgExtendedFeaturesArm7
+public enum ScfgExtendedFeaturesArm7 : uint
 {
     /// <summary>
     /// No setting set.
@@ -62,5 +62,5 @@ public enum ScfgExtendedFeaturesArm7
     /// <summary>
     /// Allow access to the SCFG/MBK registers.
     /// </summary>
-    AccessScfgMbkRegisters = 1 << 31,
+    AccessScfgMbkRegisters = 1u << 31,
 }
