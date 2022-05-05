@@ -1,5 +1,8 @@
 using SceneGate.Ekona.Containers.Rom;
 using SceneGate.Ekona.Security;
+using Texim.Animations;
+using Texim.Formats;
+using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
 
@@ -20,6 +23,18 @@ public class Cartridge
         } else {
             DataStream encryptedArm9 = key1Encryption.EncryptArm9(arm9);
         }
+        #endregion
+    }
+
+    public void ExportGif(Node rom)
+    {
+        #region ExportIconGif
+        Node animated = Navigator.SearchNode(rom, "system/banner/animated");
+
+        AnimatedFullImage animatedImage = (AnimatedFullImage)ConvertFormat.With<IconAnimation2AnimatedImage>(animated.Format);
+        using var gifData = (BinaryFormat)ConvertFormat.With<AnimatedFullImage2Gif>(animatedImage);
+
+        gifData.Stream.WriteTo("icon.gif");
         #endregion
     }
 }

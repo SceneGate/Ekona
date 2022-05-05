@@ -5,6 +5,11 @@ binary format. It is the same format for content dumped from a physical
 cartridge, digital downloads (_DSiWare_) or digital content (firmware apps like
 the menu launcher).
 
+The converters
+[`Binary2NitroRom`](xref:SceneGate.Ekona.Containers.Rom.Binary2NitroRom) and
+[`NitroRom2Binary`](xref:SceneGate.Ekona.Containers.Rom.NitroRom2Binary) support
+DS and DSi software.
+
 ## Reading a ROM
 
 The format has information about the software and contains a list of files. This
@@ -21,7 +26,8 @@ format can be converted / unpacked into a tree _nodes_ with the converter
 
 [!code-csharp[OpenGame](../../../src/Ekona.Examples/QuickStart.cs?name=OpenGame)]
 
-The converter will use the following converters to transform some content:
+The converter will use the following converters to transform some binary data
+into the specific format:
 
 - Header using
   [`Binary2RomHeader`](xref:SceneGate.Ekona.Containers.Rom.Binary2RomHeader)
@@ -42,25 +48,65 @@ Some DSi games may have
 that case the converter will also decrypt the files. This operation does not
 require keys.
 
+The data nodes contains two _tags_ that are used when
+[writing back the ROM](#writing-a-rom):
+
+- `scenegate.ekona.id`: Index in the file system. Some times used by software to
+  access files.
+- `scenegate.ekona.physical_id`: Index of the file in the data block.
+
 ## Writing a ROM
 
 Any container node (`NodeContainerFormat`) that follows the
 [structure defined by the cartridge](#nitrorom-tree) can be converter (packed)
-into binary format using the converter
-[`NitroRom2Binary`](xref:SceneGate.Ekona.Containers.Rom.NitroRom2Binary). The
-input does not need to have
-[`NitroRom`](xref:SceneGate.Ekona.Containers.Rom.NitroRom) format.
+into the ROM / cartridge binary format using the converter
+[`NitroRom2Binary`](xref:SceneGate.Ekona.Containers.Rom.NitroRom2Binary).
 
 > [!NOTE]
 >
 > - _Input format_: `NodeContainerFormat` (like `NitroRom` or a directory)
 > - _Output format_: `BinaryFormat`
 > - _Parameters_: (_Optional_)
+>   [`NitroRom2BinaryParams`](xref:SceneGate.Ekona.Containers.Rom.NitroRom2BinaryParams)
+>   - `OutputStream`: `Stream` to write the output ROM data. If not provided,
+>     the converter will create a `Stream` in memory (caution).
+>   - `KeyStore`: keys to use to re-generate the HMACs from the header and
+>     digest hashes. If not provided, the hashes will be not be generated. They
+>     may be _zero bytes_ or the ones from the original ROM if already set.
+>   - `DecompressedProgram`: set it if the provided _arm9_ program file is
+>     decompressed with BLZ compression. In that case, the converter will update
+>     the compressed length in the _arm9_ program with zero. Otherwise it will
+>     set the current _arm9_ program length.
 
 [!code-csharp[WriteGame](../../../src/Ekona.Examples/QuickStart.cs?name=WriteGame)]
 
+> [!WARNING]  
+> If you are generating a big ROM, pass the parameter with an `OutputStream`
+> from a disk file. Otherwise the output data may take a lot of RAM memory.
+
+The nodes from the container given as a input must have the formats and names
+specified in [`NitroRom` tree](#nitrorom-tree). This means every game file must
+be already in `IBinary` (`BinaryFormat`).
+
+> [!WARNING]  
+> When the `KeyStore` parameter is set, the hashes are re-generated. This
+> operation may take some extra time and it is not needed. Even if the hashes
+> won't be valid anymore, emulators and custom firmwares like _unlaunch_ skip
+> the verification. In any case, the signature is not possible to generate
+> (unknown private key) so the re-generated ROM won't be valid even if the keys
+> are provided.
+
+The file IDs are assigned by following a depth-first approach. If every node
+contains the tag `scenegate.ekona.id` then its value is used instead.
+
+The file data is written following the order of the file IDs. If every node
+contains the tag `scenegate.ekona.physical_id`, then this order is used.
+
 > [!TIP]  
-> TagsTODO
+> To reduce the size of patches, ensure that the nodes contains the
+> `scenegate.ekona.physical_id` tags, so the data is written in the same order.
+> You can do that by always applying changes to the file system read from a
+> cartridge, instead of creating it from scratch.
 
 ## `NitroRom` tree
 
@@ -93,6 +139,8 @@ follows this structure from the root node (returned node by converter):
   - `overlays7`: (container) Overlay directory for ARM7 processor.
     - `overlay_{i}`: (`BinaryFormat`) Library overlay for ARM7 processor.
 - `data`: (container) Root directory for program data files
+  - Every node under this container will be either another container or a
+    `BinaryFormat`.
 
 ## Secure area encryption (KEY1)
 
@@ -107,3 +155,25 @@ You can decrypt or encrypt the file later by using the class
 [!code-csharp[DecryptEncryptArm9](../../../src/Ekona.Examples/Cartridge.cs?name=DecryptEncryptArm9)]
 
 ## Animated icon
+
+DSi software brings an animated icon. You can export this icon into standard GIF
+format by also using the [Texim](https://github.com/SceneGate/Texim) library.
+
+The converter
+[`IconAnimation2AnimatedImage`](xref:SceneGate.Ekona.Containers.Rom.IconAnimation2AnimatedImage)
+can convert the `animated` node from the banner into the `AnimatedFullImage`
+type from _Texim_. You can use later its converters to convert to GIF format.
+
+> [!NOTE]
+>
+> - _Input format_: `NodeContainerFormat`
+> - _Output format_: `AnimatedFullImage`
+> - _Parameters_: none
+
+[!code-csharp[ExportIconGif](../../../src/Ekona.Examples/Cartridge.cs?name=ExportIconGif)]
+
+> [!NOTE]  
+> It is not possible to import the icon from a GIF file, only export. If you
+> want to modify the animated icon, edit each frame and information. For
+> instance, export each bitmap with a palette into PNG format and the animation
+> information as a JSON/YAML file.
