@@ -199,3 +199,4 @@ dotnet_diagnostic.S3966.severity = none # Dispose twice to test implementation
 [*Examples/**]
 dotnet_diagnostic.SA1123.severity = none # We can have regions inside methods
 dotnet_diagnostic.SA1515.severity = none # Allow comment lines after region
+dotnet_diagnostic.S1481.severity = none # Unused variables
