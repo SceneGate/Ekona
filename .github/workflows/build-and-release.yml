@@ -26,6 +26,7 @@ jobs:
         with:
           fetch-depth: 0 # We need full history for version number
           lfs: true
+          submodules: 'recursive'
 
       - name: "Setup .NET SDK"
         uses: actions/setup-dotnet@v1
@@ -72,6 +73,7 @@ jobs:
         with:
           fetch-depth: 0 # We need full history for version number
           lfs: true
+          submodules: 'recursive'
 
       - name: "Setup .NET SDK"
         uses: actions/setup-dotnet@v1
@@ -100,6 +102,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0 # We need full history for version number
+          submodules: 'recursive'
 
       - name: "Download artifacts"
         uses: actions/download-artifact@v2

@@ -27,7 +27,7 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// </summary>
 [Flags]
 [SuppressMessage("", "S4070", Justification = "False positive")]
-public enum TwilightAccessControl
+public enum TwilightAccessControl : uint
 {
     /// <summary>
     /// No access control set.
@@ -122,5 +122,5 @@ public enum TwilightAccessControl
     /// <summary>
     /// Debugger common client key -> 0x0380F000 = 0x03FFC600 + 0x10.
     /// </summary>
-    DebuggerCommonClientKey = 1 << 31,
+    DebuggerCommonClientKey = 1u << 31,
 }

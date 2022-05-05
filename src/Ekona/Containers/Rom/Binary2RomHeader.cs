@@ -343,8 +343,8 @@ namespace SceneGate.Ekona.Containers.Rom
             header.ProgramInfo.Arm7ParametersTableOffset = reader.ReadUInt32();
 
             // Pos: 0x90
-            header.ProgramInfo.NitroRegionEnd = reader.ReadUInt16();
-            header.ProgramInfo.TwilightRegionStart = reader.ReadUInt16();
+            header.SectionInfo.NitroRegionEnd = reader.ReadUInt16();
+            header.SectionInfo.TwilightRegionStart = reader.ReadUInt16();
 
             // Pos: 0xC0
             reader.Stream.Position = 0xC0;

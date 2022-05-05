@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ekona.PerformanceTests", "Ekona.PerformanceTests\Ekona.PerformanceTests.csproj", "{5808F29C-C802-4728-99A5-E1F299178002}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ekona.Examples", "Ekona.Examples\Ekona.Examples.csproj", "{E1BC44DB-CAA3-4C74-8A5A-7D536A53E09F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{5808F29C-C802-4728-99A5-E1F299178002}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5808F29C-C802-4728-99A5-E1F299178002}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5808F29C-C802-4728-99A5-E1F299178002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1BC44DB-CAA3-4C74-8A5A-7D536A53E09F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1BC44DB-CAA3-4C74-8A5A-7D536A53E09F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1BC44DB-CAA3-4C74-8A5A-7D536A53E09F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1BC44DB-CAA3-4C74-8A5A-7D536A53E09F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

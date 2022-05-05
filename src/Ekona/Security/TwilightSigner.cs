@@ -75,7 +75,7 @@ public class TwilightSigner
         // is the raw hash (with PKCS #7 1.5 padding). It is NOT encoded with ASN.1
         // as specified in PKCS #1.
         // That's why we do manually comparison:
-        // 1. Decript signature with RSA public key
+        // 1. Decrypt signature with RSA public key
         var rsaCipher = CipherUtilities.GetCipher("RSA/NONE/PKCS1Padding");
         rsaCipher.Init(false, pubKey);
         byte[] expectedHash = rsaCipher.DoFinal(signature);

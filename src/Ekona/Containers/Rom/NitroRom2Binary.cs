@@ -137,6 +137,8 @@ public class NitroRom2Binary :
         if (programInfo.UnitCode != DeviceUnitKind.DS) {
             // Padding to start twilight section
             writer.WritePadding(0xFF, 0x100000);
+            sectionInfo.NitroRegionEnd = (ushort)(writer.Stream.Length / (512 * 1024));
+            sectionInfo.TwilightRegionStart = (ushort)(writer.Stream.Length / (512 * 1024));
 
             WriteTwilightPrograms();
             sectionInfo.DigestTwilightOffset = sectionInfo.Arm9iOffset;
@@ -361,7 +363,7 @@ public class NitroRom2Binary :
             writer.Stream.Position = sectionInfo.Arm9Offset + sectionInfo.Arm9Size;
             writer.Write(NitroRom.NitroCode);
             writer.Write(programParams.ProgramParameterOffset);
-            writer.Write(programParams.ExtraHashesOffset);
+            writer.Write(programParams.NitroOverlayHMacOffset);
             paramsOffset = programParams.ProgramParameterOffset;
         }
 
@@ -564,7 +566,7 @@ public class NitroRom2Binary :
             };
 
             if (!node.IsContainer && node.Stream is null) {
-                throw new FormatException("Child is not binary");
+                throw new FormatException($"Child is not binary '{node.Path}'");
             }
 
             bool hasId = node.Tags.ContainsKey("scenegate.ekona.id");

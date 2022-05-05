@@ -33,9 +33,13 @@ public class NitroProgramCodeParameters
     public uint ProgramParameterOffset { get; set; }
 
     /// <summary>
-    /// Gets or sets the offset to an optional area in the program with additional hashes.
+    /// Gets or sets the offset inside the decompressed ARM9 to the list of HMAC-SHA1
+    /// hashes of each compressed overlay (only DS games).
     /// </summary>
-    public uint ExtraHashesOffset { get; set; }
+    /// <remarks>
+    /// The key is inside the ARM9 as well (`HMacKeyDSiGames`).
+    /// </remarks>
+    public uint NitroOverlayHMacOffset { get; set; }
 
     /// <summary>
     /// Gets or sets the ITCM first block info offset.

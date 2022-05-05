@@ -112,7 +112,7 @@ public class TwilightHMacGenerator
         _ = generator.TransformBlock(overlaysFat, 0, overlaysFat.Length, null, 0);
 
         // Finally hash each overlay in an fun, unnecessary and complex way.
-        // Hash each overlay including its hash, without exceeding a maximum size per file.
+        // Hash each overlay including its padding, without exceeding a maximum size per file.
         // The maximum file size to hash is changing depending how many bytes are hashed already.
         int blocksRead = 0;
         for (int i = 0; i < numOverlays; i++) {

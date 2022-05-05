@@ -117,7 +117,7 @@ public class Modcrypt
     private static Modcrypt CreateDebug(ProgramInfo programInfo, int area)
     {
         byte[] iv = (area == 1)
-            ? programInfo.DsiInfo.Arm9Mac.Hash[0..16]
+            ? programInfo.DsiInfo.Arm9SecureMac.Hash[0..16]
             : programInfo.DsiInfo.Arm7Mac.Hash[0..16];
 
         // Debug KEY[0..F]: First 16 bytes of the header

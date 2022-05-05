@@ -1,4 +1,18 @@
-- name: Changelog
-  href: Changelog.md
+- name: ✨ Getting started
+  href: introduction.md
+
+- name: ♻️ Converters
+  items:
+    - name: Cartridge
+      href: features/cartridge.md
+
 - name: API
   href: ../api/toc.yml
+
+- name: ⌨ Contribute
+  items:
+    - name: Guidelines
+      href: Contributing.md
+
+- name: Changelog
+  href: Changelog.md

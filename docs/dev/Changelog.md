@@ -1,3 +1,3 @@
 # Changelog
 
-To be filled on preview builds.
+To be filled on preview and stable builds.
