@@ -34,12 +34,16 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <item><term>/system/banner/</term><description>Program banner.</description></item>
     /// <item><term>/system/banner/info</term><description>Program banner content.</description></item>
     /// <item><term>/system/banner/icon</term><description>Program icon.</description></item>
-    /// <item><term>/system/arm9</term><description>Program execuable for ARM9 CPU.</description></item>
+    /// <item><term>/system/banner/animated</term><description>Animated program icon.</description></item>
+    /// <item><term>/system/banner/animated/bitmapX</term><description>Bitmap X (0-7) for the animated icon.</description></item>
+    /// <item><term>/system/banner/animated/palettes</term><description>Palettes (0-7) for the animated icon.</description></item>
+    /// <item><term>/system/banner/animated/animation</term><description>Animation icon information.</description></item>
+    /// <item><term>/system/arm9</term><description>Program executable for ARM9 CPU.</description></item>
     /// <item><term>/system/overlays9</term><description>Overlay libraries for ARM9 CPU.</description></item>
-    /// <item><term>/system/overlays9/overlay_0</term><description>Overlay 0 for ARM9 CPU.</description></item>
+    /// <item><term>/system/overlays9/overlay_X</term><description>Overlay X for ARM9 CPU.</description></item>
     /// <item><term>/system/arm7</term><description>Program executable for ARM7 CPU.</description></item>
     /// <item><term>/system/overlays7</term><description>Overlay libraries for ARM7 CPU.</description></item>
-    /// <item><term>/system/overlays7/overlay7_0</term><description>Overlay 0 for ARM7 CPU.</description></item>
+    /// <item><term>/system/overlays7/overlay7_X</term><description>Overlay X for ARM7 CPU.</description></item>
     /// <item><term>/data</term><description>Program data files.</description></item>
     /// </list>
     /// </remarks>

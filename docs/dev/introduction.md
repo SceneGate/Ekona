@@ -39,8 +39,8 @@ converter.
 [!code-csharp[WriteGame](../../src/Ekona.Examples/QuickStart.cs?name=WriteGame)]
 
 > [!TIP]  
-> Check-out the [TODO]() section to learn about the optional parameters of these
-> converters!
+> Check-out the [cartridge](features/cartridge.md) section to learn about the
+> optional parameters of these converters!
 
 ### Cartridge information
 

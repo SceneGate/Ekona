@@ -4,6 +4,7 @@
 - name: ♻️ Converters
   items:
     - name: Cartridge
+      href: features/cartridge.md
 
 - name: API
   href: ../api/toc.yml
