@@ -16,7 +16,7 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
   - :file_folder: Filesystem: read and write
   - :information_source: Header: read and write, including extended header
   - :framed_picture: Banner and icon: read and write.
-  - :closed_lock_with_key: ARM9 secure area encryption and decryption.
+  - :closed_lock_with_key: ARM9 secure area encryption and decryption (KEY1).
 - :video_game: DSi cartridge:
   - :file_folder: Filesystem: read and write `arm9i` and `arm7i` programs.
   - :information_source: Extended header: read and write
@@ -25,12 +25,39 @@ The library supports .NET 6.0 and above on Linux, Window and MacOS.
   - :lock_with_ink_pen: HMAC validation and generation when keys are provided.
   - :lock_with_ink_pen: Signature validation when keys are provided.
 
+## Getting started
+
+Check-out the
+[getting started guide](https://scenegate.github.io/Ekona/dev/introduction.html)
+to start using _Ekona_ in no time! Below you can find an example that shows how
+to open a DS/DSi ROM file (cartridge dump).
+
+```csharp
+// Create Yarhl node from a file (binary format).
+Node game = NodeFactory.FromFile("game.nds", FileOpenMode.Read);
+
+// Use the `Binary2NitroRom` converter to convert the binary format
+// into node containers (virtual file system tree with files and directories).
+game.TransformWith<Binary2NitroRom>();
+
+// And it's done!
+// Now we can access to every game file. For instance, we can export one file
+Node items = Navigator.SearchNode(game, "data/Items.dat");
+items.Stream.WriteTo("dump/Items.dat");
+```
+
 ## Documentation
 
-Feel free to ask any question in the
-[project Discussion site!](https://github.com/SceneGate/Ekona/discussions)
+You can get full details about how to use library from the
+[documentation](https://scenegate.github.io/Ekona/dev/features/cartridge.html)
+website.
 
-Check our on-line [API documentation](https://scenegate.github.io/Ekona/).
+Don't miss the
+[formats specifications](https://scenegate.github.io/Ekona/specs/cartridge/cartridge.html)
+in case you need to do further research.
+
+And don't hesitate to ask questions in the
+[project Discussion site!](https://github.com/SceneGate/Ekona/discussions)
 
 ## Build
 

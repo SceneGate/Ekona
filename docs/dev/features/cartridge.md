@@ -10,6 +10,9 @@ The converters
 [`NitroRom2Binary`](xref:SceneGate.Ekona.Containers.Rom.NitroRom2Binary) support
 DS and DSi software.
 
+You can find the technical details of the format specification
+[here](../../specs/cartridge/cartridge.md).
+
 ## Reading a ROM
 
 The format has information about the software and contains a list of files. This
@@ -80,6 +83,14 @@ into the ROM / cartridge binary format using the converter
 
 [!code-csharp[WriteGame](../../../src/Ekona.Examples/QuickStart.cs?name=WriteGame)]
 
+The converter will use the following converters to transform the program and
+banner information into binary data:
+
+- Header using
+  [`RomHeader2Binary`](xref:SceneGate.Ekona.Containers.Rom.RomHeader2Binary)
+- Banner using
+  [`Banner2Binary`](xref:SceneGate.Ekona.Containers.Rom.Banner2Binary)
+
 > [!WARNING]  
 > If you are generating a big ROM, pass the parameter with an `OutputStream`
 > from a disk file. Otherwise the output data may take a lot of RAM memory.
@@ -88,7 +99,7 @@ The nodes from the container given as a input must have the formats and names
 specified in [`NitroRom` tree](#nitrorom-tree). This means every game file must
 be already in `IBinary` (`BinaryFormat`).
 
-> [!WARNING]  
+> [!NOTE]  
 > When the `KeyStore` parameter is set, the hashes are re-generated. This
 > operation may take some extra time and it is not needed. Even if the hashes
 > won't be valid anymore, emulators and custom firmwares like _unlaunch_ skip
@@ -158,6 +169,9 @@ You can decrypt or encrypt the file later by using the class
 
 DSi software brings an animated icon. You can export this icon into standard GIF
 format by also using the [Texim](https://github.com/SceneGate/Texim) library.
+You can use the property
+[`SupportAnimatedIcon`](xref:SceneGate.Ekona.Containers.Rom.Banner.SupportAnimatedIcon)
+to know if the banner contains the animated icon.
 
 The converter
 [`IconAnimation2AnimatedImage`](xref:SceneGate.Ekona.Containers.Rom.IconAnimation2AnimatedImage)

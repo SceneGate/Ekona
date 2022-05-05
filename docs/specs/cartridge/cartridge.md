@@ -1,9 +1,9 @@
 # Cartridge format
 
-The binary cartridge format (also known as `SRL`) is the way to pack the
-information and files for a DS and DSi program. This is the format that physical
-cartridge carts have, but also the format used by digital content like DSiWare
-and utility programs from the DSi firmware.
+The binary cartridge format (also known as `SRL` or _ROM_) is the way to pack
+the information and files for a DS and DSi program. This is the format that
+physical cartridge carts have, but also the format used by digital content like
+DSiWare and utility programs from the DSi firmware.
 
 > [!NOTE]  
 > These documents refer to DS/DSi programs. This also includes games.

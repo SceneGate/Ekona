@@ -5,7 +5,7 @@
   href: dev/introduction.md
 
 - name: Dev docs
-  href: dev/
+  href: dev/features/cartridge.md
 
 - name: Format specifications
   href: specs/
