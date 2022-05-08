@@ -15,6 +15,7 @@ on:
 
 env:
   NET_SDK: '6.0.202'
+  RESOURCES_VERSION: '1.0'
 
 jobs:
   build_main:
@@ -45,7 +46,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: resources
-          key: test-resources-v1
+          key: ${{ runner.os }}-tests-${{ env.RESOURCES_VERSION }}
 
       - name: "Build, test and stage"
         run: dotnet cake --target=Stage-Artifacts --configuration=Release --resource-uri=${{secrets.TEST_RESOURCES_URI_V1}}
@@ -93,7 +94,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: resources
-          key: test-resources-v1
+          key: ${{ runner.os }}-tests-${{ env.RESOURCES_VERSION }}
 
       # No need to stage as one job can create the binaries for all platforms
       - name: "Build and test"
