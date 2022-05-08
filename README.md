@@ -1,6 +1,7 @@
 # Ekona [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://choosealicense.com/licenses/mit/) ![Build and release](https://github.com/SceneGate/Ekona/workflows/Build%20and%20release/badge.svg)
 
-[Yarhl](https://github.com/SceneGate/yarhl) plugin for DS and DSi formats.
+_Ekona_ is a library part of the [_SceneGate_](https://github.com/SceneGate)
+framework that provides support for DS and DSi file formats.
 
 The library supports .NET 6.0 and above on Linux, Window and MacOS.
 
@@ -46,6 +47,29 @@ Node items = Navigator.SearchNode(game, "data/Items.dat");
 items.Stream.WriteTo("dump/Items.dat");
 ```
 
+## Usage
+
+The project provides the following .NET libraries (NuGet packages in nuget.org).
+The libraries only support the latest .NET LTS version: **.NET 6.0**.
+
+- [![SceneGate.Ekona](https://img.shields.io/nuget/v/SceneGate.Ekona?label=SceneGate.Ekona&logo=nuget)](https://www.nuget.org/packages/SceneGate.Ekona)
+  - `SceneGate.Ekona.Containers.Rom`: DS and DSi cartridge (ROM) format.
+  - `SceneGate.Ekona.Security`: hash and encryption algorithms
+
+Preview releases can be found in this
+[Azure DevOps package repository](https://dev.azure.com/SceneGate/SceneGate/_packaging?_a=feed&feed=SceneGate-Preview).
+To use a preview release, create a file `nuget.config` in the same directory of
+your solution file (.sln) with the following content:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="SceneGate-Preview" value="https://pkgs.dev.azure.com/SceneGate/SceneGate/_packaging/SceneGate-Preview/nuget/v3/index.json" />
+  </packageSources>
+</configuration>
+```
+
 ## Documentation
 
 You can get full details about how to use library from the
@@ -61,8 +85,11 @@ And don't hesitate to ask questions in the
 
 ## Build
 
-The project requires to build .NET 6.0 SDK and .NET Framework 4.8 or latest
-Mono. If you open the project with VS Code and you did install the
+Building requires the
+[.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) and .NET
+Framework 4.8 or the latest
+[Mono](https://www.mono-project.com/download/stable/). If you open the project
+with VS Code and you did install the
 [VS Code Remote Containers](https://code.visualstudio.com/docs/remote/containers)
 extension, you can have an already pre-configured development environment with
 Docker or Podman.
@@ -73,15 +100,24 @@ To build, test and generate artifacts run:
 # Only required the first time
 dotnet tool restore
 
-# Default target is Stage-Artifacts
+# It will build, run the tests and create the artifacts (NuGets and doc)
 dotnet cake
 ```
 
-To just build and test quickly, run:
+To build and test only, run:
 
 ```sh
 dotnet cake --target=BuildTest
 ```
+
+To build the documentation only, run:
+
+```sh
+dotnet cake --target=Build-Doc
+```
+
+If any of the previous tasks fail and you want to get more verbosity, re-run the
+command with the argument `--verbosity=diagnostic`
 
 To run the performance test with memory and CPU traces:
 
