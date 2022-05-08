@@ -41,8 +41,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Cache test resources
+        uses: actions/cache@v3
+        with:
+          path: resources
+          key: test-resources-v1
+
       - name: "Build, test and stage"
-        run: dotnet cake --target=Stage-Artifacts --configuration=Release --verbosity=diagnostic
+        run: dotnet cake --target=Stage-Artifacts --configuration=Release --resource-uri=${{secrets.TEST_RESOURCES_URI_V1}} --verbosity=diagnostic
 
       - name: "Publish test results"
         uses: actions/upload-artifact@v2
@@ -83,9 +89,15 @@ jobs:
       - name: "Install build tools"
         run: dotnet tool restore
 
+      - name: Cache test resources
+        uses: actions/cache@v3
+        with:
+          path: resources
+          key: test-resources-v1
+
       # No need to stage as one job can create the binaries for all platforms
       - name: "Build and test"
-        run: dotnet cake --target=BuildTest --configuration=Release --verbosity=diagnostic
+        run: dotnet cake --target=BuildTest --configuration=Release --resource-uri=${{secrets.TEST_RESOURCES_URI_V1}} --verbosity=diagnostic
 
   # Preview release on push to develop only
   # Stable release on version tag push only
