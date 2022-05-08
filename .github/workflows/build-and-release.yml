@@ -48,7 +48,7 @@ jobs:
           key: test-resources-v1
 
       - name: "Build, test and stage"
-        run: dotnet cake --target=Stage-Artifacts --configuration=Release --resource-uri=${{secrets.TEST_RESOURCES_URI_V1}} --verbosity=diagnostic
+        run: dotnet cake --target=Stage-Artifacts --configuration=Release --resource-uri=${{secrets.TEST_RESOURCES_URI_V1}}
 
       - name: "Publish test results"
         uses: actions/upload-artifact@v2
@@ -97,7 +97,7 @@ jobs:
 
       # No need to stage as one job can create the binaries for all platforms
       - name: "Build and test"
-        run: dotnet cake --target=BuildTest --configuration=Release --resource-uri=${{secrets.TEST_RESOURCES_URI_V1}} --verbosity=diagnostic
+        run: dotnet cake --target=BuildTest --configuration=Release --resource-uri=${{secrets.TEST_RESOURCES_URI_V1}}
 
   # Preview release on push to develop only
   # Stable release on version tag push only
