@@ -94,11 +94,12 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         [TestCaseSource(nameof(GetFiles))]
         public void DeserializeRomWithKeysHasValidSignatures(string infoPath, string romPath)
         {
+            // TODO: Test header fields too.
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);
             DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
-            node.Invoking(n => n.TransformWith<Binary2NitroRom, DsiKeyStore>(keys)).Should().NotThrow();
+            node.Invoking(n => n.TransformWith(new Binary2NitroRom(keys))).Should().NotThrow();
 
             NitroRom rom = node.GetFormatAs<NitroRom>();
             ProgramInfo programInfo = rom.Information;
@@ -140,10 +141,10 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
 
-            var rom = (NitroRom)ConvertFormat.With<Binary2NitroRom>(node.Format!);
+            NitroRom rom = node.GetFormatAs<IBinary>().ConvertWith(new Binary2NitroRom());
 
             var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
-            var generatedStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(nitroParameters, rom);
+            BinaryFormat generatedStream = rom.ConvertWith(new NitroRom2Binary(nitroParameters));
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
             generatedStream.Stream!.Compare(node.Stream).Should().BeTrue();
@@ -228,8 +229,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
             NitroRom rom = node.TransformWith<Binary2NitroRom>().GetFormatAs<NitroRom>();
 
-            using var output1 = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
-            using var output2 = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
+            using BinaryFormat output1 = rom.ConvertWith(new NitroRom2Binary());
+            using BinaryFormat output2 = rom.ConvertWith(new NitroRom2Binary());
             output1.Stream.Compare(output2.Stream).Should().BeTrue();
         }
 
@@ -241,18 +242,18 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
             NitroRom rom = node.TransformWith<Binary2NitroRom>().GetFormatAs<NitroRom>();
 
-            using var createdStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary>(rom);
+            using var createdStream = rom.ConvertWith(new NitroRom2Binary());
 
             using var ownStream = new DataStream();
             var converterParams = new NitroRom2BinaryParams { OutputStream = ownStream };
-            var returnStream = (BinaryFormat)ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(converterParams, rom);
+            var returnStream = rom.ConvertWith(new NitroRom2Binary(converterParams));
 
             returnStream.Stream.Should().BeSameAs(ownStream);
             ownStream.Length.Should().Be(createdStream.Stream.Length);
             ownStream.Compare(createdStream.Stream).Should().BeTrue();
 
             // Second pass
-            ConvertFormat.With<NitroRom2Binary, NitroRom2BinaryParams>(converterParams, rom);
+            rom.ConvertWith(new NitroRom2Binary(converterParams));
             ownStream.Disposed.Should().BeFalse();
             ownStream.Length.Should().Be(createdStream.Stream.Length);
             ownStream.Compare(createdStream.Stream).Should().BeTrue();
@@ -270,7 +271,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             ProgramInfo originalInfo = node.GetFormatAs<NitroRom>()!.Information;
 
             var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
-            node.Invoking(n => n.TransformWith<NitroRom2Binary, NitroRom2BinaryParams>(nitroParameters)).Should().NotThrow();
+            node.Invoking(n => n.TransformWith(new NitroRom2Binary(nitroParameters))).Should().NotThrow();
 
             node.Invoking(n => n.TransformWith<Binary2NitroRom>()).Should().NotThrow();
             ProgramInfo newInfo = node.GetFormatAs<NitroRom>()!.Information;

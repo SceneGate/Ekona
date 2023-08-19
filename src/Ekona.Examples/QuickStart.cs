@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 SceneGate
+// Copyright (c) 2022 SceneGate
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -95,9 +95,11 @@ public class QuickStart
 
         // For DSi-enhanced games we can export its animated icon as GIF
         if (bannerInfo.SupportAnimatedIcon) {
-            Node animatedNode = Navigator.SearchNode(game, "system/banner/animated");
-            var animatedImage = ConvertFormat.With<IconAnimation2AnimatedImage>(animatedNode.Format);
-            using var binaryGif = (BinaryFormat)ConvertFormat.With<AnimatedFullImage2Gif>(animatedImage);
+            var animatedNode = Navigator.SearchNode(game, "system/banner/animated")
+                .GetFormatAs<NodeContainerFormat>();
+
+            var animatedImage = new IconAnimation2AnimatedImage().Convert(animatedNode);
+            using var binaryGif = new AnimatedFullImage2Gif().Convert(animatedImage);
             binaryGif.Stream.WriteTo("dump/icon.gif");
         }
         #endregion

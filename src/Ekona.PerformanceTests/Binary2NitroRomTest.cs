@@ -45,7 +45,7 @@ public class Binary2NitroRomTest
     {
         keyStore = ResourceManager.GetDsiKeyStore();
         binaryRom = new BinaryFormat(DataStreamFactory.FromFile(RomPath.Path, FileOpenMode.Read));
-        root = (NitroRom)ConvertFormat.With<Binary2NitroRom>(binaryRom);
+        root = binaryRom.ConvertWith(new Binary2NitroRom());
         outputStream = new DataStream();
     }
 
@@ -60,22 +60,20 @@ public class Binary2NitroRomTest
     [Benchmark]
     public NitroRom ReadRom()
     {
-        var converter = new Binary2NitroRom();
-        if (UseKeys) {
-            converter.Initialize(keyStore);
-        }
-
+        var converter = UseKeys ? new Binary2NitroRom() : new Binary2NitroRom(keyStore);
         return converter.Convert(binaryRom);
     }
 
     [Benchmark]
-    public void WriteRom()
+    public BinaryFormat WriteRom()
     {
-        var converter = new NitroRom2Binary();
-
         DsiKeyStore? runKeys = UseKeys ? keyStore : null;
-        converter.Initialize(new NitroRom2BinaryParams { KeyStore = runKeys, OutputStream = outputStream });
+        var parameters = new NitroRom2BinaryParams {
+            KeyStore = runKeys,
+            OutputStream = outputStream,
+        };
 
-        converter.Convert(root);
+        var converter = new NitroRom2Binary(parameters);
+        return converter.Convert(root);
     }
 }

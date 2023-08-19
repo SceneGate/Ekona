@@ -29,10 +29,11 @@ public class Cartridge
     public void ExportGif(Node rom)
     {
         #region ExportIconGif
-        Node animated = Navigator.SearchNode(rom, "system/banner/animated");
+        NodeContainerFormat animated = Navigator.SearchNode(rom, "system/banner/animated")
+            .GetFormatAs<NodeContainerFormat>();
 
-        AnimatedFullImage animatedImage = (AnimatedFullImage)ConvertFormat.With<IconAnimation2AnimatedImage>(animated.Format);
-        using var gifData = (BinaryFormat)ConvertFormat.With<AnimatedFullImage2Gif>(animatedImage);
+        AnimatedFullImage animatedImage = new IconAnimation2AnimatedImage().Convert(animated);
+        using BinaryFormat gifData = new AnimatedFullImage2Gif().Convert(animatedImage);
 
         gifData.Stream.WriteTo("icon.gif");
         #endregion
