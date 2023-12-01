@@ -384,9 +384,7 @@ public class TwilightHMacGenerator
 
     private static HMAC CreateGenerator(byte[] key)
     {
-        var hmac = HMAC.Create("HMACSHA1");
-        hmac.Key = key;
-        return hmac;
+        return new HMACSHA1(key);
     }
 
     private static byte[] Generate(byte[] key, Stream stream) => Generate(key, stream, 0, stream.Length);

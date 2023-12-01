@@ -4,7 +4,7 @@
     <AssemblyName>SceneGate.Ekona.Examples</AssemblyName>
     <Description>Examples for the documentation.</Description>
 
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 
     <RootNamespace>SceneGate.Ekona.Examples</RootNamespace>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
