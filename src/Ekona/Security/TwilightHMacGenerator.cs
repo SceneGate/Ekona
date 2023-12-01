@@ -1,4 +1,4 @@
-// Copyright(c) 2022 SceneGate
+﻿// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -252,9 +252,8 @@ public class TwilightHMacGenerator
         uint blockLength = sectionInfo.DigestBlockSectorCount * HashLength;
         byte[] buffer = new byte[blockLength];
 
-        bool result = true;
         int numBlockHashes = (int)sectionInfo.DigestBlockHashtableLength / HashLength;
-        for (int i = 0; i < numBlockHashes && result; i++) {
+        for (int i = 0; i < numBlockHashes; i++) {
             romStream.Position = sectionInfo.DigestSectorHashtableOffset + (i * blockLength);
             romStream.Read(buffer);
             yield return generator.ComputeHash(buffer);
@@ -356,7 +355,7 @@ public class TwilightHMacGenerator
             } else if (twilightBlockIdx < twilightMaxBlocks) {
                 hashOffset = sectionInfo.DigestTwilightOffset + (twilightBlockIdx * sectionInfo.DigestSectorSize);
                 twilightBlockIdx++;
-            } else if (expectedHash.All(x => x == 0)) {
+            } else if (Array.TrueForAll(expectedHash, x => x == 0)) {
                 // Because the length includes padding, we don't know if we reach to the end of hashes.
                 yield break;
             } else {

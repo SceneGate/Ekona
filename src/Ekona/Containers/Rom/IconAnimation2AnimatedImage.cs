@@ -1,4 +1,4 @@
-// Copyright(c) 2022 SceneGate
+﻿// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,6 @@ namespace SceneGate.Ekona.Containers.Rom
             var animatedImage = new AnimatedFullImage();
             animatedImage.Loops = 0; // infinite
 
-            var fullImageConverter = new Indexed2FullImage();
             int width = bitmaps[0].Width;
             int height = bitmaps[0].Height;
 
@@ -76,7 +75,7 @@ namespace SceneGate.Ekona.Containers.Rom
                 }
 
                 var frameIndexed = new IndexedImage(width, height, framePixels.ToArray());
-                fullImageConverter.Initialize(palette.Palettes[frameInfo.PaletteIndex]);
+                var fullImageConverter = new Indexed2FullImage(palette.Palettes[frameInfo.PaletteIndex]);
                 FullImage frameImage = fullImageConverter.Convert(frameIndexed);
 
                 var frame = new FullImageFrame {

@@ -1,4 +1,4 @@
-// Copyright(c) 2021 SceneGate
+﻿// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -125,8 +125,7 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var paletteParam = new IndexedImageBitmapParams {
                 Palettes = actualIcon.GetFormatAs<IPaletteCollection>(),
             };
-            var image2Bitmap = new IndexedImage2Bitmap();
-            image2Bitmap.Initialize(paletteParam);
+            var image2Bitmap = new IndexedImage2Bitmap(paletteParam);
 
             actualIcon.Invoking(n => n.TransformWith(image2Bitmap))
                 .Should().NotThrow();

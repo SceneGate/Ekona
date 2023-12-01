@@ -1,4 +1,4 @@
-// Copyright(c) 2021 SceneGate
+﻿// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -191,10 +191,10 @@ namespace SceneGate.Ekona.Containers.Rom
 
             int area;
             uint modcryptLength;
-            if (kinds.Any(k => header.ProgramInfo.DsiInfo.ModcryptArea1Target == k)) {
+            if (Array.Exists(kinds, k => header.ProgramInfo.DsiInfo.ModcryptArea1Target == k)) {
                 area = 1;
                 modcryptLength = header.SectionInfo.ModcryptArea1Length;
-            } else if (kinds.Any(k => header.ProgramInfo.DsiInfo.ModcryptArea2Target == k)) {
+            } else if (Array.Exists(kinds, k => header.ProgramInfo.DsiInfo.ModcryptArea2Target == k)) {
                 area = 2;
                 modcryptLength = header.SectionInfo.ModcryptArea2Length;
             } else {

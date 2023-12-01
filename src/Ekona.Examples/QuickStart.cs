@@ -1,4 +1,4 @@
-// Copyright (c) 2022 SceneGate
+﻿// Copyright (c) 2022 SceneGate
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -87,8 +87,8 @@ public class QuickStart
             .GetFormatAs<IndexedPaletteImage>();
 
         // Using Texim converters, create a PNG image
-        IndexedImage2Bitmap bitmapConverter = new IndexedImage2Bitmap();
-        bitmapConverter.Initialize(new IndexedImageBitmapParams { Palettes = icon });
+        var converterParameters = new IndexedImageBitmapParams { Palettes = icon };
+        var bitmapConverter = new IndexedImage2Bitmap(converterParameters);
 
         using BinaryFormat binaryPng = bitmapConverter.Convert(icon);
         binaryPng.Stream.WriteTo("dump/icon.png");
