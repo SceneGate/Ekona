@@ -16,6 +16,8 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       dotnet_version: '8.0.100'
+    secrets:
+      test_resources: ${{ secrets.TEST_RESOURCES_URI_V1 }}
 
   # Preview release on push to main only
   # Stable release on version tag push only

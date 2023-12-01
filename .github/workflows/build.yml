@@ -6,6 +6,9 @@ on:
       dotnet_version:
         required: true
         type: string
+    secrets:
+      test_resources:
+        required: true
 
 jobs:
   build:
@@ -30,7 +33,7 @@ jobs:
           dotnet-version: ${{ inputs.dotnet_version }}
 
       - name: "Build and test"
-        run: dotnet run --project build/orchestrator -- --target=Default --dotnet-configuration=Release
+        run: dotnet run --project build/orchestrator -- --resource-uri=${{ secrets.test_resources }} --target=Default --dotnet-configuration=Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
