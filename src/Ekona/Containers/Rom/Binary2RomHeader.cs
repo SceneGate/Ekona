@@ -27,31 +27,36 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <summary>
     /// Converter for binary ROM header into an object.
     /// </summary>
-    public class Binary2RomHeader :
-        IInitializer<DsiKeyStore>,
-        IConverter<IBinary, RomHeader>
+    public class Binary2RomHeader : IConverter<IBinary, RomHeader>
     {
         private const int SecureAreaLength = 16 * 1024;
-        private DsiKeyStore keyStore;
+        private readonly DsiKeyStore keyStore;
 
         /// <summary>
-        /// Gets the offset in the header containing the header size value.
+        /// Initializes a new instance of the <see cref="Binary2RomHeader"/> class.
         /// </summary>
-        public static int HeaderSizeOffset => 0x84;
+        public Binary2RomHeader()
+        {
+        }
 
         /// <summary>
-        /// Initialize the converter with the key store to enable additional features.
+        /// Initializes a new instance of the <see cref="Binary2RomHeader"/> class.
         /// </summary>
         /// <remarks>
         /// The key store is used to verify a special token and set the value of `DisableSecureArea`.
         /// Otherwise, it will always be `false`. The required key is `BlowfishDsKey`.
         /// </remarks>
-        /// <param name="parameters">The converter parameters.</param>
+        /// <param name="keyStore">The converter parameters.</param>
         /// <exception cref="ArgumentNullException">The argument is null.</exception>
-        public void Initialize(DsiKeyStore parameters)
+        public Binary2RomHeader(DsiKeyStore keyStore)
         {
-            keyStore = parameters ?? throw new ArgumentNullException(nameof(parameters));
+            this.keyStore = keyStore ?? throw new ArgumentNullException(nameof(keyStore));
         }
+
+        /// <summary>
+        /// Gets the offset in the header containing the header size value.
+        /// </summary>
+        public static int HeaderSizeOffset => 0x84;
 
         /// <summary>
         /// Convert a binary format into a ROM header object.

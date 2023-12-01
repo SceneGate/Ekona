@@ -120,8 +120,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(headerPath, FileOpenMode.Read);
 
-            var header = (RomHeader)ConvertFormat.With<Binary2RomHeader>(node.Format!);
-            var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
+            RomHeader header = node.GetFormatAs<IBinary>().ConvertWith(new Binary2RomHeader());
+            BinaryFormat generatedStream = header.ConvertWith(new RomHeader2Binary());
 
             var originalStream = new DataStream(node.Stream!, 0, header.SectionInfo.HeaderSize);
             generatedStream.Stream.Length.Should().Be(originalStream.Length);
@@ -135,9 +135,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(headerPath, FileOpenMode.Read);
 
-            var originalHeader = (RomHeader)ConvertFormat.With<Binary2RomHeader>(node.Format!);
-            using var generatedStream = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(originalHeader);
-            var generatedHeader = (RomHeader)ConvertFormat.With<Binary2RomHeader>(generatedStream);
+            RomHeader originalHeader = node.GetFormatAs<IBinary>().ConvertWith(new Binary2RomHeader());
+            using BinaryFormat generatedStream = originalHeader.ConvertWith(new RomHeader2Binary());
+            RomHeader generatedHeader = generatedStream.ConvertWith(new Binary2RomHeader());
 
             generatedHeader.Should().BeEquivalentTo(
                 originalHeader,

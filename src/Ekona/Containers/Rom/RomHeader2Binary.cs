@@ -27,24 +27,29 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// <summary>
 /// Converter for ROM header object into binary stream (serialization).
 /// </summary>
-public class RomHeader2Binary :
-    IInitializer<DsiKeyStore>,
-    IConverter<RomHeader, BinaryFormat>
+public class RomHeader2Binary : IConverter<RomHeader, BinaryFormat>
 {
-    private DsiKeyStore keyStore;
+    private readonly DsiKeyStore keyStore;
 
     /// <summary>
-    /// Initialize the converter with the key store to enable additional features.
+    /// Initializes a new instance of the <see cref="RomHeader2Binary"/> class.
+    /// </summary>
+    public RomHeader2Binary()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RomHeader2Binary"/> class.
     /// </summary>
     /// <remarks>
     /// The key store is used to generate a special token if `DisableSecureArea` is `true`.
     /// Otherwise, it will always write 0. The required key is `BlowfishDsKey`.
     /// </remarks>
-    /// <param name="parameters">The converter parameters.</param>
+    /// <param name="keyStore">The converter parameters.</param>
     /// <exception cref="ArgumentNullException">The argument is null.</exception>
-    public void Initialize(DsiKeyStore parameters)
+    public RomHeader2Binary(DsiKeyStore keyStore)
     {
-        keyStore = parameters ?? throw new ArgumentNullException(nameof(parameters));
+        this.keyStore = keyStore ?? throw new ArgumentNullException(nameof(keyStore));
     }
 
     /// <summary>
