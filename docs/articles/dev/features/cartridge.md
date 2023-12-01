@@ -27,7 +27,7 @@ format can be converted / unpacked into a tree _nodes_ with the converter
 > - _Parameters_: (_Optional_)
 >   [`DsiKeyStore`](xref:SceneGate.Ekona.Security.DsiKeyStore)
 
-[!code-csharp[OpenGame](../../../src/Ekona.Examples/QuickStart.cs?name=OpenGame)]
+[!code-csharp[OpenGame](../../../../src/Ekona.Examples/QuickStart.cs?name=OpenGame)]
 
 The converter will use the following converters to transform some binary data
 into the specific format:
@@ -81,7 +81,7 @@ into the ROM / cartridge binary format using the converter
 >     the compressed length in the _arm9_ program with zero. Otherwise it will
 >     set the current _arm9_ program length.
 
-[!code-csharp[WriteGame](../../../src/Ekona.Examples/QuickStart.cs?name=WriteGame)]
+[!code-csharp[WriteGame](../../../../src/Ekona.Examples/QuickStart.cs?name=WriteGame)]
 
 The converter will use the following converters to transform the program and
 banner information into binary data:
@@ -163,7 +163,7 @@ so.
 You can decrypt or encrypt the file later by using the class
 [`NitroKey1Encryption`](xref:SceneGate.Ekona.Security.NitroKey1Encryption)
 
-[!code-csharp[DecryptEncryptArm9](../../../src/Ekona.Examples/Cartridge.cs?name=DecryptEncryptArm9)]
+[!code-csharp[DecryptEncryptArm9](../../../../src/Ekona.Examples/Cartridge.cs?name=DecryptEncryptArm9)]
 
 ## Animated icon
 
@@ -184,7 +184,7 @@ type from _Texim_. You can use later its converters to convert to GIF format.
 > - _Output format_: `AnimatedFullImage`
 > - _Parameters_: none
 
-[!code-csharp[ExportIconGif](../../../src/Ekona.Examples/Cartridge.cs?name=ExportIconGif)]
+[!code-csharp[ExportIconGif](../../../../src/Ekona.Examples/Cartridge.cs?name=ExportIconGif)]
 
 > [!NOTE]  
 > It is not possible to import the icon from a GIF file, only export. If you
