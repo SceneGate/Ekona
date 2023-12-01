@@ -1,4 +1,4 @@
-// Copyright(c) 2021 SceneGate
+﻿// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,12 @@ namespace SceneGate.Ekona.Containers.Rom
     /// <summary>
     /// Converter for binary formats into a NitroRom container.
     /// </summary>
-    public class Binary2NitroRom : IConverter<IBinary, NitroRom>, IInitializer<DsiKeyStore>
+    public class Binary2NitroRom : IConverter<IBinary, NitroRom>
     {
         private const int SecureAreaLength = 16 * 1024;
         private static readonly FileAddressOffsetComparer FileAddressComparer = new FileAddressOffsetComparer();
 
-        private DsiKeyStore keyStore;
+        private readonly DsiKeyStore keyStore;
 
         private DataReader reader;
         private NitroRom rom;
@@ -47,12 +47,19 @@ namespace SceneGate.Ekona.Containers.Rom
         private List<FileAddress> addressesByOffset;
 
         /// <summary>
-        /// Initializes the converter with the key store to validate signatures.
+        /// Initializes a new instance of the <see cref="Binary2NitroRom"/> class.
         /// </summary>
-        /// <param name="parameters">The key store.</param>
-        public void Initialize(DsiKeyStore parameters)
+        public Binary2NitroRom()
         {
-            keyStore = parameters;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Binary2NitroRom"/> class.
+        /// </summary>
+        /// <param name="keys">Keys for hashes validation.</param>
+        public Binary2NitroRom(DsiKeyStore keys)
+        {
+            keyStore = keys;
         }
 
         /// <summary>
@@ -62,8 +69,7 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <returns>The new node container.</returns>
         public NitroRom Convert(IBinary source)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            ArgumentNullException.ThrowIfNull(source);
 
             source.Stream.Position = 0;
             reader = new DataReader(source.Stream);
@@ -89,7 +95,7 @@ namespace SceneGate.Ekona.Containers.Rom
             reader.Stream.Seek(Binary2RomHeader.HeaderSizeOffset, SeekOrigin.Begin);
             int headerSize = reader.ReadInt32();
             using var binaryHeader = new BinaryFormat(reader.Stream, 0, headerSize);
-            header = (RomHeader)ConvertFormat.With<Binary2RomHeader>(binaryHeader);
+            header = binaryHeader.ConvertWith(new Binary2RomHeader());
 
             rom.System.Children["info"].ChangeFormat(header.ProgramInfo);
 
@@ -185,10 +191,10 @@ namespace SceneGate.Ekona.Containers.Rom
 
             int area;
             uint modcryptLength;
-            if (kinds.Any(k => header.ProgramInfo.DsiInfo.ModcryptArea1Target == k)) {
+            if (Array.Exists(kinds, k => header.ProgramInfo.DsiInfo.ModcryptArea1Target == k)) {
                 area = 1;
                 modcryptLength = header.SectionInfo.ModcryptArea1Length;
-            } else if (kinds.Any(k => header.ProgramInfo.DsiInfo.ModcryptArea2Target == k)) {
+            } else if (Array.Exists(kinds, k => header.ProgramInfo.DsiInfo.ModcryptArea2Target == k)) {
                 area = 2;
                 modcryptLength = header.SectionInfo.ModcryptArea2Length;
             } else {

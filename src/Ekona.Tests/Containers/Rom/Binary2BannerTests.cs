@@ -1,4 +1,4 @@
-// Copyright(c) 2021 SceneGate
+﻿// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,8 @@ using FluentAssertions;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using SceneGate.Ekona.Security;
+using Texim.Animations;
 using Texim.Formats;
-using Texim.Images;
 using Texim.Palettes;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -125,7 +125,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             var paletteParam = new IndexedImageBitmapParams {
                 Palettes = actualIcon.GetFormatAs<IPaletteCollection>(),
             };
-            actualIcon.Invoking(n => n.TransformWith<IndexedImage2Bitmap, IndexedImageBitmapParams>(paletteParam))
+            var image2Bitmap = new IndexedImage2Bitmap(paletteParam);
+
+            actualIcon.Invoking(n => n.TransformWith(image2Bitmap))
                 .Should().NotThrow();
 
             using var expectedIcon = NodeFactory.FromFile(expectedIconPath, FileOpenMode.Read);
@@ -155,8 +157,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             TestDataBase.IgnoreIfFileDoesNotExist(gifPath);
             using var expectedGif = DataStreamFactory.FromFile(gifPath, FileOpenMode.Read);
 
-            object animatedImage = ConvertFormat.With<IconAnimation2AnimatedImage>(animated.Format);
-            using var actualGif = (BinaryFormat)ConvertFormat.With<AnimatedFullImage2Gif>(animatedImage);
+            AnimatedFullImage animatedImage = animated.GetFormatAs<NodeContainerFormat>()
+                .ConvertWith(new IconAnimation2AnimatedImage());
+            using var actualGif = new AnimatedFullImage2Gif().Convert(animatedImage);
             actualGif.Stream.Compare(expectedGif).Should().BeTrue("GIF streams must be identical");
 
             string infoPath = GetAniInfoFile(bannerPath);
@@ -192,8 +195,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
             using Node node = NodeFactory.FromFile(bannerPath, FileOpenMode.Read);
 
-            var banner = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(node.Format!);
-            var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(banner);
+            var banner = node.GetFormatAs<IBinary>().ConvertWith(new Binary2Banner());
+            var generatedStream = banner.ConvertWith(new Banner2Binary());
 
             generatedStream.Stream.Length.Should().Be(node.Stream!.Length);
             generatedStream.Stream.Compare(node.Stream).Should().BeTrue();
@@ -205,9 +208,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             TestDataBase.IgnoreIfFileDoesNotExist(bannerPath);
 
             using var originalStream = new BinaryFormat(DataStreamFactory.FromFile(bannerPath, FileOpenMode.Read));
-            using var originalNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(originalStream);
-            using var generatedStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(originalNode);
-            using var generatedNode = (NodeContainerFormat)ConvertFormat.With<Binary2Banner>(generatedStream);
+            using NodeContainerFormat originalNode = originalStream.ConvertWith(new Binary2Banner());
+            using BinaryFormat generatedStream = originalNode.ConvertWith(new Banner2Binary());
+            using NodeContainerFormat generatedNode = generatedStream.ConvertWith(new Binary2Banner());
 
             generatedNode.Should().BeEquivalentTo(originalNode, opts => opts.IgnoringCyclicReferences());
         }

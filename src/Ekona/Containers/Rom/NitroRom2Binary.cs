@@ -34,29 +34,33 @@ namespace SceneGate.Ekona.Containers.Rom;
 /// <summary>
 /// Converter from NitroRom containers into binary format.
 /// </summary>
-public class NitroRom2Binary :
-    IInitializer<NitroRom2BinaryParams>,
-    IConverter<NodeContainerFormat, BinaryFormat>
+public class NitroRom2Binary : IConverter<NodeContainerFormat, BinaryFormat>
 {
     private const int PaddingSize = 0x200;
     private const int TwilightPaddingSize = 0x400;
     private const int SecureAreaLength = 16 * 1024;
     private readonly SortedList<int, NodeInfo> nodesById = new SortedList<int, NodeInfo>();
     private readonly SortedList<int, NodeInfo> nodesByOffset = new SortedList<int, NodeInfo>();
-    private Stream? initializedOutputStream;
-    private DsiKeyStore? keyStore;
-    private bool decompressedProgram;
+    private readonly Stream? initializedOutputStream;
+    private readonly DsiKeyStore? keyStore;
+    private readonly bool decompressedProgram;
     private DataWriter writer = null!;
     private Node root = null!;
     private ProgramInfo programInfo = null!;
     private RomSectionInfo sectionInfo = null!;
 
     /// <summary>
-    /// Initializes the converter with the output stream for the next conversion.
+    /// Initializes a new instance of the <see cref="NitroRom2Binary"/> class.
     /// </summary>
-    /// <param name="parameters">The output stream for the next conversion.</param>
-    /// <exception cref="ArgumentNullException">The argument is null.</exception>
-    public void Initialize(NitroRom2BinaryParams parameters)
+    public NitroRom2Binary()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NitroRom2Binary"/> class.
+    /// </summary>
+    /// <param name="parameters">The parameters of the converter.</param>
+    public NitroRom2Binary(NitroRom2BinaryParams parameters)
     {
         ArgumentNullException.ThrowIfNull(parameters);
         initializedOutputStream = parameters.OutputStream;
@@ -72,8 +76,7 @@ public class NitroRom2Binary :
     /// <exception cref="ArgumentNullException">The argument is null.</exception>
     public BinaryFormat Convert(NodeContainerFormat source)
     {
-        if (source is null)
-            throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(source);
 
         // Binary order is:
         // - Header
@@ -193,7 +196,7 @@ public class NitroRom2Binary :
 
         // We need to write a first time the header because we need some of the data
         // for the signatures.
-        using var initialHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
+        using BinaryFormat initialHeader = header.ConvertWith(new RomHeader2Binary());
         writer.Stream.Position = 0;
         initialHeader.Stream.WriteTo(writer.Stream);
 
@@ -202,7 +205,7 @@ public class NitroRom2Binary :
         // Re-write with the good signatures.
         // We don't calculate the header length but we expect it's preset.
         // It's used inside the converter to pad.
-        using var binaryHeader = (BinaryFormat)ConvertFormat.With<RomHeader2Binary>(header);
+        using BinaryFormat binaryHeader = header.ConvertWith(new RomHeader2Binary());
         writer.Stream.Position = 0;
         binaryHeader.Stream.WriteTo(writer.Stream);
     }
@@ -280,7 +283,7 @@ public class NitroRom2Binary :
 
         writer.Stream.Position = sectionInfo.BannerOffset;
         var bannerContainer = GetChildFormatSafe<NodeContainerFormat>("system/banner");
-        using var bannerStream = (BinaryFormat)ConvertFormat.With<Banner2Binary>(bannerContainer);
+        using BinaryFormat bannerStream = bannerContainer.ConvertWith(new Banner2Binary());
         bannerStream.Stream!.WriteTo(writer.Stream);
 
         writer.Stream.Position = sectionInfo.BannerOffset;

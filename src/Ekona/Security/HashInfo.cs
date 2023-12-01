@@ -1,4 +1,4 @@
-// Copyright(c) 2022 SceneGate
+﻿// Copyright(c) 2022 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+using System;
 using System.Linq;
 
 namespace SceneGate.Ekona.Security;
@@ -63,7 +64,7 @@ public class HashInfo
     /// <summary>
     /// Gets a value indicating whether the hash is null.
     /// </summary>
-    public bool IsNull => Hash.All(x => x == 0);
+    public bool IsNull => Array.TrueForAll(Hash, x => x == 0);
 
     /// <summary>
     /// Gets or sets the status of the hash.

@@ -87,17 +87,19 @@ public class QuickStart
             .GetFormatAs<IndexedPaletteImage>();
 
         // Using Texim converters, create a PNG image
-        IndexedImage2Bitmap bitmapConverter = new IndexedImage2Bitmap();
-        bitmapConverter.Initialize(new IndexedImageBitmapParams { Palettes = icon });
+        var converterParameters = new IndexedImageBitmapParams { Palettes = icon };
+        var bitmapConverter = new IndexedImage2Bitmap(converterParameters);
 
         using BinaryFormat binaryPng = bitmapConverter.Convert(icon);
         binaryPng.Stream.WriteTo("dump/icon.png");
 
         // For DSi-enhanced games we can export its animated icon as GIF
         if (bannerInfo.SupportAnimatedIcon) {
-            Node animatedNode = Navigator.SearchNode(game, "system/banner/animated");
-            var animatedImage = ConvertFormat.With<IconAnimation2AnimatedImage>(animatedNode.Format);
-            using var binaryGif = (BinaryFormat)ConvertFormat.With<AnimatedFullImage2Gif>(animatedImage);
+            var animatedNode = Navigator.SearchNode(game, "system/banner/animated")
+                .GetFormatAs<NodeContainerFormat>();
+
+            var animatedImage = new IconAnimation2AnimatedImage().Convert(animatedNode);
+            using var binaryGif = new AnimatedFullImage2Gif().Convert(animatedImage);
             binaryGif.Stream.WriteTo("dump/icon.gif");
         }
         #endregion

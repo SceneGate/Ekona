@@ -23,8 +23,6 @@
 _Ekona_ is a library part of the [_SceneGate_](https://github.com/SceneGate)
 framework that provides support for **DS and DSi file formats.**
 
-The library supports .NET 6.0 and above on Linux, Window and MacOS.
-
 ## Supported formats
 
 - :video_game: DS cartridge:
@@ -64,7 +62,7 @@ items.Stream.WriteTo("dump/Items.dat");
 ## Usage
 
 The project provides the following .NET libraries (NuGet packages in nuget.org).
-The libraries only support the latest .NET LTS version: **.NET 6.0**.
+The libraries works on supported versions of .NET: 6.0 and 8.0.
 
 - [![SceneGate.Ekona](https://img.shields.io/nuget/v/SceneGate.Ekona?label=SceneGate.Ekona&logo=nuget)](https://www.nuget.org/packages/SceneGate.Ekona)
   - `SceneGate.Ekona.Containers.Rom`: DS and DSi cartridge (ROM) format.
