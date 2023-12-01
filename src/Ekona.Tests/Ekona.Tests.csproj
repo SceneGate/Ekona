@@ -2,9 +2,13 @@
 
   <PropertyGroup>
     <AssemblyName>SceneGate.Ekona.Tests</AssemblyName>
-    <RootNamespace>SceneGate.Ekona.Tests</RootNamespace>
     <Description>Tests for Ekona.</Description>
+
     <TargetFramework>net6.0</TargetFramework>
+
+    <RootNamespace>SceneGate.Ekona.Tests</RootNamespace>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

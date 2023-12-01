@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <AssemblyName>SceneGate.Ekona.Examples</AssemblyName>
-    <RootNamespace>SceneGate.Ekona.Examples</RootNamespace>
     <Description>Examples for the documentation.</Description>
+
     <TargetFramework>net6.0</TargetFramework>
 
+    <RootNamespace>SceneGate.Ekona.Examples</RootNamespace>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
   </PropertyGroup>
