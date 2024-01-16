@@ -9,9 +9,6 @@ on:
     branches: [ main ]
     # Stable
     tags: [ "v*" ]
-  # Allow external PR with secrets
-  pull_request_target:
-    types: [labeled]
 
 jobs:
   build:
@@ -21,8 +18,6 @@ jobs:
       dotnet_version: '8.0.100'
     secrets:
       test_resources: ${{ secrets.TEST_RESOURCES_URI_V1 }}
-    # Allow to run in external PR if the label is present
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'allow workflow')
 
   # Preview release on push to main only
   # Stable release on version tag push only

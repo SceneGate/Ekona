@@ -21,6 +21,8 @@ jobs:
             is_main_build: true
     name: "${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    env:
+      test_resources: ${{ secrets.test_resources }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -32,8 +34,16 @@ jobs:
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
 
-      - name: "Build and test"
-        run: dotnet run --project build/orchestrator -- --resource-uri=${{ secrets.test_resources }} --target=Default --dotnet-configuration=Release
+      - if: ${{ env.test_resources != '' }}
+        name: "Build and run FULL tests"
+        run: dotnet run --project build/orchestrator -- --resource-uri=${{ env.test_resources }} --target=Default --dotnet-configuration=Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # External PR will run basic tests due to the complexity to make it work with secrets
+      - if: ${{ env.test_resources == '' }}
+        name: "Build and run basic tests"
+        run: dotnet run --project build/orchestrator -- --target=Default --dotnet-configuration=Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
