@@ -22,7 +22,7 @@ jobs:
     secrets:
       test_resources: ${{ secrets.TEST_RESOURCES_URI_V1 }}
     # Allow to run in external PR if the label is present
-    if: github.event_name != 'pull_request_target' || contains(github.event.pull_request.labels.*.name, 'allow workflow')
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'allow workflow')
 
   # Preview release on push to main only
   # Stable release on version tag push only
