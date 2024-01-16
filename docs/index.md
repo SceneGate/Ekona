@@ -21,7 +21,7 @@ framework that provides support for DS and DSi file formats.
 ## Getting started
 
 Check-out the
-[getting started guide](https://scenegate.github.io/Ekona/dev/introduction.html)
+[getting started guide](https://scenegate.github.io/Ekona/docs/dev/tutorial.html)
 to start using _Ekona_ in no time! Below you can find an example that shows how
 to open a DS/DSi ROM file (cartridge dump).
 
