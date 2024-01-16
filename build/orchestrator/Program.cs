@@ -13,7 +13,8 @@ public sealed class BuildLifetime : FrostingLifetime<BuildContext>
 {
     public override void Setup(BuildContext context, ISetupContext info)
     {
-        context.DotNetContext.CoverageTarget = 85;
+        // Do not enforce coverage as everyone may not have all test resources
+        context.DotNetContext.CoverageTarget = 0;
 
         context.ReadArguments();
 
