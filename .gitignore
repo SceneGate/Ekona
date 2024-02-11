@@ -10,6 +10,7 @@ build/temp/
 .vs/
 *.csproj.user
 *.DotSettings.user
+launchSettings.json
 
 # Test results
 BenchmarkDotNet.Artifacts/
