@@ -5,6 +5,7 @@
     <Description>Tests for Ekona.</Description>
 
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <LangVersion>12</LangVersion>
 
     <RootNamespace>SceneGate.Ekona.Tests</RootNamespace>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>

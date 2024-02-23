@@ -1,34 +1,41 @@
 ﻿namespace SceneGate.Ekona.Compression;
 
 using System;
+using System.IO;
 
+/// <summary>
+/// Decode / Decompress blocks of data with the LZSS DS/GBA algorithm.
+/// </summary>
 public class LzssDecoder : IDataBlockConverter<byte, byte>
 {
+    private const int MinSequenceLength = 2;
+
     private readonly CircularBuffer<byte> pastBuffer = new((1 << 12) + 19);
 
-    private byte flag = 0;
-    private int remainingFlagBits = 0;
+    private byte flag;
+    private int remainingFlagBits;
 
-    public int GetOutputMaxCount(int inputLength) => inputLength * 8 * 19; // last byte was 8-bit enabled flag to copy max
+    /// <inheritdoc />
+    public int GetOutputMaxCount(int inputLength)
+    {
+        // best compression rate achieved by copying a sequence of bytes (already in circular buffer)
+        // for each bit of the token (already read) with its maximum sequence length.
+        return inputLength * 8 * 18 / 17;
+    }
 
+    /// <inheritdoc />
     public int Convert(ReadOnlySpan<byte> input, Span<byte> output, out int consumed)
     {
         int produced = 0;
         consumed = 0;
-        while (consumed < input.Length) {
-            if (IsFlagRawCopy(input, ref consumed)) {
-                if (consumed >= input.Length) {
-                    break;
-                }
 
-                DecodeRawMode(input, ref consumed, output, ref produced);
-            } else {
-                if (consumed + 1 >= input.Length) {
-                    break;
-                }
+        bool continueProcessing = consumed < input.Length;
+        while (continueProcessing) {
+            bool enoughDataAvailable = IsFlagRawCopy(input, ref consumed)
+                ? DecodeRawMode(input, ref consumed, output, ref produced)
+                : DecodePastCopyMode(input, ref consumed, output, ref produced);
 
-                DecodePastCopyMode(input, ref consumed, output, ref produced);
-            }
+            continueProcessing = enoughDataAvailable && (consumed < input.Length);
         }
 
         return produced;
@@ -45,22 +52,41 @@ public class LzssDecoder : IDataBlockConverter<byte, byte>
         return ((flag >> remainingFlagBits) & 1) == 0;
     }
 
-    private void DecodeRawMode(ReadOnlySpan<byte> input, ref int consumed, Span<byte> output, ref int produced)
+    private bool DecodeRawMode(ReadOnlySpan<byte> input, ref int consumed, Span<byte> output, ref int produced)
     {
+        if (consumed >= input.Length) {
+            return false;
+        }
+
+        if (produced >= output.Length) {
+            throw new EndOfStreamException("Output is not large enough to decompress data");
+        }
+
         WriteOutput(input[consumed++], output, ref produced);
+        return true;
     }
 
-    private void DecodePastCopyMode(ReadOnlySpan<byte> input, ref int consumed, Span<byte> output, ref int produced)
+    private bool DecodePastCopyMode(ReadOnlySpan<byte> input, ref int consumed, Span<byte> output, ref int produced)
     {
+        if (consumed + 1 >= input.Length) {
+            return false;
+        }
+
         byte info = input[consumed++];
-        int bufferPos = (((info & 0x0F) << 8) | input[consumed++]) + 1;
-        int length = (info >> 4) + 2 + 1;
+        int bufferPos = ((info & 0x0F) << 8) | input[consumed++];
+        int length = (info >> 4) + MinSequenceLength + 1;
+
+        if (produced + length > output.Length) {
+            throw new EndOfStreamException("Output is not large enough to decompress data");
+        }
 
         while (length > 0) {
-            byte value = pastBuffer[bufferPos - 1];
+            byte value = pastBuffer[bufferPos];
             WriteOutput(value, output, ref produced);
             length--;
         }
+
+        return true;
     }
 
     private void WriteOutput(byte value, Span<byte> output, ref int produced)
