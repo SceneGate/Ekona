@@ -11,3 +11,7 @@
   href: cartridge/program.md
 - name: Security
   href: cartridge/security.md
+
+- name: 🗜️ Compression
+- name: LZSS
+  href: compression/lzss.md
