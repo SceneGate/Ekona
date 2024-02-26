@@ -1,98 +1,140 @@
-﻿namespace SceneGate.Ekona.Compression;
+namespace SceneGate.Ekona.Compression;
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using Yarhl.FileFormat;
+using Yarhl.IO;
 
 /// <summary>
 /// Decode / Decompress blocks of data with the LZSS DS/GBA algorithm.
 /// </summary>
-public class LzssDecoder : IDataBlockConverter<byte, byte>
+public class LzssDecoder :
+    IConverter<Stream, Stream>,
+    IConverter<IBinary, BinaryFormat>
 {
     private const int MinSequenceLength = 3;
-    private const int MaxDistance = 1 << 12;
+    private const int MaxDistance = (1 << 12) - 1;
 
     private readonly CircularBuffer<byte> pastBuffer = new(MaxDistance);
+
+    private readonly Stream output;
+    private readonly bool hasHeader;
 
     private byte flag;
     private int remainingFlagBits;
 
-    /// <inheritdoc />
-    public int GetOutputMaxCount(int inputLength)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LzssDecoder"/> class.
+    /// </summary>
+    public LzssDecoder()
     {
-        // best compression rate achieved by copying a sequence of bytes (already in circular buffer)
-        // for each bit of the token (already read) with its maximum sequence length.
-        return inputLength * 8 * 18 / 17;
+        output = new MemoryStream();
+        hasHeader = true;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LzssDecoder"/> class.
+    /// </summary>
+    /// <param name="decompressedLength">The maximum decompressed length of the output.</param>
+    public LzssDecoder(int decompressedLength)
+    {
+        output = new MemoryStream(decompressedLength);
+        hasHeader = true;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LzssDecoder"/> class.
+    /// </summary>
+    /// <param name="output">The output stream to write the decompressed data.</param>
+    /// <param name="hasHeader">Value indicating whether the input stream has a 4-bytes header.</param>
+    public LzssDecoder(Stream output, bool hasHeader)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+        this.output = output;
+        this.hasHeader = hasHeader;
     }
 
     /// <inheritdoc />
-    public int Convert(ReadOnlySpan<byte> input, Span<byte> output, out int consumed)
+    public BinaryFormat Convert(IBinary source)
     {
-        int produced = 0;
-        consumed = 0;
+        ArgumentNullException.ThrowIfNull(source);
+        return new BinaryFormat(Convert(source.Stream));
+    }
 
-        bool continueProcessing = consumed < input.Length;
-        while (continueProcessing) {
-            bool enoughDataAvailable = IsFlagRawCopy(input, ref consumed)
-                ? DecodeRawMode(input, ref consumed, output, ref produced)
-                : DecodePastCopyMode(input, ref consumed, output, ref produced);
+    /// <inheritdoc />
+    public Stream Convert(Stream source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
 
-            continueProcessing = enoughDataAvailable && (consumed < input.Length);
+        source.Position = 0;
+        if (hasHeader) {
+            if (source.Length < 4) {
+                throw new EndOfStreamException();
+            }
+
+            // bit 0-3: ID (0x10), 4-31: uncompressed length
+            Span<byte> header = stackalloc byte[4];
+            source.Read(header);
+
+            uint id = header[0];
+            if (id != 0x10) {
+                throw new FormatException("Invalid header");
+            }
         }
 
-        return produced;
+        while (source.Position < source.Length) {
+            if (IsFlagRawCopy(source)) {
+                DecodeRawMode(source);
+            } else {
+                DecodePastCopyMode(source);
+            }
+        }
+
+        return output;
     }
 
-    private bool IsFlagRawCopy(ReadOnlySpan<byte> input, ref int consumed)
+    private bool IsFlagRawCopy(Stream input)
     {
         if (remainingFlagBits <= 0) {
             remainingFlagBits = 8;
-            flag = input[consumed++];
+            flag = (byte)input.ReadByte();
         }
 
         remainingFlagBits--;
         return ((flag >> remainingFlagBits) & 1) == 0;
     }
 
-    private bool DecodeRawMode(ReadOnlySpan<byte> input, ref int consumed, Span<byte> output, ref int produced)
+    private void DecodeRawMode(Stream input)
     {
-        if (consumed >= input.Length) {
-            return false;
+        if (input.Position >= input.Length) {
+            throw new EndOfStreamException();
         }
 
-        if (produced >= output.Length) {
-            throw new EndOfStreamException("Output is not large enough to decompress data");
-        }
-
-        WriteOutput(input[consumed++], output, ref produced);
-        return true;
+        WriteOutput((byte)input.ReadByte());
     }
 
-    private bool DecodePastCopyMode(ReadOnlySpan<byte> input, ref int consumed, Span<byte> output, ref int produced)
+    private void DecodePastCopyMode(Stream input)
     {
-        if (consumed + 1 >= input.Length) {
-            return false;
+        if (input.Position + 1 >= input.Length) {
+            throw new EndOfStreamException();
         }
 
-        byte info = input[consumed++];
-        int bufferPos = ((info & 0x0F) << 8) | input[consumed++];
+        byte info = (byte)input.ReadByte();
+        int bufferPos = ((info & 0x0F) << 8) | (byte)input.ReadByte();
         int length = (info >> 4) + MinSequenceLength;
-
-        if (produced + length > output.Length) {
-            throw new EndOfStreamException("Output is not large enough to decompress data");
-        }
 
         while (length > 0) {
             byte value = pastBuffer[bufferPos];
-            WriteOutput(value, output, ref produced);
+            WriteOutput(value);
             length--;
         }
-
-        return true;
     }
 
-    private void WriteOutput(byte value, Span<byte> output, ref int produced)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void WriteOutput(byte value)
     {
         pastBuffer.PushFront(value);
-        output[produced++] = value;
+        output.WriteByte(value);
     }
 }
