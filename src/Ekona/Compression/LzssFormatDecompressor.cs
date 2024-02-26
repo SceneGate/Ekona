@@ -6,9 +6,9 @@ using Yarhl.FileFormat;
 using Yarhl.IO;
 
 /// <summary>
-/// Converter that decompress a stream with the LZSS algorithm.
+/// Converter that decompress a binary format with LZSS format.
 /// </summary>
-public class LzssDecompressor :
+public class LzssFormatDecompressor :
     IConverter<IBinary, BinaryFormat>,
     IConverter<Stream, DataStream>
 {

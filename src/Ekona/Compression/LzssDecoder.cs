@@ -8,9 +8,10 @@ using System.IO;
 /// </summary>
 public class LzssDecoder : IDataBlockConverter<byte, byte>
 {
-    private const int MinSequenceLength = 2;
+    private const int MinSequenceLength = 3;
+    private const int MaxDistance = 1 << 12;
 
-    private readonly CircularBuffer<byte> pastBuffer = new((1 << 12) + 19);
+    private readonly CircularBuffer<byte> pastBuffer = new(MaxDistance);
 
     private byte flag;
     private int remainingFlagBits;
@@ -74,7 +75,7 @@ public class LzssDecoder : IDataBlockConverter<byte, byte>
 
         byte info = input[consumed++];
         int bufferPos = ((info & 0x0F) << 8) | input[consumed++];
-        int length = (info >> 4) + MinSequenceLength + 1;
+        int length = (info >> 4) + MinSequenceLength;
 
         if (produced + length > output.Length) {
             throw new EndOfStreamException("Output is not large enough to decompress data");
