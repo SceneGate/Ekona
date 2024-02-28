@@ -1,37 +1,46 @@
-namespace Ekona.Compressions;
+namespace SceneGate.Ekona.Compression;
 
 using System;
 using System.IO;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 
+/// <summary>
+/// Encode / Compress blocks of data with the LZSS DS/GBA algorithm.
+/// </summary>
 public class LzssEncoder :
     IConverter<Stream, Stream>,
     IConverter<IBinary, BinaryFormat>
 {
     private const int MinSequenceLength = 3;
-    private const int MaxSequenceLength = (1 << 4) + MinSequenceLength - 1;
-    private const int MaxDistance = (1 << 12) - 1;
+    private const int MaxSequenceLength = (1 << 4) - 1 + MinSequenceLength;
+    private const int MaxDistance = 1 << 12;
 
     private readonly byte[] windowBuffer = new byte[MaxDistance + MaxSequenceLength];
-    private readonly byte[] patternBuffer = new byte[MaxSequenceLength];
-    private readonly Stream output;
+    private Stream output = null!;
 
-    private int actionsEncoded;
     private byte currentFlag;
     private long flagPosition;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LzssEncoder"/> class.
+    /// </summary>
+    /// <remarks>The output of the converter will be in a new memory stream each time.</remarks>
     public LzssEncoder()
     {
-        output = new MemoryStream();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LzssEncoder"/> class.
+    /// </summary>
+    /// <param name="output">Stream to write the output.</param>
     public LzssEncoder(Stream output)
     {
         ArgumentNullException.ThrowIfNull(output);
         this.output = output;
     }
 
+    /// <inheritdoc />
     public BinaryFormat Convert(IBinary source)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -40,11 +49,28 @@ public class LzssEncoder :
         return new BinaryFormat(result);
     }
 
+    /// <inheritdoc />
     public Stream Convert(Stream source)
     {
+        output ??= new MemoryStream();
+
+        long decompressedLength = source.Length;
+        output.WriteByte(0x10); // compression ID
+        output.WriteByte((byte)(decompressedLength & 0xFF));
+        output.WriteByte((byte)(decompressedLength >> 8));
+        output.WriteByte((byte)(decompressedLength >> 16));
+
+        // Prepare the initial token flag
+        currentFlag = 0;
+        flagPosition = output.Position;
+        output.WriteByte(0);
+
+        int actionsEncoded = 0;
+        source.Position = 0;
         while (source.Position < source.Length) {
             if (actionsEncoded == 8) {
-                FlushFlag();
+                FlushFlag(true);
+                actionsEncoded = 0;
             }
 
             (int sequencePos, int sequenceLen) = FindSequence(source);
@@ -53,8 +79,9 @@ public class LzssEncoder :
                 currentFlag |= (byte)(1 << (7 - actionsEncoded));
 
                 int encodedLength = sequenceLen - MinSequenceLength;
-                output.WriteByte((byte)((encodedLength << 4) | (sequencePos >> 8)));
-                output.WriteByte((byte)sequencePos);
+                int encodedPos = sequencePos;
+                output.WriteByte((byte)((encodedLength << 4) | (encodedPos >> 8)));
+                output.WriteByte((byte)encodedPos);
 
                 source.Position += sequenceLen;
             } else {
@@ -65,19 +92,22 @@ public class LzssEncoder :
             actionsEncoded++;
         }
 
-        FlushFlag();
+        FlushFlag(false);
         return output;
     }
 
-    private void FlushFlag()
+    private void FlushFlag(bool hasMoreData)
     {
         long currentPos = output.Position;
         output.Position = flagPosition;
         output.WriteByte(currentFlag);
-
-        currentFlag = 0;
         output.Position = currentPos;
-        flagPosition = currentPos;
+
+        if (hasMoreData) {
+            currentFlag = 0;
+            flagPosition = currentPos;
+            output.WriteByte(0x00);
+        }
     }
 
     private (int pos, int length) FindSequence(Stream input)
@@ -96,27 +126,24 @@ public class LzssEncoder :
             ? input.Position - windowPos
             : MaxDistance);
         if (windowLen == 0) {
-            return (-1, -1);
+            return (0, 0);
         }
 
-        long inputPos = input.Position;
+        Span<byte> window = windowBuffer.AsSpan(0, windowLen + maxPattern);
 
-        Span<byte> window = windowBuffer.AsSpan(0, windowLen + (maxPattern - 1));
+        long inputPos = input.Position;
         input.Position = windowPos;
         _ = input.Read(window);
-
-        Span<byte> pattern = patternBuffer.AsSpan(0, maxPattern);
         input.Position = inputPos;
-        _ = input.Read(pattern);
 
-        input.Position = inputPos;
+        Span<byte> fullPattern = window[^maxPattern..];
 
         int bestLength = -1;
         int bestPos = -1;
-        for (int pos = windowLen - 1; pos >= 0; pos--) {
+        for (int pos = 0; pos < windowLen - 1; pos++) {
             int length = 0;
             for (; length < maxPattern; length++) {
-                if (pattern[length] != window[pos + length]) {
+                if (fullPattern[length] != window[pos + length]) {
                     break;
                 }
             }
@@ -125,11 +152,11 @@ public class LzssEncoder :
                 bestLength = length;
                 bestPos = pos;
                 if (length == MaxSequenceLength) {
-                    return (windowLen - bestPos, bestLength);
+                    return (windowLen - bestPos - 1, bestLength);
                 }
             }
         }
 
-        return (windowLen - bestPos, bestLength);
+        return (windowLen - bestPos - 1, bestLength);
     }
 }
