@@ -18,6 +18,7 @@ public class LzssEncoder :
 
     private readonly byte[] windowBuffer = new byte[MaxDistance + MaxSequenceLength];
     private Stream output = null!;
+    private readonly bool hasHeader;
 
     private byte currentFlag;
     private long flagPosition;
@@ -28,6 +29,7 @@ public class LzssEncoder :
     /// <remarks>The output of the converter will be in a new memory stream each time.</remarks>
     public LzssEncoder()
     {
+        hasHeader = true;
     }
 
     /// <summary>
@@ -38,6 +40,18 @@ public class LzssEncoder :
     {
         ArgumentNullException.ThrowIfNull(output);
         this.output = output;
+        hasHeader = true;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LzssEncoder"/> class.
+    /// </summary>
+    /// <param name="output">Stream to write the output.</param>
+    /// <param name="hasHeader">Value indicating whether the output stream will include the compression header.</param>
+    public LzssEncoder(Stream output, bool hasHeader)
+        : this(output)
+    {
+        this.hasHeader = hasHeader;
     }
 
     /// <inheritdoc />
@@ -52,13 +66,18 @@ public class LzssEncoder :
     /// <inheritdoc />
     public Stream Convert(Stream source)
     {
+        ArgumentNullException.ThrowIfNull(source);
+        source.Position = 0;
+
         output ??= new MemoryStream();
 
-        long decompressedLength = source.Length;
-        output.WriteByte(0x10); // compression ID
-        output.WriteByte((byte)(decompressedLength & 0xFF));
-        output.WriteByte((byte)(decompressedLength >> 8));
-        output.WriteByte((byte)(decompressedLength >> 16));
+        if (hasHeader) {
+            long decompressedLength = source.Length;
+            output.WriteByte(0x10); // compression ID
+            output.WriteByte((byte)(decompressedLength & 0xFF));
+            output.WriteByte((byte)(decompressedLength >> 8));
+            output.WriteByte((byte)(decompressedLength >> 16));
+        }
 
         // Prepare the initial token flag
         currentFlag = 0;
@@ -66,7 +85,6 @@ public class LzssEncoder :
         output.WriteByte(0);
 
         int actionsEncoded = 0;
-        source.Position = 0;
         while (source.Position < source.Length) {
             if (actionsEncoded == 8) {
                 FlushFlag(true);
@@ -125,12 +143,13 @@ public class LzssEncoder :
         int windowLen = (int)(windowPos + MaxDistance > input.Position
             ? input.Position - windowPos
             : MaxDistance);
-        if (windowLen == 0) {
+
+        // To be VRAM-compatible we need a window of minimum two bytes
+        if (windowLen <= 1) {
             return (0, 0);
         }
 
         Span<byte> window = windowBuffer.AsSpan(0, windowLen + maxPattern);
-
         long inputPos = input.Position;
         input.Position = windowPos;
         _ = input.Read(window);
@@ -138,6 +157,8 @@ public class LzssEncoder :
 
         Span<byte> fullPattern = window[^maxPattern..];
 
+        // To be VRAM compatible we don't start sequences from the last byte
+        // We start searching from the bottom of the buffer not the last byte
         int bestLength = -1;
         int bestPos = -1;
         for (int pos = 0; pos < windowLen - 1; pos++) {
@@ -151,7 +172,7 @@ public class LzssEncoder :
             if (length > bestLength) {
                 bestLength = length;
                 bestPos = pos;
-                if (length == MaxSequenceLength) {
+                if (length == maxPattern) {
                     return (windowLen - bestPos - 1, bestLength);
                 }
             }
