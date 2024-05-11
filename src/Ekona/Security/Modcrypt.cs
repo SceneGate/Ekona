@@ -162,12 +162,13 @@ public class Modcrypt
         byte[] keyY = programInfo.DsiInfo.Arm9iMac.Hash[0..16];
 
         // Key = ((Key_X XOR Key_Y) + scrambler) ROL 42
+        const ulong Mask42Bits = 0x3FF_FFFFFFFF;
         byte[] scrambler = { 0x79, 0x3E, 0x4F, 0x1A, 0x5F, 0x0F, 0x68, 0x2A, 0x58, 0x02, 0x59, 0x29, 0x4E, 0xFB, 0xFE, 0xFF };
         var bigX = new BigInteger(keyX, isUnsigned: true);
         var bigY = new BigInteger(keyY, isUnsigned: true);
         var bigScrambler = new BigInteger(scrambler, isUnsigned: true);
         var keyNum = ((bigX ^ bigY) + bigScrambler) << 42;
-        keyNum |= keyNum >> 128; // move to overflow 128-bits into lower part (ROL 42)
+        keyNum = keyNum | ((keyNum >> 128) & Mask42Bits); // move to overflow 128-bits into lower part (ROL 42)
         byte[] key = keyNum.ToByteArray(isUnsigned: true)[0..16]; // Get first 128-bits (like an AND)
 
         // Reverse everything
