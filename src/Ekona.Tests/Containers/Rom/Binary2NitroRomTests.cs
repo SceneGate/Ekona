@@ -133,6 +133,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
 
                 programInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Valid);
             }
+
+            programInfo.HasValidHashes().Should().BeTrue();
+            programInfo.HasValidSignature().Should().BeTrue();
         }
 
         [TestCaseSource(nameof(GetFiles))]
@@ -379,6 +382,9 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                     programInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Valid);
                 }
             }
+
+            programInfo.HasValidHashes().Should().BeTrue();
+            programInfo.HasValidSignature().Should().Be(!isDsi);
         }
     }
 }
