@@ -152,15 +152,24 @@ public class NitroRom2Binary : IConverter<NodeContainerFormat, BinaryFormat>
             // Needs to happen before the modcrypt encryption.
             WriteActualDigest(encryptedArm9);
 
-            var modcrypt1 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea1Target, 1);
-            var modcrypt2 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea2Target, 2);
-            (sectionInfo.ModcryptArea1Offset, sectionInfo.ModcryptArea1Length) = modcrypt1;
-            (sectionInfo.ModcryptArea2Offset, sectionInfo.ModcryptArea2Length) = modcrypt2;
-
             sectionInfo.DsiRomLength = (uint)writer.Stream.Length;
         }
 
-        WriteHeader(encryptedArm9);
+        // Write the simple - base - DS header that it used for further hashes
+        WriteBaseHeader(encryptedArm9);
+
+        GenerateSignatures(encryptedArm9);
+
+        // Modcrypt has to happen after HMAC generation as it use them for the IV and key
+        var modcrypt1 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea1Target, 1);
+        var modcrypt2 = EncryptModcrypt(programInfo.DsiInfo.ModcryptArea2Target, 2);
+        (sectionInfo.ModcryptArea1Offset, sectionInfo.ModcryptArea1Length) = modcrypt1;
+        (sectionInfo.ModcryptArea2Offset, sectionInfo.ModcryptArea2Length) = modcrypt2;
+
+        // Re-write with the good signatures.
+        // We don't calculate the header length but we expect it's present.
+        // It's used inside the converter to pad.
+        WriteHeader();
 
         // Fill size to the cartridge size
         writer.WriteUntilLength(0xFF, programInfo.CartridgeSize);
@@ -180,7 +189,19 @@ public class NitroRom2Binary : IConverter<NodeContainerFormat, BinaryFormat>
            $"Expected {typeof(T).FullName}, got: {child.Format?.GetType().FullName}");
     }
 
-    private void WriteHeader(DataStream encryptedArm9)
+    private void WriteBaseHeader(DataStream encryptedArm9)
+    {
+        // Generate the header secure area CRC
+        // It's inside the 0x160 bytes of the header, those bytes are later hashed by other HMACs
+        // so we need to get them valid in the pre-header writing.
+        var crcGenerator = new NitroCrcGenerator();
+        byte[] secureAreaCrc = crcGenerator.GenerateCrc16(encryptedArm9, 0, SecureAreaLength);
+        programInfo.ChecksumSecureArea.ChangeHash(secureAreaCrc);
+
+        WriteHeader();
+    }
+
+    private void WriteHeader()
     {
         var header = new RomHeader {
             ProgramInfo = programInfo,
@@ -197,24 +218,6 @@ public class NitroRom2Binary : IConverter<NodeContainerFormat, BinaryFormat>
             header.CopyrightLogo = new byte[156];
         }
 
-        // Generate the header secure area CRC
-        // It's inside the 0x160 bytes of the header, those bytes are later hashed by other HMACs
-        // so we need to get them valid in the pre-header writing.
-        var crcGenerator = new NitroCrcGenerator();
-        byte[] secureAreaCrc = crcGenerator.GenerateCrc16(encryptedArm9, 0, SecureAreaLength);
-        programInfo.ChecksumSecureArea.ChangeHash(secureAreaCrc);
-
-        // We need to write a first time the header because we need some of the data
-        // for the signatures.
-        using BinaryFormat initialHeader = header.ConvertWith(new RomHeader2Binary());
-        writer.Stream.Position = 0;
-        initialHeader.Stream.WriteTo(writer.Stream);
-
-        GenerateSignatures(encryptedArm9);
-
-        // Re-write with the good signatures.
-        // We don't calculate the header length but we expect it's preset.
-        // It's used inside the converter to pad.
         using BinaryFormat binaryHeader = header.ConvertWith(new RomHeader2Binary());
         writer.Stream.Position = 0;
         binaryHeader.Stream.WriteTo(writer.Stream);
@@ -222,12 +225,18 @@ public class NitroRom2Binary : IConverter<NodeContainerFormat, BinaryFormat>
 
     private DataStream GetEncryptedArm9()
     {
-        var key1Encryption = new NitroKey1Encryption(programInfo.GameCode, keyStore);
-
         // Get ARM9 encrypted (or encrypt it) since it's used for several CRC / hashes
         // We can't use anymore the node system as the arm9 may have been patched
         // with the code parameters such us its compressed length
         using var arm9 = new DataStream(writer.Stream, sectionInfo.Arm9Offset, sectionInfo.Arm9Size);
+
+        if (keyStore is null) {
+            // We have other checks to not generate the hashes if we don't have keys.
+            return new DataStream(arm9);
+        }
+
+        var key1Encryption = new NitroKey1Encryption(programInfo.GameCode, keyStore);
+
         return key1Encryption.HasEncryptedArm9(arm9)
             ? new DataStream(arm9)
             : key1Encryption.EncryptArm9(arm9);
@@ -666,10 +675,15 @@ public class NitroRom2Binary : IConverter<NodeContainerFormat, BinaryFormat>
             _ => throw new NotSupportedException($"Unsupported modcrypt area: {target}"),
         };
 
+        if (length == 0) {
+            return (offset, length);
+        }
+
         using var input = new DataStream(writer.Stream, offset, length);
         var modcrypt = Modcrypt.Create(programInfo, area);
-        using var output = modcrypt.Transform(input);
+        using DataStream output = modcrypt.Transform(input);
 
+        // Write new memory stream over the input stream (our generated ROM)
         input.Position = 0;
         output.WriteTo(input);
 
