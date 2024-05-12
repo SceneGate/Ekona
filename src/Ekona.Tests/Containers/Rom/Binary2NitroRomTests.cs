@@ -1,4 +1,4 @@
-// Copyright(c) 2021 SceneGate
+﻿// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using NUnit.Framework;
 using SceneGate.Ekona.Containers.Rom;
 using SceneGate.Ekona.Security;
@@ -94,7 +95,6 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
         [TestCaseSource(nameof(GetFiles))]
         public void DeserializeRomWithKeysHasValidSignatures(string infoPath, string romPath)
         {
-            // TODO: Test header fields too.
             TestDataBase.IgnoreIfFileDoesNotExist(romPath);
             DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
 
@@ -105,6 +105,8 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
             ProgramInfo programInfo = rom.Information;
             bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
 
+            programInfo.ChecksumHeader.Status.Should().Be(HashStatus.Valid);
+            programInfo.ChecksumLogo.Status.Should().Be(HashStatus.Valid);
             programInfo.ChecksumSecureArea.Status.Should().Be(HashStatus.Valid);
 
             if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
@@ -321,6 +323,61 @@ namespace SceneGate.Ekona.Tests.Containers.Rom
                 originalInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Generated);
 
                 originalInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Generated);
+            }
+        }
+
+        [TestCaseSource(nameof(GetFiles))]
+        public void ReadWriteThreeWaysGenerateValidHashes(string infoPath, string romPath)
+        {
+            TestDataBase.IgnoreIfFileDoesNotExist(romPath);
+            DsiKeyStore keys = TestDataBase.GetDsiKeyStore();
+
+            // Read - no need to validate hashes
+            using Node node = NodeFactory.FromFile(romPath, FileOpenMode.Read);
+            node.Invoking(n => n.TransformWith(new Binary2NitroRom(keys))).Should().NotThrow();
+
+            // Change some code parameters that are written to arm9, so hashes are different.
+            node.GetFormatAs<NitroRom>().Information.ProgramCodeParameters.SdkVersion = new System.Version(4, 2, 4242);
+
+            // Write - with keys to regenerate hashes
+            var nitroParameters = new NitroRom2BinaryParams { KeyStore = keys };
+            node.Invoking(n => n.TransformWith(new NitroRom2Binary(nitroParameters))).Should().NotThrow();
+
+            // Read - with keys to validate
+            node.Invoking(n => n.TransformWith(new Binary2NitroRom(keys))).Should().NotThrow();
+            NitroRom rom = node.GetFormatAs<NitroRom>();
+            ProgramInfo programInfo = rom.Information;
+            bool isDsi = programInfo.UnitCode != DeviceUnitKind.DS;
+
+            using (new AssertionScope()) {
+                programInfo.ChecksumHeader.Status.Should().Be(HashStatus.Valid);
+                programInfo.ChecksumLogo.Status.Should().Be(HashStatus.Valid);
+                programInfo.ChecksumSecureArea.Status.Should().Be(HashStatus.Valid);
+
+                if (isDsi || programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
+                    programInfo.BannerMac.Status.Should().Be(HashStatus.Valid);
+                }
+
+                if (programInfo.ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
+                    programInfo.NitroProgramMac.Status.Should().Be(HashStatus.Valid);
+                    programInfo.NitroOverlaysMac.Status.Should().Be(HashStatus.Valid);
+                    programInfo.Signature.Status.Should().Be(HashStatus.Invalid); // not regenerated
+                }
+
+                if (isDsi) {
+                    programInfo.NitroProgramMac.IsNull.Should().BeTrue();
+                    programInfo.NitroOverlaysMac.IsNull.Should().BeTrue();
+                    programInfo.Signature.Status.Should().Be(HashStatus.Invalid); // not regenerated
+
+                    programInfo.DsiInfo.Arm9SecureMac.Status.Should().Be(HashStatus.Valid);
+                    programInfo.DsiInfo.Arm7Mac.Status.Should().Be(HashStatus.Valid);
+                    programInfo.DsiInfo.DigestMain.Status.Should().Be(HashStatus.Valid);
+                    programInfo.DsiInfo.Arm9iMac.Status.Should().Be(HashStatus.Valid);
+                    programInfo.DsiInfo.Arm7iMac.Status.Should().Be(HashStatus.Valid);
+                    programInfo.DsiInfo.Arm9Mac.Status.Should().Be(HashStatus.Valid);
+
+                    programInfo.DsiInfo.DigestHashesStatus.Should().Be(HashStatus.Valid);
+                }
             }
         }
     }
