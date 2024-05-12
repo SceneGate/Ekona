@@ -19,6 +19,7 @@
 // SOFTWARE.
 namespace SceneGate.Ekona.Containers.Rom
 {
+    using System;
     using System.Collections.ObjectModel;
     using SceneGate.Ekona.Security;
     using Yarhl.FileFormat;
@@ -249,32 +250,32 @@ namespace SceneGate.Ekona.Containers.Rom
         public bool HasValidHashes()
         {
             // Standard DS header checksums (CRC)
-            bool isValid = (ChecksumHeader.Status is HashStatus.Valid)
-                && (ChecksumLogo.Status is HashStatus.Valid)
-                && (ChecksumSecureArea.Status is HashStatus.Valid);
+            bool isValid = IsValidHash(ChecksumHeader)
+                && IsValidHash(ChecksumLogo)
+                && IsValidHash(ChecksumSecureArea);
 
             bool isDsi = UnitCode != DeviceUnitKind.DS;
 
             // HMACs from DS games after DSi release
             if (isDsi || ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
-                isValid = isValid && BannerMac.Status is HashStatus.Valid;
+                isValid = isValid && IsValidHash(BannerMac);
             }
 
             if (ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
-                isValid = isValid && NitroProgramMac.Status is HashStatus.Valid;
-                isValid = isValid && NitroOverlaysMac.Status is HashStatus.Valid;
+                isValid = isValid && IsValidHash(NitroProgramMac);
+                isValid = isValid && IsValidHash(NitroOverlaysMac);
             }
 
             // HMACs from DSi and DSi enhanced games
             if (isDsi) {
-                isValid = isValid && DsiInfo.Arm9SecureMac.Status is HashStatus.Valid;
-                isValid = isValid && DsiInfo.Arm7Mac.Status is HashStatus.Valid;
-                isValid = isValid && DsiInfo.DigestMain.Status is HashStatus.Valid;
-                isValid = isValid && DsiInfo.Arm9iMac.Status is HashStatus.Valid;
-                isValid = isValid && DsiInfo.Arm7iMac.Status is HashStatus.Valid;
-                isValid = isValid && DsiInfo.Arm9Mac.Status is HashStatus.Valid;
+                isValid = isValid && IsValidHash(DsiInfo?.Arm9SecureMac);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm7Mac);
+                isValid = isValid && IsValidHash(DsiInfo?.DigestMain);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm9iMac);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm7iMac);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm9Mac);
 
-                isValid = isValid && DsiInfo.DigestHashesStatus is HashStatus.Valid;
+                isValid = isValid && IsValidHash(DsiInfo?.DigestHashesStatus ?? HashStatus.Valid);
             }
 
             return isValid;
@@ -287,7 +288,27 @@ namespace SceneGate.Ekona.Containers.Rom
         /// <remarks>In the case of DS games it always returns true.</remarks>
         public bool HasValidSignature()
         {
-            return (UnitCode is DeviceUnitKind.DS) || (Signature.Status is HashStatus.Valid);
+            return (UnitCode is DeviceUnitKind.DS) || IsValidHash(Signature);
+        }
+
+        private static bool IsValidHash(HashInfo hashInfo)
+        {
+            if (hashInfo is null) {
+                return true;
+            }
+
+            return IsValidHash(hashInfo.Status);
+        }
+
+        private static bool IsValidHash(HashStatus status)
+        {
+            return status switch {
+                HashStatus.Valid => true,
+                HashStatus.Generated => true,
+                HashStatus.Invalid => false,
+                HashStatus.NotValidated => throw new InvalidOperationException("Hash not validated yet"),
+                _ => throw new NotSupportedException("Unsupported hash status"),
+            };
         }
     }
 }
