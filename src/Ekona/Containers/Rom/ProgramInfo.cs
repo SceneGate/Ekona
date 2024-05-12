@@ -1,4 +1,4 @@
-// Copyright(c) 2021 SceneGate
+﻿// Copyright(c) 2021 SceneGate
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,12 +17,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-using System.Collections.ObjectModel;
-using SceneGate.Ekona.Security;
-using Yarhl.FileFormat;
-
 namespace SceneGate.Ekona.Containers.Rom
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using SceneGate.Ekona.Security;
+    using Yarhl.FileFormat;
+
     /// <summary>
     /// Information about the content of the program.
     /// </summary>
@@ -240,5 +241,74 @@ namespace SceneGate.Ekona.Containers.Rom
         /// Gets or sets the collection of information of overlays for ARM-7.
         /// </summary>
         public Collection<OverlayInfo> Overlays7Info { get; set; } = new Collection<OverlayInfo>();
+
+        /// <summary>
+        /// Gets a value indicating if all the content hashes are valid.
+        /// </summary>
+        /// <returns>Value indicating whether the hashes are valid.</returns>
+        /// <remarks>It takes into account hashes only available in DS or DSi games.</remarks>
+        public bool HasValidHashes()
+        {
+            // Standard DS header checksums (CRC)
+            bool isValid = IsValidHash(ChecksumHeader)
+                && IsValidHash(ChecksumLogo)
+                && IsValidHash(ChecksumSecureArea);
+
+            bool isDsi = UnitCode != DeviceUnitKind.DS;
+
+            // HMACs from DS games after DSi release
+            if (isDsi || ProgramFeatures.HasFlag(DsiRomFeatures.NitroBannerSigned)) {
+                isValid = isValid && IsValidHash(BannerMac);
+            }
+
+            if (ProgramFeatures.HasFlag(DsiRomFeatures.NitroProgramSigned)) {
+                isValid = isValid && IsValidHash(NitroProgramMac);
+                isValid = isValid && IsValidHash(NitroOverlaysMac);
+            }
+
+            // HMACs from DSi and DSi enhanced games
+            if (isDsi) {
+                isValid = isValid && IsValidHash(DsiInfo?.Arm9SecureMac);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm7Mac);
+                isValid = isValid && IsValidHash(DsiInfo?.DigestMain);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm9iMac);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm7iMac);
+                isValid = isValid && IsValidHash(DsiInfo?.Arm9Mac);
+
+                isValid = isValid && IsValidHash(DsiInfo?.DigestHashesStatus ?? HashStatus.Valid);
+            }
+
+            return isValid;
+        }
+
+        /// <summary>
+        /// Gets a value indicating if the content signature is valid.
+        /// </summary>
+        /// <returns>Value indicating whether the signature is valid.</returns>
+        /// <remarks>In the case of DS games it always returns true.</remarks>
+        public bool HasValidSignature()
+        {
+            return (UnitCode is DeviceUnitKind.DS) || IsValidHash(Signature);
+        }
+
+        private static bool IsValidHash(HashInfo hashInfo)
+        {
+            if (hashInfo is null) {
+                return true;
+            }
+
+            return IsValidHash(hashInfo.Status);
+        }
+
+        private static bool IsValidHash(HashStatus status)
+        {
+            return status switch {
+                HashStatus.Valid => true,
+                HashStatus.Generated => true,
+                HashStatus.Invalid => false,
+                HashStatus.NotValidated => throw new InvalidOperationException("Hash not validated yet"),
+                _ => throw new NotSupportedException("Unsupported hash status"),
+            };
+        }
     }
 }
