@@ -34,6 +34,11 @@ jobs:
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
 
+      - name: "Setup .NET 6 SDK"
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.421
+
       - if: ${{ env.test_resources != '' }}
         name: "Build and run FULL tests"
         run: dotnet run --project build/orchestrator -- --resource-uri=${{ env.test_resources }} --target=Default --dotnet-configuration=Release
